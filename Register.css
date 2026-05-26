@@ -1,0 +1,129 @@
+body { 
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    flex-direction: column;
+    background: linear-gradient(to right, #6a8aff, #b2fbff);
+    min-height: 100vh; 
+    font-family: Arial, Helvetica, sans-serif;
+    display: flex;
+ }
+.barra-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 10px;
+    color: black;
+    top: 0px;
+}
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: bold;
+    background-color: #f2f2f2;
+    padding: 15px 27px;
+    border-radius: 20px;
+    font-size: 14px;
+}
+
+.logo img{
+    width: 35px;
+    height: 35px;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+.barra-nav ul {
+    display: flex;
+    list-style: none;
+    gap: 15px;
+    align-items:center;
+    margin: 0;
+    padding: 0;
+}
+.barra-nav li {
+    margin-left: 20px;
+}
+.barra-nav a {
+    color: black;
+    text-decoration: none;
+    background-color: #f2f2f2;
+    font-size: 16px;
+    font-family: sans-serif;
+    font-weight: bold;
+    transition: 0.3s;
+    border-radius: 20px;
+    padding: 15px 27px;
+    font-size: 14px;
+}
+.barra-nav a:hover {
+    background-color: lightblue; /* Color al pasar el mouse por encima */
+    transform: scale(1.1)
+}
+.titulo {
+    margin: 0;
+    font-size: 30px;
+    font-weight: bold;
+    margin-bottom: 0px;
+}
+.subtitulo {
+    margin: 0;
+    font-size: 16px;
+    font-weight: normal;
+}
+.register-box{ 
+    width: 300px;
+    background-color: rgb(255, 255, 255);
+    padding: 40px;
+    border-radius: 50px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    color: black;
+    justify-content: center;
+    align-items: center;
+    opacity: 0.8;
+}
+.register-logo img {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 50%;
+}
+.container {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+input{
+    padding: 10px;
+    width: 300px;
+    border: 1px solid white;
+    outline: none;
+    border-radius: 20px;
+    border-color: black;
+}
+
+button { 
+    padding: 10px;
+    cursor: pointer;
+    background-color: #4a60f0;
+    transition: background-color 0.5s ease;
+    border-radius: 10px;
+    width: 250px;
+    color: white;
+}
+
+button:hover{ background-color: lightblue;
+    transform: scale(1.05);
+    transition: transform 0.5s ease;
+}
+footer{
+    background-color: #333;
+    color: white;
+    text-align: center;
+    padding: 15px;
+}
