@@ -1,26 +1,38 @@
 <!DOCTYPE html> 
 <html>
 <head>
-    <meta-name="viewport" content="width=device-width,
+    <meta name="viewport" content="width=device-width,
     initial-scale=1.0">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="Login.css">
 </head>
     <body>
     <nav class="barra-nav">
-        <div class="logo">Mi pag</div>
+        <div class="logo">
+            <img src="persona.png" alt="Logo">
+            <span>Classify</span>
+        </div>
         <ul>
-            <li><a href="index.html">Inicio</a></li>
-            <li><a href="Login.html">Login</a></li>
-            <li><a href="Registro.html">Registro</a></li>
+            <li><a href="Login.html">Iniciar Sesión</a></li>
+            <li><a href="Register.html">Registrarse</a></li>
         </ul>
     </nav>
     <div class="container">
         <div class="login-box"> 
-        <h1> LOGIN
-        </h1> 
+        <div class="login-logo">
+        <img src="persona.png" alt="Persona">
+        </div>
+        <p class="titulo">Iniciar Sesión</p>
+        <p class="subtitulo">Ingrese sus Datos</p>
         <input type="text" placeholder="Nombre">
         <input type="password" placeholder="Contraseña"> 
+        <a href="Registro.html">Olvidé mi contraseña</a>
         <button> Iniciar Sesion </button>
-    </div> 
+        <p style="margin: 0">¿No tienes una cuenta? <a href="Register.html">Regístrate aquí</a></p>
+        </div>
+    </div>
+    <footer>
+        Derechos reservados 2026 a Classify
+    </footer>
 </body> 
+</html>
 </html>
