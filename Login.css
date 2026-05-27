@@ -3,7 +3,7 @@ body {
     padding: 0;
     box-sizing: border-box;
     flex-direction: column;
-    background: linear-gradient(to right, #6a8aff, #b2fbff);
+    background: linear-gradient(to right, #4162da, #89e6eb);
     min-height: 100vh; 
     font-family: Arial, Helvetica, sans-serif;
     display: flex;
@@ -132,20 +132,28 @@ footer{
 
 @media (max-width: 768px) {
     .barra-nav {
-        flex-direction: column;
-        align-items: center;
-        display: flex;
-        justify-content: center;
+        padding: 5px 10px;
+        font-size: 12px;
+
     }
-    .barra-nav ul {
-        flex-direction: column;
-        display: flex;
-        justify-content: center;
-        padding: 0;
-        margin: 0;
+    .barra-nav a {
+        padding: 10px 20px;
+        font-size: 12px;
     }
-    .barra-nav li {
-        margin: 10px 0;
+    .logo {
+        padding: 10px 20px;
+        font-size: 12px;
+    }
+    .logo img {
+        width: 20px;
+        height: 20px;
+    }
+    .login-box {
+        width: 80%;
+        padding: 20px;
+    }
+
+}
     }
 }
 }
