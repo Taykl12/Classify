@@ -170,6 +170,12 @@
   font-weight: 700;
   line-height: 1.35;
   color: var(--color-ink);
+  max-width: 100%;
+  word-break: break-word;
+}
+
+.sidebar--expanded .sidebar__profile-name {
+  display: block;
 }
 
 .sidebar__nav {

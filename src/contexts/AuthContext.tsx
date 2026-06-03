@@ -14,6 +14,8 @@ export interface AuthUser {
   email?: string;
   firstName?: string;
   lastName?: string;
+  /** Cargo para el sidebar, ej. Alumno, Profesor */
+  roleLabel?: string;
 }
 
 interface AuthContextValue {
@@ -36,6 +38,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const persistSession = useCallback((accessToken: string, nextUser: AuthUser) => {
+    setAccessToken(accessToken);
+    localStorage.setItem("classify_user", JSON.stringify(nextUser));
+    setUser(nextUser);
+  }, []);
+
   useEffect(() => {
     const token = getAccessToken();
     if (!token) {
@@ -48,16 +56,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(JSON.parse(raw) as AuthUser);
       } catch {
         setAccessToken(null);
+        setLoading(false);
+        return;
       }
     }
-    setLoading(false);
-  }, []);
-
-  const persistSession = useCallback((accessToken: string, nextUser: AuthUser) => {
-    setAccessToken(accessToken);
-    localStorage.setItem("classify_user", JSON.stringify(nextUser));
-    setUser(nextUser);
-  }, []);
+    (async () => {
+      try {
+        const data = await apiFetch<{ user: AuthUser }>("/api/auth/me");
+        persistSession(token, data.user);
+      } catch {
+        if (!raw) setAccessToken(null);
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, [persistSession]);
 
   const login = useCallback(async (email: string, password: string) => {
     const data = await apiFetch<{

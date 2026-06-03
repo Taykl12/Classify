@@ -101,9 +101,11 @@ export function Sidebar() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const modifier = collapsed ? "sidebar--collapsed" : "sidebar--expanded";
-  const displayName = user
+  const fullName = user
     ? [user.firstName, user.lastName].filter(Boolean).join(" ") || user.email || "Usuario"
     : "Usuario";
+  const profileLine =
+    !collapsed && user?.roleLabel ? `${fullName} - ${user.roleLabel}` : fullName;
 
   async function handleLogout() {
     await logout();
@@ -120,7 +122,7 @@ export function Sidebar() {
           <div className="sidebar__avatar" aria-hidden>
             <User size={collapsed ? 20 : 24} />
           </div>
-          <p className="sidebar__profile-name">{displayName}</p>
+          <p className="sidebar__profile-name">{profileLine}</p>
         </div>
       </div>
       <nav className="sidebar__nav-block sidebar__nav" aria-label="Menú">

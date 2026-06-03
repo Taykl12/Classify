@@ -1,18 +1,26 @@
 ﻿import { Router } from "express";
+import { buildAuthUser } from "../lib/authUser.js";
 import { createAnonClient, createUserClient } from "../lib/supabase.js";
 import { config } from "../config.js";
+import {
+  getUserSupabase,
+  requireAuth,
+  type AuthedRequest,
+} from "../middleware/auth.js";
 
 const router = Router();
 
-async function getProfesorRoleId(): Promise<number> {
+/** Registro por defecto: alumno (cambio a profesor vía administración más adelante). */
+async function getDefaultRoleId(): Promise<number> {
   const supabase = createAnonClient();
   const { data, error } = await supabase
     .from("roles")
     .select("id_rol")
-    .eq("nombre_rol", "profesor")
-    .single();
-  if (error || !data) throw new Error("Rol profesor no configurado");
-  return data.id_rol as number;
+    .eq("nombre_rol", "alumno")
+    .maybeSingle();
+  if (!error && data?.id_rol != null) return data.id_rol as number;
+  // Seed conocido en Classify: admin=1, profesor=2, alumno=3
+  return 3;
 }
 
 router.post("/register", async (req, res) => {
@@ -43,7 +51,7 @@ router.post("/register", async (req, res) => {
       res.status(400).json({ error: "No se pudo crear el usuario" });
       return;
     }
-    const idRol = await getProfesorRoleId();
+    const idRol = await getDefaultRoleId();
     if (!session?.access_token) {
       res.json({
         message: "Revisá tu correo para confirmar la cuenta",
@@ -62,10 +70,16 @@ router.post("/register", async (req, res) => {
       res.status(400).json({ error: profileError.message });
       return;
     }
+    const authUser = await buildAuthUser(userClient, user.id, {
+      email,
+      nombre: firstName,
+      apellido: lastName,
+      roleLabel: "Alumno",
+    });
     res.json({
       accessToken: session.access_token,
       refreshToken: session.refresh_token,
-      user: { id: user.id, email, firstName, lastName },
+      user: authUser,
     });
   } catch (e) {
     res.status(500).json({ error: e instanceof Error ? e.message : "Error interno" });
@@ -86,21 +100,33 @@ router.post("/login", async (req, res) => {
       return;
     }
     const userClient = createUserClient(data.session.access_token);
-    const { data: perfil } = await userClient
-      .from("usuarios")
-      .select("nombre, apellido")
-      .eq("id_usuario", data.user.id)
-      .maybeSingle();
+    const authUser = await buildAuthUser(userClient, data.user.id, {
+      email: data.user.email,
+      nombre: data.user.user_metadata?.nombre as string | undefined,
+      apellido: data.user.user_metadata?.apellido as string | undefined,
+    });
     res.json({
       accessToken: data.session.access_token,
       refreshToken: data.session.refresh_token,
-      user: {
-        id: data.user.id,
-        email: data.user.email,
-        firstName: perfil?.nombre ?? (data.user.user_metadata?.nombre as string | undefined),
-        lastName: perfil?.apellido ?? (data.user.user_metadata?.apellido as string | undefined),
-      },
+      user: authUser,
     });
+  } catch (e) {
+    res.status(500).json({ error: e instanceof Error ? e.message : "Error interno" });
+  }
+});
+
+router.get("/me", requireAuth, async (req, res) => {
+  try {
+    const { userId, accessToken } = req as AuthedRequest;
+    const supabase = createAnonClient();
+    const { data: authData } = await supabase.auth.getUser(accessToken);
+    const userClient = getUserSupabase(req as AuthedRequest);
+    const authUser = await buildAuthUser(userClient, userId, {
+      email: authData.user?.email,
+      nombre: authData.user?.user_metadata?.nombre as string | undefined,
+      apellido: authData.user?.user_metadata?.apellido as string | undefined,
+    });
+    res.json({ user: authUser });
   } catch (e) {
     res.status(500).json({ error: e instanceof Error ? e.message : "Error interno" });
   }
