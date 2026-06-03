@@ -205,6 +205,42 @@ npm run preview
 
 ---
 
+## Fase 2 — Mejoras UI/UX (accesibilidad + rango etario alto)
+
+Implementado según [`PLAN-MEJORAS-UI-UX.md`](PLAN-MEJORAS-UI-UX.md).
+
+### Sidebar
+- **Expandido:** toggle de ancho completo con icono + texto **“Ocultar menú”**, centrado.
+- **Colapsado:** solo icono hamburguesa; `aria-label="Abrir menú"`.
+- Grilla centrada de 48px para toggle, avatar, nav y footer en modo colapsado.
+- Menos espacio entre bloques; ancho expandido **260px**.
+- Ítem **Inicio** con estado activo (`sidebar__nav-item--active`).
+
+### Tipografía y paneles
+- Fuente system-ui (Segoe UI, Roboto, Arial); cuerpo 16px, `line-height: 1.5`.
+- Títulos de panel 24px; subtítulo en Pendientes: *“Tareas que requieren tu atención”*.
+- Paneles con fondo blanco más opaco y sombra `--shadow-panel`.
+- Gradiente de fondo más suave (menos saturación).
+
+### Tabla Pendientes
+- Encabezados sin mayúsculas forzadas; color `--color-primary`; 15px.
+- **Prioridad** y **Estado** como badges con texto + color (Alta/Media/Baja, Pendiente/En curso).
+- **Editar / Ver** como botones con borde y `min-height: 44px`.
+- Filas con borde `1px` además de sombra.
+
+### Carrusel
+- Tarjetas **125px** de alto con línea secundaria (*“N tareas pendientes”*).
+- Borde en tarjetas; hover sutil (respetando `prefers-reduced-motion`).
+
+### Tokens nuevos
+- `--color-success-*`, `--color-warning-*`, `--color-error-*`, `--color-neutral-*`
+- `--shadow-panel`, `--touch-min`, `--font-size-*`, `--card-height`
+
+### Tipos
+- `Project.pendingTasks` y uniones literales en `PendingItem.priority` / `status`.
+
+---
+
 ## Nota sobre pruebas en navegador
 
-Se acordó validar diseño y funcionalidad en navegador integrado en futuras iteraciones. Para comprobar localmente: sidebar (expandir/contraer), carrusel (flechas y teclado), scroll de página (sidebar sin hueco abajo) y tabla con encabezados visibles.
+Validar en `npm run dev`: toggle “Ocultar menú”, alineación colapsada, badges, botones 44px, carrusel y scroll con sidebar sticky a altura completa.

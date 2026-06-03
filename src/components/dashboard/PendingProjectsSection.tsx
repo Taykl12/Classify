@@ -14,6 +14,30 @@ const COLUMN_HEADERS = [
   'Acciones',
 ] as const;
 
+function priorityBadgeClass(priority: PendingItem['priority']): string {
+  switch (priority) {
+    case 'Alta':
+      return 'pending-badge pending-badge--priority-high';
+    case 'Media':
+      return 'pending-badge pending-badge--priority-medium';
+    case 'Baja':
+      return 'pending-badge pending-badge--priority-low';
+    default:
+      return 'pending-badge';
+  }
+}
+
+function statusBadgeClass(status: PendingItem['status']): string {
+  switch (status) {
+    case 'En curso':
+      return 'pending-badge pending-badge--status-progress';
+    case 'Pendiente':
+      return 'pending-badge pending-badge--status-pending';
+    default:
+      return 'pending-badge';
+  }
+}
+
 export function PendingProjectsSection({
   items,
   isLoading = false,
@@ -59,10 +83,12 @@ export function PendingProjectsSection({
                 {item.projectName}
               </td>
               <td className="pending-table__cell" data-label={COLUMN_HEADERS[2]}>
-                {item.priority}
+                <span className={priorityBadgeClass(item.priority)}>
+                  {item.priority}
+                </span>
               </td>
               <td className="pending-table__cell" data-label={COLUMN_HEADERS[3]}>
-                {item.status}
+                <span className={statusBadgeClass(item.status)}>{item.status}</span>
               </td>
               <td
                 className="pending-table__cell pending-table__cell--actions"

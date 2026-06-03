@@ -32,9 +32,19 @@ const FOOTER_NAV: NavItem[] = [
   { id: 'logout', label: 'Cerrar Sesión', icon: <LogOut size={22} aria-hidden /> },
 ];
 
-function NavButton({ item, collapsed }: { item: NavItem; collapsed: boolean }) {
+function NavButton({
+  item,
+  collapsed,
+  active = false,
+}: {
+  item: NavItem;
+  collapsed: boolean;
+  active?: boolean;
+}) {
+  const activeClass = active ? ' sidebar__nav-item--active' : '';
+
   return (
-    <button type="button" className="sidebar__nav-item">
+    <button type="button" className={`sidebar__nav-item${activeClass}`}>
       <span className="sidebar__nav-icon">{item.icon}</span>
       <span className={collapsed ? 'sr-only' : 'sidebar__label'}>{item.label}</span>
     </button>
@@ -54,7 +64,7 @@ export function Sidebar() {
       <div className="sidebar__profile-block">
         <div className="sidebar__profile">
           <div className="sidebar__avatar" aria-hidden>
-            <User size={collapsed ? 22 : 28} />
+            <User size={collapsed ? 20 : 24} />
           </div>
           <p className="sidebar__profile-name">Nombre y Apellido - Cargo</p>
         </div>
@@ -62,7 +72,12 @@ export function Sidebar() {
 
       <nav className="sidebar__nav-block sidebar__nav" aria-label="Menú">
         {MAIN_NAV.map((item) => (
-          <NavButton key={item.id} item={item} collapsed={collapsed} />
+          <NavButton
+            key={item.id}
+            item={item}
+            collapsed={collapsed}
+            active={item.id === 'home'}
+          />
         ))}
       </nav>
 
