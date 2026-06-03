@@ -1,0 +1,92 @@
+.carousel {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  width: 100%;
+  outline: none;
+}
+
+.carousel:focus-visible {
+  outline: 2px solid var(--color-primary-accent);
+  outline-offset: 4px;
+  border-radius: var(--radius-sm);
+}
+
+.carousel__nav {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border: none;
+  border-radius: 50%;
+  background: var(--color-surface);
+  color: var(--color-ink);
+  box-shadow: var(--shadow-soft);
+  transition: opacity 0.2s ease, background-color 0.2s ease;
+}
+
+.carousel__nav:hover:not(:disabled) {
+  background: var(--color-panel);
+}
+
+.carousel__nav:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.carousel__nav:focus-visible {
+  outline: 2px solid var(--color-primary-accent);
+  outline-offset: 2px;
+}
+
+.carousel__viewport {
+  flex: 1;
+  overflow: hidden;
+  min-width: 0;
+  width: 100%;
+  --carousel-card-width: var(--card-width);
+  --carousel-stride: calc(var(--card-width) + var(--card-gap));
+  --carousel-index: 0;
+}
+
+.carousel__track {
+  display: flex;
+  gap: var(--card-gap);
+  transition: transform 0.35s ease;
+  will-change: transform;
+  transform: translateX(
+    calc(-1 * var(--carousel-index) * var(--carousel-stride))
+  );
+}
+
+.project-card {
+  flex: 0 0 var(--carousel-card-width, var(--card-width));
+  height: 160px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-soft);
+}
+
+.project-card__title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--color-ink);
+}
+
+@media (max-width: 768px) {
+  .carousel__nav {
+    width: 40px;
+    height: 40px;
+  }
+
+  .project-card {
+    height: 140px;
+  }
+}

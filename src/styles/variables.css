@@ -1,0 +1,28 @@
+:root {
+  --color-primary: #1e3a5f;
+  --color-primary-hover: #23476a;
+  --color-primary-accent: #1d4ed8;
+  --color-canvas: #f5f7fa;
+  --color-surface: #ffffff;
+  --color-border: #e2e8f0;
+  --color-ink: #111827;
+  --color-ink-muted: #6b7280;
+  --color-panel: #e8f0fe;
+  --color-panel-strong: #d4e4fc;
+  --color-gradient-start: #4162da;
+  --color-gradient-end: #89e6eb;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 24px;
+  --radius-xl: 32px;
+  --sidebar-width-collapsed: 72px;
+  --sidebar-width-expanded: 240px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --shadow-soft: 0 4px 20px rgba(30, 58, 95, 0.08);
+  --card-width: 280px;
+  --card-gap: 20px;
+  --carousel-peek: 28px;
+}
