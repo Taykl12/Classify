@@ -1,0 +1,4 @@
+.auth-page--login,
+.auth-page--recover {
+  background: linear-gradient(to right, #4162da, #89e6eb);
+}

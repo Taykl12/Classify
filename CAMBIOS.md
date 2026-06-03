@@ -8,7 +8,7 @@ Documento que resume todo lo implementado en el repositorio respecto al dashboar
 
 ## Resumen
 
-Se añadió una aplicación **React + TypeScript + Vite** con **CSS vanilla** (sin Tailwind) que reproduce el dashboard de los mockups: sidebar colapsable, carrusel de proyectos destacados con “peek” lateral y tabla de pendientes con acciones. Los archivos estáticos de login (`Login.html`, `Register.html`) **no se modificaron**.
+Se añadió una aplicación **React + TypeScript + Vite** con **CSS vanilla** (sin Tailwind) que reproduce el dashboard de los mockups: sidebar colapsable, carrusel de proyectos destacados con “peek” lateral y tabla de pendientes con acciones. **Login, registro y recuperar contraseña** están solo en React (`src/pages/`, `src/components/auth/`). Se eliminaron `Login.html`, `Register.html` y duplicados en `public/` (evitaban el bucle de redirección en `/login` en Windows).
 
 ---
 
@@ -20,7 +20,7 @@ Se añadió una aplicación **React + TypeScript + Vite** con **CSS vanilla** (s
 | TypeScript | Tipado estricto |
 | Vite 6 | Dev server y build |
 | lucide-react | Iconos (sidebar, carrusel) |
-| react-router-dom | Rutas `/` y `/dashboard` |
+| react-router-dom | Rutas dashboard y auth (`/login`, `/register`, etc.) |
 
 ### Scripts (`package.json`)
 
@@ -161,10 +161,31 @@ Tras la primera versión visual se ajustó lo siguiente:
 
 ---
 
+## Auth en React (`/login`, `/register`, `/recuperar-contrasena`)
+
+### Motivo
+- `persona.png` no existía en el repo → logos rotos en HTML.
+- Enlace “Olvidé mi contraseña” apuntaba a `Registro.html` (inexistente).
+
+### Implementación
+- Componentes: [`AuthLayout`](src/components/auth/AuthLayout.tsx), [`AuthNav`](src/components/auth/AuthNav.tsx), [`AuthAvatar`](src/components/auth/AuthAvatar.tsx) (iconos `User` / `Mail` de lucide-react), [`AuthFooter`](src/components/auth/AuthFooter.tsx).
+- Páginas: [`LoginPage`](src/pages/LoginPage.tsx), [`RegisterPage`](src/pages/RegisterPage.tsx), [`RecoverPasswordPage`](src/pages/RecoverPasswordPage.tsx).
+- Estilos portados y acotados bajo `.auth-page`: [`auth.css`](src/styles/auth.css), [`login.css`](src/styles/login.css), [`register.css`](src/styles/register.css), [`recover-password.css`](src/styles/recover-password.css).
+- Rutas en [`routes.ts`](src/routes.ts): `LOGIN`, `REGISTER`, `RECOVER_PASSWORD`.
+
+### Diseño conservado
+- Gradientes originales (login/recuperar: `#4162da` → `#89e6eb`; register: `#6a8aff` → `#b2fbff`).
+- Caja blanca 50px radius, nav gris, footer `#333`, inputs y botones como en `Login.css` / `Register.css`.
+- Sin API ni envío real de correo; botones placeholder.
+
+### Navegación
+- Login ↔ Register; “Olvidé mi contraseña” → `/recuperar-contrasena`; recuperar → “Volver a iniciar sesión”.
+- Diseño original portado a `src/styles/auth.css`, `login.css`, `register.css` (ya no se usan HTML/CSS sueltos en la raíz).
+
+---
+
 ## Archivos del repo sin cambios
 
-- `Login.html`, `Login.css`
-- `Register.html`, `Register.css`
 - `DESIGN.md`
 - `.cursor/rules/frontend.mdc` (sigue recomendando Tailwind; el dashboard usa CSS vanilla por decisión del proyecto)
 
@@ -196,12 +217,44 @@ npm run preview
 
 ---
 
+## Pestaña Proyectos (`/proyectos`)
+
+### Rutas y navegación
+- [`src/routes.ts`](src/routes.ts): `HOME`, `DASHBOARD`, `PROJECTS` (`/proyectos`).
+- [`ProjectsPage`](src/pages/ProjectsPage.tsx) registrada en [`App.tsx`](src/App.tsx).
+- Sidebar: **Inicio** y **Proyectos** con `NavLink`; activo en `/` y `/dashboard` para Inicio; Calendario / Preferencias / Cerrar sesión siguen como botones placeholder.
+
+### Página
+- Título **Proyectos** centrado.
+- Botones placeholder **Borrar Proyecto** y **Crear Proyecto** (pill, sin lógica).
+- Panel **Mis Proyectos** con tabla de listado (mismo estilo educativo que Pendientes, no tema oscuro del mockup de referencia).
+
+### Tabla de proyectos
+| Columna | Detalle |
+|---------|---------|
+| Escuela | Badge rectangular amarillo (`--color-warning-*`) |
+| Nombre | Texto en negrita |
+| Descripción | Texto muted; truncado en desktop con `title` |
+| Estado | Badge pill: Abierto (verde) / Cerrado (neutro) |
+| Creado | Fecha `DD/MM/YYYY` vía `formatProjectDate` |
+| Acciones | Editar / Ver, `min-height: 44px`, `aria-label` por fila |
+
+### Datos mock
+- [`src/types/projects.ts`](src/types/projects.ts): `ProjectListItem`, 10 filas en `PROJECT_LIST_ITEMS`.
+
+### Estilos
+- [`projects.css`](src/styles/projects.css), [`projects-page.css`](src/styles/projects-page.css).
+
+---
+
 ## Pendiente / fuera de alcance
 
-- Conectar el botón “Iniciar sesión” de `Login.html` al dashboard.
+- Conectar el botón “Iniciar sesión” de [`LoginPage`](src/pages/LoginPage.tsx) al dashboard.
+- Envío real de email en recuperar contraseña.
 - Backend, autenticación real y API.
-- Ordenación/filtrado avanzado en la tabla.
-- Rutas adicionales (Proyectos, Calendario, etc.) más allá del placeholder en botones del sidebar.
+- Ordenación/filtrado avanzado en tablas.
+- CRUD real en Crear/Borrar/Editar/Ver de Proyectos.
+- Rutas adicionales (Calendario, Preferencias, etc.) más allá del placeholder en botones del sidebar.
 
 ---
 
@@ -244,3 +297,31 @@ Implementado según [`PLAN-MEJORAS-UI-UX.md`](PLAN-MEJORAS-UI-UX.md).
 ## Nota sobre pruebas en navegador
 
 Validar en `npm run dev`: toggle “Ocultar menú”, alineación colapsada, badges, botones 44px, carrusel y scroll con sidebar sticky a altura completa.
+
+---
+
+## Backend Express + Supabase (junio 2026)
+
+### Supabase (Classify)
+
+- Proyecto: `jgrtmokyqdvdxsldmkou`
+- Migración `001`: columnas `escuela`, `estado_proyecto` en `grupos_proyectos`; seed `roles`
+- Políticas RLS para profesor autenticado
+
+### Servidor `server/`
+
+- Express en puerto 3001
+- Rutas: `/api/health`, `/api/auth/*`, `/api/projects`, `/api/dashboard/featured`, `/api/dashboard/pending`
+- Cliente Supabase con JWT del usuario
+
+### Frontend
+
+- `AuthContext`, `ProtectedRoute`, `/` → `/login`
+- Login con email; datos desde API (sin mocks)
+- Proxy Vite `/api` → Express
+- Logout en sidebar
+
+### Configuración
+
+- `server/.env.example`, `.env.example` (raíz)
+- `docs/supabase-schema.md`

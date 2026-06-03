@@ -180,6 +180,10 @@
   width: 100%;
 }
 
+a.sidebar__nav-item {
+  text-decoration: none;
+}
+
 .sidebar__nav-item {
   display: flex;
   align-items: center;
@@ -195,6 +199,8 @@
   font-weight: 700;
   text-align: left;
   transition: background-color 0.2s ease;
+  cursor: pointer;
+  box-sizing: border-box;
 }
 
 .sidebar__nav-item:hover {

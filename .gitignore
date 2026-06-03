@@ -7,3 +7,7 @@ dist
 PLAN*.md
 *-PLAN.md
 plans/
+
+server/.env
+.env
+
