@@ -1,0 +1,9 @@
+node_modules
+dist
+*.local
+.DS_Store
+
+# Planes de trabajo locales (no commitear)
+PLAN*.md
+*-PLAN.md
+plans/
