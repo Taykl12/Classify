@@ -1,0 +1,141 @@
+# Frontend Development Rules
+
+## Tech Stack
+
+Always use:
+
+* React
+* TypeScript
+* Functional Components
+
+Never use class components.
+
+---
+
+## TypeScript
+
+Rules:
+
+* Avoid `any`.
+* Prefer explicit interfaces.
+* Strong typing is preferred over convenience.
+* Create dedicated types for API responses.
+
+---
+
+## Components
+
+Requirements:
+
+* Single responsibility.
+* Reusable.
+* Predictable.
+* Easy to test.
+
+If a component exceeds ~250 lines, consider splitting it.
+
+---
+
+## React
+
+Prefer:
+
+* Custom hooks for reusable logic.
+* Composition over prop drilling.
+* Controlled forms.
+
+Avoid unnecessary abstractions.
+
+---
+
+## Styling
+
+Use Tailwind CSS.
+
+Prefer utility classes.
+
+Extract reusable UI patterns into components.
+
+Avoid:
+
+* Inline styles.
+* Hardcoded colors.
+* Repeated utility groups.
+
+---
+
+## Accessibility
+
+Every component must:
+
+* Use semantic HTML.
+* Be keyboard accessible.
+* Have proper labels.
+* Maintain WCAG-friendly contrast.
+
+---
+
+## Tables
+
+Tables are core components.
+
+Support:
+
+* Sorting
+* Filtering
+* Empty states
+* Loading states
+
+Prioritize readability.
+
+---
+
+## Forms
+
+Requirements:
+
+* Clear validation.
+* Helpful error messages.
+* Consistent spacing.
+* Labels above fields.
+
+---
+
+## Naming
+
+Good:
+
+* StudentTable
+* AttendanceForm
+* TeacherDashboard
+* GradeCard
+
+Bad:
+
+* Component1
+* DataThing
+* Utils2
+
+---
+
+## Code Quality Priorities
+
+1. Readability
+2. Maintainability
+3. Consistency
+4. Performance
+
+Never sacrifice readability for micro-optimizations.
+
+---
+
+## AI Instructions
+
+Before generating code:
+
+1. Read design.md.
+2. Follow existing project architecture.
+3. Reuse components whenever possible.
+4. Avoid duplicate logic.
+5. Generate production-ready code.
+6. Explain architectural decisions when relevant.

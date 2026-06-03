@@ -1,0 +1,120 @@
+.carousel {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  width: 100%;
+  outline: none;
+}
+
+.carousel:focus-visible {
+  outline: 2px solid var(--color-primary-accent);
+  outline-offset: 4px;
+  border-radius: var(--radius-sm);
+}
+
+.carousel__nav {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--touch-min);
+  height: var(--touch-min);
+  border: 1px solid var(--color-border);
+  border-radius: 50%;
+  background: var(--color-surface);
+  color: var(--color-ink);
+  box-shadow: var(--shadow-soft);
+  transition: opacity 0.2s ease, background-color 0.2s ease;
+}
+
+.carousel__nav:hover:not(:disabled) {
+  background: var(--color-panel);
+}
+
+.carousel__nav:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.carousel__nav:focus-visible {
+  outline: 2px solid var(--color-primary-accent);
+  outline-offset: 2px;
+}
+
+.carousel__viewport {
+  flex: 1;
+  overflow: hidden;
+  min-width: 0;
+  width: 100%;
+}
+
+.carousel__pages {
+  display: flex;
+  transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
+}
+
+.carousel__page {
+  flex: 0 0 auto;
+  display: flex;
+  gap: var(--card-gap);
+  box-sizing: border-box;
+}
+
+.carousel__page .project-card {
+  flex: 1 1 0;
+  min-width: 0;
+  height: var(--card-height);
+  display: flex;
+  align-items: stretch;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-soft);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.carousel__page .project-card:hover {
+  box-shadow: var(--shadow-panel);
+  transform: translateY(-2px);
+}
+
+.project-card__content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--space-sm);
+  padding: var(--space-md) var(--space-lg);
+  width: 100%;
+}
+
+.project-card__title {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--color-ink);
+}
+
+.project-card__meta {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--color-ink-muted);
+}
+
+@media (max-width: 768px) {
+  .carousel__nav {
+    width: 40px;
+    height: 40px;
+  }
+
+  .carousel__page .project-card {
+    height: 115px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .carousel__page .project-card:hover {
+    transform: none;
+  }
+}
