@@ -26,10 +26,8 @@ El proxy de Vite reenvía `/api` al servidor Express.
 ```bash
 npm run build
 npm run build:server
-```
+``` 
 
-Documentación BD: [docs/supabase-schema.md](docs/supabase-schema.md)
 
----
 
 [Ver cambios](CAMBIOS.md)
