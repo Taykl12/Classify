@@ -9,6 +9,11 @@
   --color-ink-muted: #4b5563;
   --color-panel: #e8f0fe;
   --color-panel-strong: #d4e4fc;
+  --color-sidebar-bg: rgba(232, 240, 254, 0.95);
+  --color-dashboard-gradient-start: #3d56c4;
+  --color-dashboard-gradient-mid: #6eb8d4;
+  --color-dashboard-gradient-end: #e8f4f8;
+  --color-dashboard-panel-bg: rgba(255, 255, 255, 0.88);
   --color-gradient-start: #3d56c4;
   --color-gradient-mid: #6eb8d4;
   --color-gradient-end: #e8f4f8;
@@ -20,6 +25,21 @@
   --color-error-text: #991b1b;
   --color-neutral-bg: #f1f5f9;
   --color-neutral-text: #334155;
+  --color-modal-backdrop: rgba(15, 23, 42, 0.4);
+  --color-modal-surface: #f3f4f6;
+  --color-modal-panel: #ffffff;
+  --color-modal-input: #ffffff;
+  --color-btn-muted: #d1d5db;
+  --color-btn-muted-hover: #c4c8d0;
+  --color-btn-muted-active: #b8bcc4;
+  --color-chip-bg: #e8eaed;
+  --color-chip-text: #202124;
+  --color-on-primary: #ffffff;
+  --auth-pill-bg: #f2f2f2;
+  --auth-pill-hover: lightblue;
+  --auth-ink: #111827;
+  --auth-surface: rgb(255, 255, 255);
+  --auth-input-border: #000000;
   --font-size-body: 1rem;
   --font-size-table-head: 0.9375rem;
   --font-size-title: 1.5rem;
@@ -41,5 +61,48 @@
   --card-width: 280px;
   --card-gap: 20px;
   --carousel-peek: 28px;
-  --card-height: 125px;
+  --card-height: 140px;
+}
+
+/* Modo oscuro opcional; el diseño base sigue siendo modo claro */
+[data-theme="dark"] {
+  --color-primary: #93c5fd;
+  --color-primary-hover: #bfdbfe;
+  --color-primary-accent: #60a5fa;
+  --color-canvas: #0f172a;
+  --color-surface: #1e293b;
+  --color-border: #334155;
+  --color-ink: #f1f5f9;
+  --color-ink-muted: #94a3b8;
+  --color-panel: #1e3a5f;
+  --color-panel-strong: #1e40af;
+  --color-sidebar-bg: rgba(15, 23, 42, 0.96);
+  --color-dashboard-gradient-start: #1e293b;
+  --color-dashboard-gradient-mid: #334155;
+  --color-dashboard-gradient-end: #0f172a;
+  --color-dashboard-panel-bg: rgba(30, 41, 59, 0.92);
+  --color-success-bg: #14532d;
+  --color-success-text: #bbf7d0;
+  --color-warning-bg: #78350f;
+  --color-warning-text: #fde68a;
+  --color-error-bg: #7f1d1d;
+  --color-error-text: #fecaca;
+  --color-neutral-bg: #334155;
+  --color-neutral-text: #e2e8f0;
+  --color-modal-backdrop: rgba(0, 0, 0, 0.55);
+  --color-modal-surface: #1e293b;
+  --color-modal-panel: #334155;
+  --color-modal-input: #1e293b;
+  --color-btn-muted: #475569;
+  --color-btn-muted-hover: #64748b;
+  --color-btn-muted-active: #94a3b8;
+  --color-chip-bg: #475569;
+  --color-chip-text: #f1f5f9;
+  --auth-pill-bg: #334155;
+  --auth-pill-hover: #475569;
+  --auth-ink: #f1f5f9;
+  --auth-surface: #1e293b;
+  --auth-input-border: #475569;
+  --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.35);
+  --shadow-panel: 0 8px 24px rgba(0, 0, 0, 0.4);
 }

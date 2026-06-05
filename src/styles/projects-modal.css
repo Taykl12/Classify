@@ -1,0 +1,296 @@
+.project-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-lg);
+  background: var(--color-modal-backdrop);
+}
+
+.project-modal__dialog {
+  width: min(100%, 400px);
+  background: var(--color-modal-surface);
+  border-radius: 28px;
+  box-shadow: var(--shadow-panel);
+  border: 1px solid var(--color-border);
+  overflow: hidden;
+}
+
+.project-modal__body {
+  padding: 28px 24px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.project-modal__title {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 800;
+  color: var(--color-ink);
+}
+
+.project-modal__member-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px 14px;
+  border-radius: 22px;
+  background: var(--color-modal-panel);
+  box-shadow: inset 0 0 0 1px var(--color-border), var(--shadow-soft);
+  animation: project-modal-panel-in 0.2s ease;
+}
+
+@keyframes project-modal-panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.project-modal__member-panel .email-chips {
+  position: relative;
+}
+
+.project-modal__member-panel .email-chips__box {
+  border-radius: 22px;
+  min-height: 56px;
+}
+
+.project-modal__btn--add-active {
+  background: var(--color-btn-muted-active);
+}
+
+.project-modal__error {
+  margin: 0;
+  color: var(--color-error-text);
+  font-size: 0.875rem;
+  text-align: center;
+}
+
+.project-modal__label {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--color-ink);
+}
+
+.project-modal__label--static {
+  margin-bottom: 2px;
+}
+
+.project-modal__input {
+  font: inherit;
+  font-weight: 500;
+  padding: 14px 18px;
+  border: none;
+  border-radius: 999px;
+  background: var(--color-modal-input);
+  color: var(--color-ink);
+  box-shadow: inset 0 0 0 1px var(--color-border);
+}
+
+.project-modal__input:focus {
+  outline: 2px solid var(--color-primary-accent);
+  outline-offset: 2px;
+}
+
+.project-modal__section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.project-modal__member-preview {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.project-modal__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 0 22px;
+  border: none;
+  border-radius: 999px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.2s ease, transform 0.15s ease, background-color 0.2s ease;
+}
+
+.project-modal__btn--add {
+  width: 100%;
+  background: var(--color-btn-muted);
+  color: var(--color-ink);
+}
+
+.project-modal__btn--add:hover {
+  background: var(--color-btn-muted-hover);
+}
+
+.project-modal__btn--muted {
+  flex: 1;
+  background: var(--color-btn-muted);
+  color: var(--color-ink);
+}
+
+.project-modal__btn--muted:hover {
+  background: var(--color-btn-muted-hover);
+}
+
+.project-modal__btn--block {
+  width: 100%;
+  margin-top: 8px;
+}
+
+.project-modal__btn--primary {
+  flex: 1;
+  background: var(--color-primary-accent);
+  color: var(--color-on-primary);
+}
+
+.project-modal__btn--primary:hover:not(:disabled) {
+  filter: brightness(0.92);
+}
+
+.project-modal__btn--primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.project-modal__footer {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.project-modal__footer--split {
+  justify-content: stretch;
+}
+
+/* Gmail-style email chips */
+.email-chips__box {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  min-height: 52px;
+  padding: 10px 14px;
+  border-radius: 999px;
+  background: var(--color-modal-input);
+  box-shadow: inset 0 0 0 1px var(--color-border);
+}
+
+.email-chips__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  max-width: 100%;
+  padding: 6px 10px 6px 14px;
+  border-radius: 999px;
+  background: var(--color-chip-bg);
+  color: var(--color-chip-text);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.email-chips__chip--preview {
+  padding: 6px 14px;
+}
+
+.email-chips__chip-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.email-chips__chip-remove {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--color-ink-muted);
+  cursor: pointer;
+}
+
+.email-chips__chip-remove:hover {
+  background: var(--color-neutral-bg);
+}
+
+.email-chips__input {
+  flex: 1 1 120px;
+  min-width: 100px;
+  border: none;
+  outline: none;
+  background: transparent;
+  font: inherit;
+  font-size: 0.95rem;
+  color: var(--color-ink);
+}
+
+.email-chips {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.email-chips__suggest {
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  max-height: 200px;
+  overflow-y: auto;
+  border-radius: 18px;
+  background: var(--color-modal-panel);
+  box-shadow: inset 0 0 0 1px var(--color-border), var(--shadow-soft);
+}
+
+.email-chips__suggest-item {
+  display: block;
+  width: 100%;
+  padding: 10px 14px;
+  border: none;
+  border-radius: 12px;
+  background: transparent;
+  text-align: left;
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--color-ink);
+  cursor: pointer;
+}
+
+.email-chips__suggest-item:hover {
+  background: var(--color-neutral-bg);
+}
+
+.email-chips__suggest-item--muted {
+  cursor: default;
+  color: var(--color-ink-muted);
+  font-weight: 500;
+}
+
+.email-chips__suggest-item--muted:hover {
+  background: transparent;
+}

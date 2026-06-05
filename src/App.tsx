@@ -1,9 +1,11 @@
 ﻿import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
+import { ThemeProvider } from "./contexts/ThemeContext";
 import { HomeRedirect } from "./components/auth/HomeRedirect";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import DashboardPage from "./pages/DashboardPage";
 import LoginPage from "./pages/LoginPage";
+import ProjectConfigPage from "./pages/ProjectConfigPage";
 import ProjectsPage from "./pages/ProjectsPage";
 import RecoverPasswordPage from "./pages/RecoverPasswordPage";
 import RegisterPage from "./pages/RegisterPage";
@@ -11,8 +13,9 @@ import { ROUTES } from "./routes";
 
 function App() {
   return (
-    <AuthProvider>
-      <BrowserRouter>
+    <ThemeProvider>
+      <AuthProvider>
+        <BrowserRouter>
         <Routes>
           <Route path={ROUTES.HOME} element={<HomeRedirect />} />
           <Route
@@ -31,13 +34,22 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/proyectos/:projectId/config"
+            element={
+              <ProtectedRoute>
+                <ProjectConfigPage />
+              </ProtectedRoute>
+            }
+          />
           <Route path={ROUTES.LOGIN} element={<LoginPage />} />
           <Route path={ROUTES.REGISTER} element={<RegisterPage />} />
           <Route path={ROUTES.RECOVER_PASSWORD} element={<RecoverPasswordPage />} />
           <Route path="*" element={<Navigate to={ROUTES.LOGIN} replace />} />
         </Routes>
-      </BrowserRouter>
-    </AuthProvider>
+        </BrowserRouter>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
 

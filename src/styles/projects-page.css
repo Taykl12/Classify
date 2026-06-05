@@ -11,7 +11,7 @@
   flex-shrink: 0;
   width: 52px;
   height: 52px;
-  color: #ffffff;
+  color: var(--color-on-primary);
   filter: drop-shadow(0 3px 10px rgba(15, 23, 42, 0.45));
 }
 
@@ -21,7 +21,7 @@
   font-weight: 800;
   line-height: 1.1;
   letter-spacing: -0.02em;
-  color: #ffffff;
+  color: var(--color-on-primary);
   text-shadow:
     0 2px 4px rgba(15, 23, 42, 0.5),
     0 4px 20px rgba(15, 23, 42, 0.35);
@@ -66,6 +66,22 @@
 .projects-panel__action-btn:focus-visible {
   outline: 2px solid var(--color-primary-accent);
   outline-offset: 2px;
+}
+
+.projects-panel__action-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.projects-panel__action-btn--primary {
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+  border-color: var(--color-primary);
+}
+
+.projects-panel__action-btn--primary:hover:not(:disabled) {
+  background: var(--color-primary-accent);
+  border-color: var(--color-primary-accent);
 }
 
 @media (max-width: 768px) {

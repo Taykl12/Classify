@@ -3,9 +3,9 @@
   min-height: 100vh;
   background: linear-gradient(
     160deg,
-    var(--color-gradient-start) 0%,
-    var(--color-gradient-mid) 40%,
-    var(--color-gradient-end) 75%,
+    var(--color-dashboard-gradient-start) 0%,
+    var(--color-dashboard-gradient-mid) 40%,
+    var(--color-dashboard-gradient-end) 75%,
     var(--color-canvas) 100%
   );
 }
@@ -20,7 +20,7 @@
 }
 
 .dashboard-panel {
-  background: rgba(255, 255, 255, 0.88);
+  background: var(--color-dashboard-panel-bg);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-xl);
   padding: var(--space-lg);
@@ -44,6 +44,22 @@
   font-size: var(--font-size-subtitle);
   color: var(--color-ink-muted);
   line-height: var(--line-height-body);
+}
+
+.dashboard-panel__empty {
+  margin: 0;
+  padding: var(--space-lg);
+  font-size: var(--font-size-body);
+  color: var(--color-ink-muted);
+  text-align: center;
+}
+
+.dashboard-panel__empty {
+  margin: 0;
+  padding: var(--space-lg);
+  font-size: var(--font-size-body);
+  color: var(--color-ink-muted);
+  text-align: center;
 }
 
 .dashboard-panel--featured .dashboard-panel__header {

@@ -12,8 +12,22 @@
 
 ## Columnas añadidas (migración 001)
 
-- `grupos_proyectos.escuela` (varchar)
-- `grupos_proyectos.estado_proyecto` (`Abierto` | `Cerrado`)
+- `grupos_proyectos.estado_proyecto` (`Abierto` | `Cerrado`) — al crear siempre `Abierto`
+- `grupos_proyectos.es_favorito` (boolean) — carrusel del inicio
+
+## API proyectos
+
+| Método | Ruta | Acción |
+|--------|------|--------|
+| GET | `/api/projects` | Listado del usuario |
+| GET | `/api/projects/:id` | Detalle + emails integrantes |
+| POST | `/api/projects` | Crear (`memberEmails[]`) + `grupo_estudiante` |
+| PUT | `/api/projects/:id` | Editar nombre e integrantes |
+| PATCH | `/api/projects/:id/favorite` | Favorito (carrusel) |
+| DELETE | `/api/projects/:id` | Borrar uno |
+| DELETE | `/api/projects/bulk` | Borrar selección `{ ids: [] }` |
+
+Carrusel: `GET /api/dashboard/featured` solo proyectos con `es_favorito = true`.
 
 ## Mappers API
 

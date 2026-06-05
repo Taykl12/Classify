@@ -1,12 +1,51 @@
-type ProjectListStatus = "Abierto" | "Cerrado";
+﻿type ProjectListStatus = "Abierto" | "Cerrado";
+
+export interface ProjectDocumentRow {
+  nombre?: string;
+  url?: string;
+}
 
 export interface GrupoProyectoRow {
   id_grupo: number;
   nombre_proyecto: string;
   descripcion: string | null;
   fecha_creacion: string;
-  escuela: string | null;
   estado_proyecto: string | null;
+  es_favorito?: boolean;
+  alcance_detalle?: string | null;
+  notas_alcance?: string | null;
+  anteproyecto_validado?: boolean;
+  link_respaldo?: string | null;
+  link_calificaciones?: string | null;
+  documentos?: ProjectDocumentRow[] | null;
+}
+
+export const GRUPO_PROJECT_SELECT =
+  "id_grupo, nombre_proyecto, descripcion, fecha_creacion, estado_proyecto, es_favorito, alcance_detalle, notas_alcance, anteproyecto_validado, link_respaldo, link_calificaciones, documentos";
+
+export function mapProjectConfig(row: GrupoProyectoRow) {
+  const docs = Array.isArray(row.documentos) ? row.documentos : [];
+  return {
+    scopeDetail: row.alcance_detalle ?? "",
+    scopeNotes: row.notas_alcance ?? "",
+    preprojectValidated: Boolean(row.anteproyecto_validado),
+    backupLink: row.link_respaldo ?? "",
+    gradesLink: row.link_calificaciones ?? "",
+    documents: docs
+      .filter((d) => d?.url?.trim())
+      .map((d) => ({
+        name: (d.nombre?.trim() || d.url!.trim()) as string,
+        url: d.url!.trim(),
+      })),
+  };
+}
+
+export function mapProjectDetail(row: GrupoProyectoRow) {
+  return {
+    ...mapProjectListItem(row),
+    objective: row.descripcion ?? "",
+    ...mapProjectConfig(row),
+  };
 }
 
 export interface TareaGrupoRow {
@@ -40,13 +79,16 @@ function mapPriority(p: string): "Alta" | "Media" | "Baja" {
 
 export function mapProjectListItem(row: GrupoProyectoRow) {
   const status = (row.estado_proyecto ?? "Abierto") as ProjectListStatus;
+  const scopeNotes = row.notas_alcance?.trim() ?? "";
   return {
     id: String(row.id_grupo),
-    school: row.escuela ?? "â€”",
     name: row.nombre_proyecto,
     description: row.descripcion ?? "",
+    scopeNotes,
     status: status === "Cerrado" ? "Cerrado" : "Abierto",
     createdAt: formatDate(row.fecha_creacion),
+    isFavorite: Boolean(row.es_favorito),
+    preprojectValidated: Boolean(row.anteproyecto_validado),
   };
 }
 
@@ -63,7 +105,7 @@ export function mapPendingItem(row: TareaGrupoRow) {
   const projectName = Array.isArray(gp)
     ? (gp[0]?.nombre_proyecto ?? "Proyecto")
     : (gp?.nombre_proyecto ?? "Proyecto");
-  const summary = row.titulo_tarea?.trim() || row.descripcion_tarea?.trim() || "Sin descripciÃ³n";
+  const summary = row.titulo_tarea?.trim() || row.descripcion_tarea?.trim() || "Sin descripción";
   return {
     id: String(row.id_tarea),
     summary,

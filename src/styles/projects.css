@@ -55,12 +55,54 @@
   white-space: nowrap;
 }
 
+.projects-table__cell--details {
+  max-width: 320px;
+}
+
 .projects-table__cell--name {
   font-weight: 700;
 }
 
 .projects-table__cell--actions {
   white-space: nowrap;
+}
+
+.projects-table__th-check,
+.projects-table__cell--check {
+  width: 40px;
+  text-align: center;
+}
+
+.projects-table__row--selected td {
+  background: var(--color-panel);
+}
+
+.projects-favorite-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--color-ink-muted);
+  cursor: pointer;
+  transition: color 0.2s ease, transform 0.15s ease;
+}
+
+.projects-favorite-btn:hover {
+  color: var(--color-warning-text);
+  transform: scale(1.05);
+}
+
+.projects-favorite-btn--active {
+  color: #eab308;
+}
+
+.projects-table__action + .projects-table__action {
+  margin-left: var(--space-sm);
 }
 
 .projects-badge {

@@ -12,7 +12,9 @@ import { useAuth } from "../../contexts/AuthContext";
 import { useSidebarCollapsed } from "../../hooks/useSidebarCollapsed";
 import { ROUTES } from "../../routes";
 import "../../styles/sidebar.css";
+import "../../styles/theme-toggle.css";
 import { SidebarToggle } from "./SidebarToggle";
+import { ThemeToggleButton } from "./ThemeToggleButton";
 
 interface NavItem {
   id: string;
@@ -59,7 +61,12 @@ function NavLinkItem({ item, collapsed }: { item: NavItem; collapsed: boolean })
   const isHome = item.to === ROUTES.DASHBOARD;
   const isActive = isHome ? pathname === ROUTES.DASHBOARD : pathname === item.to;
   return (
-    <NavLink to={item.to} end={isHome} className={navItemClassName(isActive)} aria-current={isActive ? "page" : undefined}>
+    <NavLink
+      to={item.to}
+      end={isHome}
+      className={navItemClassName(isActive)}
+      aria-current={isActive ? "page" : undefined}
+    >
       <span className="sidebar__nav-icon">{item.icon}</span>
       <span className={collapsed ? "sr-only" : "sidebar__label"}>{item.label}</span>
     </NavLink>
@@ -75,8 +82,12 @@ function NavButtonItem({
   collapsed: boolean;
   onLogout?: () => void;
 }) {
+  function handleClick() {
+    if (item.action === "logout") onLogout?.();
+  }
+
   return (
-    <button type="button" className="sidebar__nav-item" onClick={item.action === "logout" ? onLogout : undefined}>
+    <button type="button" className="sidebar__nav-item" onClick={handleClick}>
       <span className="sidebar__nav-icon">{item.icon}</span>
       <span className={collapsed ? "sr-only" : "sidebar__label"}>{item.label}</span>
     </button>
@@ -93,7 +104,13 @@ function NavItemRow({
   onLogout?: () => void;
 }) {
   if (item.to) return <NavLinkItem item={item} collapsed={collapsed} />;
-  return <NavButtonItem item={item} collapsed={collapsed} onLogout={onLogout} />;
+  return (
+    <NavButtonItem
+      item={item}
+      collapsed={collapsed}
+      onLogout={onLogout}
+    />
+  );
 }
 
 export function Sidebar() {
@@ -131,8 +148,17 @@ export function Sidebar() {
         ))}
       </nav>
       <div className="sidebar__footer-block sidebar__nav" aria-label="Cuenta">
+        <ThemeToggleButton
+          className="sidebar__nav-item theme-toggle theme-toggle--sidebar"
+          collapsed={collapsed}
+        />
         {FOOTER_NAV.map((item) => (
-          <NavItemRow key={item.id} item={item} collapsed={collapsed} onLogout={handleLogout} />
+          <NavItemRow
+            key={item.id}
+            item={item}
+            collapsed={collapsed}
+            onLogout={handleLogout}
+          />
         ))}
       </div>
     </aside>

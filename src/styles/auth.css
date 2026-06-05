@@ -6,6 +6,14 @@
   flex-direction: column;
   min-height: 100vh;
   font-family: Arial, Helvetica, sans-serif;
+  color: var(--auth-ink);
+  background: linear-gradient(
+    160deg,
+    var(--color-dashboard-gradient-start) 0%,
+    var(--color-dashboard-gradient-mid) 40%,
+    var(--color-dashboard-gradient-end) 75%,
+    var(--color-canvas) 100%
+  );
 }
 
 .auth-page *,
@@ -31,13 +39,13 @@
 .auth-page .register-box {
   width: min(440px, 92vw);
   max-width: 440px;
-  background-color: rgb(255, 255, 255);
+  background-color: var(--auth-surface);
   padding: 40px 48px;
   border-radius: 50px;
   display: flex;
   flex-direction: column;
   gap: 20px;
-  color: black;
+  color: var(--auth-ink);
   justify-content: center;
   align-items: stretch;
   opacity: 0.8;
@@ -61,7 +69,7 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  background-color: #f2f2f2;
+  background-color: var(--auth-pill-bg);
   border-radius: 50%;
   color: #4a60f0;
 }
@@ -92,7 +100,7 @@
   width: 100%;
   max-width: 100%;
   min-width: 0;
-  border: 1px solid black;
+  border: 1px solid var(--auth-input-border);
   outline: none;
   border-radius: 20px;
   font-family: inherit;
@@ -138,7 +146,7 @@
 }
 
 .auth-page .auth-link {
-  color: black;
+  color: var(--auth-ink);
   font-size: 14px;
   text-decoration: underline;
 }
@@ -163,7 +171,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 5px 10px;
-  color: black;
+  color: var(--auth-ink);
 }
 
 .auth-page .logo {
@@ -171,11 +179,11 @@
   align-items: center;
   gap: 8px;
   font-weight: bold;
-  background-color: #f2f2f2;
+  background-color: var(--auth-pill-bg);
   padding: 15px 27px;
   border-radius: 20px;
   font-size: 14px;
-  color: black;
+  color: var(--auth-ink);
   text-decoration: none;
 }
 
@@ -193,9 +201,9 @@
 }
 
 .auth-page .barra-nav a {
-  color: black;
+  color: var(--auth-ink);
   text-decoration: none;
-  background-color: #f2f2f2;
+  background-color: var(--auth-pill-bg);
   font-family: sans-serif;
   font-weight: bold;
   transition: 0.3s;
@@ -205,7 +213,7 @@
 }
 
 .auth-page .barra-nav a:hover {
-  background-color: lightblue;
+  background-color: var(--auth-pill-hover);
   transform: scale(1.1);
 }
 

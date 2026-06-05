@@ -40,8 +40,17 @@ export default function DashboardPage() {
       <section className="dashboard-panel dashboard-panel--featured" aria-labelledby="featured-title">
         <div className="dashboard-panel__header">
           <h2 id="featured-title" className="dashboard-panel__title">Proyectos Destacados</h2>
+          <p className="dashboard-panel__subtitle">
+            Favoritos desde Mis Proyectos (estrella)
+          </p>
         </div>
-        <FeaturedProjectsCarousel projects={featured} />
+        {!loading && featured.length === 0 ? (
+          <p className="dashboard-panel__empty" role="status">
+            Marcá proyectos con la estrella en Mis Proyectos para verlos aquí.
+          </p>
+        ) : (
+          <FeaturedProjectsCarousel projects={featured} />
+        )}
       </section>
       <section className="dashboard-panel" aria-labelledby="pending-title">
         <div className="dashboard-panel__header">
