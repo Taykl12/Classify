@@ -1,6 +1,6 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { CSSProperties, KeyboardEvent } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
+import type { CSSProperties } from 'react';
 import { useCarouselItemsPerPage } from '../../hooks/useCarouselMetrics';
 import { useViewportWidth } from '../../hooks/useViewportWidth';
 import type { Project } from '../../types/dashboard';
@@ -16,7 +16,7 @@ export function FeaturedProjectsCarousel({ projects }: FeaturedProjectsCarouselP
   const viewportRef = useRef<HTMLDivElement>(null);
   const itemsPerPage = useCarouselItemsPerPage(viewportRef);
   const viewportWidth = useViewportWidth(viewportRef);
-  const [currentPage, setCurrentPage] = useState(0);
+  const [pageIndex, setPageIndex] = useState(0);
 
   const pages = useMemo(
     () => chunkProjects(projects, itemsPerPage),
@@ -25,34 +25,17 @@ export function FeaturedProjectsCarousel({ projects }: FeaturedProjectsCarouselP
 
   const pageCount = pages.length;
   const maxPage = Math.max(0, pageCount - 1);
+  const currentPage = Math.min(pageIndex, maxPage);
   const canGoPrev = currentPage > 0;
   const canGoNext = currentPage < maxPage;
 
-  useEffect(() => {
-    setCurrentPage((page) => Math.min(page, maxPage));
-  }, [maxPage]);
-
   const goPrev = useCallback(() => {
-    setCurrentPage((page) => Math.max(0, page - 1));
+    setPageIndex((page) => Math.max(0, page - 1));
   }, []);
 
   const goNext = useCallback(() => {
-    setCurrentPage((page) => Math.min(maxPage, page + 1));
+    setPageIndex((page) => Math.min(maxPage, page + 1));
   }, [maxPage]);
-
-  const handleRegionKeyDown = useCallback(
-    (event: KeyboardEvent<HTMLDivElement>) => {
-      if (event.key === 'ArrowLeft' && canGoPrev) {
-        event.preventDefault();
-        goPrev();
-      }
-      if (event.key === 'ArrowRight' && canGoNext) {
-        event.preventDefault();
-        goNext();
-      }
-    },
-    [canGoPrev, canGoNext, goPrev, goNext],
-  );
 
   const trackStyle = useMemo((): CSSProperties | undefined => {
     if (viewportWidth <= 0) return undefined;
@@ -63,13 +46,7 @@ export function FeaturedProjectsCarousel({ projects }: FeaturedProjectsCarouselP
   }, [currentPage, pageCount, viewportWidth]);
 
   return (
-    <div
-      className="carousel"
-      role="region"
-      aria-label="Proyectos destacados"
-      tabIndex={0}
-      onKeyDown={handleRegionKeyDown}
-    >
+    <div className="carousel" role="region" aria-label="Proyectos destacados">
       <button
         type="button"
         className="carousel__nav carousel__nav--prev"

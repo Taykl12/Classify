@@ -4,7 +4,8 @@ import { useNavigate } from "react-router-dom";
 import { ProjectFormModal } from "../components/projects/ProjectFormModal";
 import { ProjectsListSection } from "../components/projects/ProjectsListSection";
 import { DashboardLayout } from "../components/layout/DashboardLayout";
-import { ApiError, apiFetch } from "../lib/api";
+import { useAuth } from "../contexts/AuthContext";
+import { ApiError, apiFetch, apiFetchWithRetry, isUnauthorizedError } from "../lib/api";
 import { ROUTES } from "../routes";
 import type { ProjectDetail, ProjectFormValues, ProjectListItem } from "../types/projects";
 import { EMPTY_PROJECT_FORM } from "../types/projects";
@@ -13,6 +14,7 @@ import "../styles/projects-page.css";
 
 export default function ProjectsPage() {
   const navigate = useNavigate();
+  const { user, loading: authLoading } = useAuth();
   const [items, setItems] = useState<ProjectListItem[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -23,7 +25,7 @@ export default function ProjectsPage() {
 
   const loadProjects = useCallback(async () => {
     setError(null);
-    const data = await apiFetch<ProjectListItem[]>("/api/projects");
+    const data = await apiFetchWithRetry<ProjectListItem[]>("/api/projects");
     setItems(data);
     setSelectedIds((prev) => {
       const next = new Set<string>();
@@ -35,12 +37,16 @@ export default function ProjectsPage() {
   }, []);
 
   useEffect(() => {
+    if (authLoading || !user) return;
     let cancelled = false;
+    setLoading(true);
     (async () => {
       try {
         await loadProjects();
       } catch (e) {
-        if (!cancelled) setError(e instanceof Error ? e.message : "Error al cargar");
+        if (!cancelled && !isUnauthorizedError(e)) {
+          setError(e instanceof Error ? e.message : "Error al cargar");
+        }
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -48,7 +54,7 @@ export default function ProjectsPage() {
     return () => {
       cancelled = true;
     };
-  }, [loadProjects]);
+  }, [authLoading, user, loadProjects]);
 
   function toggleSelect(id: string) {
     setSelectedIds((prev) => {

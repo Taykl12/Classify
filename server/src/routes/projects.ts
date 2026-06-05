@@ -58,12 +58,11 @@ function buildConfigPatch(
   if (body.backupLink !== undefined) patch.link_respaldo = body.backupLink.trim() || null;
   if (body.gradesLink !== undefined) patch.link_calificaciones = body.gradesLink.trim() || null;
   if (body.documents !== undefined) {
-    const docs: ProjectDocumentRow[] = body.documents
-      .filter((d) => d.url?.trim())
-      .map((d) => ({
-        nombre: d.name?.trim() || d.url!.trim(),
-        url: d.url!.trim(),
-      }));
+    const docs: ProjectDocumentRow[] = body.documents.flatMap((d) => {
+      const url = d.url?.trim();
+      if (!url) return [];
+      return [{ nombre: d.name?.trim() || url, url }];
+    });
     patch.documentos = docs;
   }
   return patch;

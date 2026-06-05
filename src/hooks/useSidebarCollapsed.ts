@@ -1,16 +1,15 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 
 const STORAGE_KEY = 'classify-sidebar-collapsed';
 
-export function useSidebarCollapsed(defaultCollapsed = true) {
-  const [collapsed, setCollapsed] = useState(defaultCollapsed);
+function readStoredCollapsed(defaultCollapsed: boolean): boolean {
+  const stored = localStorage.getItem(STORAGE_KEY);
+  if (stored === null) return defaultCollapsed;
+  return stored === 'true';
+}
 
-  useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored !== null) {
-      setCollapsed(stored === 'true');
-    }
-  }, []);
+export function useSidebarCollapsed(defaultCollapsed = true) {
+  const [collapsed, setCollapsed] = useState(() => readStoredCollapsed(defaultCollapsed));
 
   const toggle = useCallback(() => {
     setCollapsed((prev) => {

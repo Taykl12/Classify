@@ -4,7 +4,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { DashboardLayout } from "../components/layout/DashboardLayout";
 import { EmailChipInput } from "../components/projects/EmailChipInput";
 import { useAuth } from "../contexts/AuthContext";
-import { ApiError, apiFetch } from "../lib/api";
+import { ApiError, apiFetch, apiFetchWithRetry, isUnauthorizedError } from "../lib/api";
 import { ensureCreatorInMembers, sortMembersWithCreatorFirst } from "../lib/memberEmails";
 import { documentNameFromUrl, openExternalUrl } from "../lib/openUrl";
 import { isProfessor } from "../lib/roles";
@@ -80,7 +80,7 @@ function LinkField({
 export default function ProjectConfigPage() {
   const { projectId } = useParams<{ projectId: string }>();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [tab, setTab] = useState<ProjectConfigTab>("alcance");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -96,7 +96,7 @@ export default function ProjectConfigPage() {
   const load = useCallback(async () => {
     if (!projectId) return;
     setError(null);
-    const detail = await apiFetch<ProjectDetail>(`/api/projects/${projectId}`);
+    const detail = await apiFetchWithRetry<ProjectDetail>(`/api/projects/${projectId}`);
     const next = detailToForm(detail, user?.email ?? detail.ownerEmail);
     setForm(next);
     setSaved(next);
@@ -105,12 +105,16 @@ export default function ProjectConfigPage() {
   }, [projectId, user?.email]);
 
   useEffect(() => {
+    if (authLoading || !user) return;
     let cancelled = false;
+    setLoading(true);
     (async () => {
       try {
         await load();
       } catch (e) {
-        if (!cancelled) setError(e instanceof Error ? e.message : "Error al cargar");
+        if (!cancelled && !isUnauthorizedError(e)) {
+          setError(e instanceof Error ? e.message : "Error al cargar");
+        }
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -118,7 +122,7 @@ export default function ProjectConfigPage() {
     return () => {
       cancelled = true;
     };
-  }, [load]);
+  }, [authLoading, user, load]);
 
   const sortedMembers = useMemo(() => {
     if (!form) return [];

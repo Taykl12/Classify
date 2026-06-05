@@ -2,36 +2,43 @@
 import { FeaturedProjectsCarousel } from "../components/dashboard/FeaturedProjectsCarousel";
 import { PendingProjectsSection } from "../components/dashboard/PendingProjectsSection";
 import { DashboardLayout } from "../components/layout/DashboardLayout";
-import { apiFetch } from "../lib/api";
+import { useAuth } from "../contexts/AuthContext";
+import { apiFetchWithRetry, isUnauthorizedError } from "../lib/api";
 import type { PendingItem, Project } from "../types/dashboard";
 import "../styles/dashboard.css";
 
 export default function DashboardPage() {
+  const { user, loading: authLoading } = useAuth();
   const [featured, setFeatured] = useState<Project[]>([]);
   const [pending, setPending] = useState<PendingItem[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (authLoading || !user) return;
     let cancelled = false;
+    setLoading(true);
+    setError(null);
     (async () => {
       try {
         const [f, p] = await Promise.all([
-          apiFetch<Project[]>("/api/dashboard/featured"),
-          apiFetch<PendingItem[]>("/api/dashboard/pending"),
+          apiFetchWithRetry<Project[]>("/api/dashboard/featured"),
+          apiFetchWithRetry<PendingItem[]>("/api/dashboard/pending"),
         ]);
         if (!cancelled) {
           setFeatured(f);
           setPending(p);
         }
       } catch (e) {
-        if (!cancelled) setError(e instanceof Error ? e.message : "Error al cargar");
+        if (!cancelled && !isUnauthorizedError(e)) {
+          setError(e instanceof Error ? e.message : "Error al cargar");
+        }
       } finally {
         if (!cancelled) setLoading(false);
       }
     })();
     return () => { cancelled = true; };
-  }, []);
+  }, [authLoading, user]);
 
   return (
     <DashboardLayout>

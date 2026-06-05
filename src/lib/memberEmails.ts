@@ -9,9 +9,11 @@ export function sortMembersWithCreatorFirst(
 ): string[] {
   if (!creatorEmail?.trim()) return [...emails];
   const creator = normalizeEmail(creatorEmail);
-  const rest = emails
-    .map(normalizeEmail)
-    .filter((e) => e && e !== creator);
+  const rest = emails.flatMap((email) => {
+    const normalized = normalizeEmail(email);
+    if (!normalized || normalized === creator) return [];
+    return [normalized];
+  });
   return [creator, ...rest];
 }
 

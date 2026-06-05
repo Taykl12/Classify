@@ -11,3 +11,11 @@ plans/
 server/.env
 .env
 
+# React Doctor — skills auto-instalados por el CLI (IDE-local)
+.agents/
+.claude/
+.continue/
+
+# Guía local de base de datos (lectura personal / equipo)
+guia-base-de-datos.md
+

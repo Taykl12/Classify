@@ -31,12 +31,11 @@ export function mapProjectConfig(row: GrupoProyectoRow) {
     preprojectValidated: Boolean(row.anteproyecto_validado),
     backupLink: row.link_respaldo ?? "",
     gradesLink: row.link_calificaciones ?? "",
-    documents: docs
-      .filter((d) => d?.url?.trim())
-      .map((d) => ({
-        name: (d.nombre?.trim() || d.url!.trim()) as string,
-        url: d.url!.trim(),
-      })),
+    documents: docs.flatMap((d) => {
+      const url = d?.url?.trim();
+      if (!url) return [];
+      return [{ name: (d.nombre?.trim() || url) as string, url }];
+    }),
   };
 }
 

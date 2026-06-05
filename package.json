@@ -8,7 +8,8 @@
     "dev:server": "npm run dev --prefix server",
     "build": "tsc -b && vite build",
     "build:server": "npm run build --prefix server",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "doctor": "npx react-doctor@latest"
   },
   "dependencies": {
     "lucide-react": "^0.511.0",

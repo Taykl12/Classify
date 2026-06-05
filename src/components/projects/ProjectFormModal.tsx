@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 import { Plus } from "lucide-react";
 import { useAuth } from "../../contexts/AuthContext";
 import { ensureCreatorInMembers } from "../../lib/memberEmails";
@@ -17,32 +17,40 @@ interface ProjectFormModalProps {
   onSubmit: (values: ProjectFormValues) => void | Promise<void>;
 }
 
-export function ProjectFormModal({
-  open,
+interface ProjectFormModalContentProps {
+  mode: "create" | "edit";
+  initialValues?: ProjectFormValues;
+  submitting: boolean;
+  error?: string | null;
+  onClose: () => void;
+  onSubmit: (values: ProjectFormValues) => void | Promise<void>;
+}
+
+function buildInitialValues(
+  initialValues: ProjectFormValues | undefined,
+  creatorEmail: string | null
+): ProjectFormValues {
+  const base = initialValues ?? EMPTY_PROJECT_FORM;
+  return {
+    ...base,
+    memberEmails: ensureCreatorInMembers(base.memberEmails, creatorEmail),
+  };
+}
+
+function ProjectFormModalContent({
   mode,
   initialValues,
-  submitting = false,
+  submitting,
   error,
   onClose,
   onSubmit,
-}: ProjectFormModalProps) {
+}: ProjectFormModalContentProps) {
   const { user } = useAuth();
-  const [values, setValues] = useState<ProjectFormValues>(EMPTY_PROJECT_FORM);
-  const [memberInputOpen, setMemberInputOpen] = useState(false);
   const creatorEmail = user?.email ?? null;
-
-  useEffect(() => {
-    if (open) {
-      const base = initialValues ?? EMPTY_PROJECT_FORM;
-      setValues({
-        ...base,
-        memberEmails: ensureCreatorInMembers(base.memberEmails, creatorEmail),
-      });
-      setMemberInputOpen(false);
-    }
-  }, [open, initialValues, creatorEmail]);
-
-  if (!open) return null;
+  const [values, setValues] = useState(() =>
+    buildInitialValues(initialValues, creatorEmail)
+  );
+  const [memberInputOpen, setMemberInputOpen] = useState(false);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -141,5 +149,34 @@ export function ProjectFormModal({
         </form>
       </div>
     </div>
+  );
+}
+
+export function ProjectFormModal({
+  open,
+  mode,
+  initialValues,
+  submitting = false,
+  error,
+  onClose,
+  onSubmit,
+}: ProjectFormModalProps) {
+  if (!open) return null;
+
+  const formKey =
+    mode === "edit"
+      ? `${initialValues?.name ?? ""}:${(initialValues?.memberEmails ?? []).join(",")}`
+      : "create";
+
+  return (
+    <ProjectFormModalContent
+      key={formKey}
+      mode={mode}
+      initialValues={initialValues}
+      submitting={submitting}
+      error={error}
+      onClose={onClose}
+      onSubmit={onSubmit}
+    />
   );
 }

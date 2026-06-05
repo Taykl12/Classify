@@ -7,7 +7,14 @@
   useState,
   type ReactNode,
 } from "react";
-import { apiFetch, getAccessToken, setAccessToken } from "../lib/api";
+import {
+  apiFetch,
+  apiFetchWithRetry,
+  clearStoredSession,
+  getAccessToken,
+  registerUnauthorizedHandler,
+  setAccessToken,
+} from "../lib/api";
 
 export interface AuthUser {
   id: string;
@@ -44,32 +51,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(nextUser);
   }, []);
 
+  useEffect(() => registerUnauthorizedHandler(() => setUser(null)), []);
+
   useEffect(() => {
     const token = getAccessToken();
     if (!token) {
       setLoading(false);
       return;
     }
-    const raw = localStorage.getItem("classify_user");
-    if (raw) {
-      try {
-        setUser(JSON.parse(raw) as AuthUser);
-      } catch {
-        setAccessToken(null);
-        setLoading(false);
-        return;
-      }
-    }
+    let cancelled = false;
     (async () => {
       try {
-        const data = await apiFetch<{ user: AuthUser }>("/api/auth/me");
-        persistSession(token, data.user);
+        const data = await apiFetchWithRetry<{ user: AuthUser }>("/api/auth/me");
+        if (!cancelled) persistSession(token, data.user);
       } catch {
-        if (!raw) setAccessToken(null);
+        if (!cancelled) {
+          clearStoredSession();
+          setUser(null);
+        }
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     })();
+    return () => {
+      cancelled = true;
+    };
   }, [persistSession]);
 
   const login = useCallback(async (email: string, password: string) => {
@@ -111,8 +117,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       await apiFetch("/api/auth/logout", { method: "POST" });
     } finally {
-      setAccessToken(null);
-      localStorage.removeItem("classify_user");
+      clearStoredSession();
       setUser(null);
     }
   }, []);
