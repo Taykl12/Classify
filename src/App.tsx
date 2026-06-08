@@ -3,6 +3,7 @@ import { AuthProvider } from "./contexts/AuthContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { HomeRedirect } from "./components/auth/HomeRedirect";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
+import CalendaryPage from "./pages/Calendary";
 import DashboardPage from "./pages/DashboardPage";
 import LoginPage from "./pages/LoginPage";
 import ProjectConfigPage from "./pages/ProjectConfigPage";
@@ -35,6 +36,14 @@ function App() {
             }
           />
           <Route
+           path={ROUTES.CALENDARY}
+            element={
+              <ProtectedRoute>
+                <CalendaryPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route 
             path="/proyectos/:projectId/config"
             element={
               <ProtectedRoute>

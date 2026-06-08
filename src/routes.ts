@@ -6,4 +6,5 @@ export const ROUTES = {
   LOGIN: '/login',
   REGISTER: '/register',
   RECOVER_PASSWORD: '/recuperar-contrasena',
+  CALENDARY: '/calendario',
 } as const;

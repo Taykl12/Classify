@@ -41,6 +41,7 @@ const MAIN_NAV: NavItem[] = [
     id: "calendar",
     label: "Calendario",
     icon: <CalendarClock size={22} aria-hidden />,
+    to: ROUTES.CALENDARY,
   },
 ];
 

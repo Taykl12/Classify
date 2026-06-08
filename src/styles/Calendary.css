@@ -1,0 +1,78 @@
+.calendary-page {
+  --calendary-bg-start: var(--color-panel);
+  --calendary-bg-end: var(--color-canvas);
+  --calendary-weekday-bg: var(--color-panel-strong);
+  --calendary-weekday-text: var(--color-primary);
+  --calendary-day-bg: var(--color-surface);
+  width: 100%;
+  min-height: calc(100vh - (var(--space-lg) * 2));
+  background: linear-gradient(
+    180deg,
+    var(--calendary-bg-start) 0%,
+    var(--calendary-bg-end) 100%
+  );
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-md);
+}
+
+
+
+[data-theme="dark"] .calendary-page {
+  --calendary-bg-start: #12233f;
+  --calendary-bg-end: var(--color-canvas);
+  --calendary-weekday-bg: #1e3a5f;
+  --calendary-weekday-text: #bfdbfe;
+  --calendary-day-bg: var(--color-surface);
+}
+
+.calendary-page .calendar-container {
+  max-width: 1400px;
+  margin: auto;
+  padding: 20px;
+}
+
+.calendary-page .calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.calendary-page .month-controls {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.calendary-page .weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  background: var(--calendary-day-bg);
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+  overflow: hidden;
+}
+
+.calendary-page .weekdays div {
+  text-align: center;
+  padding: 15px;
+  font-weight: bold;
+  background: var(--calendary-weekday-bg);
+  border: 1px solid var(--color-border);
+  color: var(--calendary-weekday-text);
+}
+
+.calendary-page .calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+}
+
+.calendary-page .day-cell {
+  height: 120px;
+  background: var(--calendary-day-bg);
+  border: 1px solid var(--color-border);
+
+  padding: 8px;
+  font-size: 14px;
+}
+
