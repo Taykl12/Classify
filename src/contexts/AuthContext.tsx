@@ -23,6 +23,7 @@ export interface AuthUser {
   lastName?: string;
   /** Cargo para el sidebar, ej. Alumno, Profesor */
   roleLabel?: string;
+  profilePhotoUrl?: string | null;
 }
 
 interface AuthContextValue {
@@ -37,6 +38,7 @@ interface AuthContextValue {
   }) => Promise<{ needsConfirmation?: boolean }>;
   logout: () => Promise<void>;
   recoverPassword: (email: string) => Promise<string>;
+  refreshUser: (nextUser: AuthUser) => void;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -130,9 +132,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return data.message;
   }, []);
 
+  const refreshUser = useCallback(
+    (nextUser: AuthUser) => {
+      const token = getAccessToken();
+      if (token) persistSession(token, nextUser);
+    },
+    [persistSession]
+  );
+
   const value = useMemo(
-    () => ({ user, loading, login, register, logout, recoverPassword }),
-    [user, loading, login, register, logout, recoverPassword]
+    () => ({ user, loading, login, register, logout, recoverPassword, refreshUser }),
+    [user, loading, login, register, logout, recoverPassword, refreshUser]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

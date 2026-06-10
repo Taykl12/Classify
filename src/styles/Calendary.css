@@ -4,8 +4,12 @@
   --calendary-weekday-bg: var(--color-panel-strong);
   --calendary-weekday-text: var(--color-primary);
   --calendary-day-bg: var(--color-surface);
+  --calendary-weekend-color: #dc2626;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
   width: 100%;
-  min-height: calc(100vh - (var(--space-lg) * 2));
   background: linear-gradient(
     180deg,
     var(--calendary-bg-start) 0%,
@@ -13,10 +17,8 @@
   );
   border: 1px solid var(--color-border);
   border-radius: var(--radius-xl);
-  padding: var(--space-md);
+  padding: var(--space-sm) var(--space-md);
 }
-
-
 
 [data-theme="dark"] .calendary-page {
   --calendary-bg-start: #12233f;
@@ -24,30 +26,91 @@
   --calendary-weekday-bg: #1e3a5f;
   --calendary-weekday-text: #bfdbfe;
   --calendary-day-bg: var(--color-surface);
+  --calendary-weekend-color: #f87171;
 }
 
 .calendary-page .calendar-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
   max-width: 1400px;
-  margin: auto;
-  padding: 20px;
+  width: 100%;
+  margin: 0 auto;
 }
 
 .calendary-page .calendar-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  flex-shrink: 0;
+  margin-bottom: var(--space-sm);
+  padding: 0;
 }
 
 .calendary-page .month-controls {
   display: flex;
   align-items: center;
-  gap: 15px;
+  gap: var(--space-sm);
+}
+
+.calendary-page .calendar-title {
+  margin: 0;
+  font-size: 1.375rem;
+  font-weight: 700;
+  color: var(--color-ink);
+  text-transform: capitalize;
+  min-width: 10ch;
+}
+
+.calendary-page .calendar-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  background: var(--color-surface);
+  color: var(--color-ink);
+  font-weight: 600;
+  box-shadow: var(--shadow-soft);
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.calendary-page .calendar-btn:hover {
+  background: var(--color-panel);
+  border-color: var(--color-primary-accent);
+}
+
+.calendary-page .calendar-btn:focus-visible {
+  outline: 2px solid var(--color-primary-accent);
+  outline-offset: 2px;
+}
+
+.calendary-page .calendar-btn--today {
+  min-height: var(--touch-min);
+  padding: 0 var(--space-lg);
+  font-size: var(--font-size-body);
+}
+
+.calendary-page .calendar-btn--nav {
+  min-width: var(--touch-min);
+  min-height: var(--touch-min);
+  padding: 0;
+}
+
+.calendary-page .calendar-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
 }
 
 .calendary-page .weekdays {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
+  flex-shrink: 0;
   background: var(--calendary-day-bg);
   border-radius: var(--radius-md) var(--radius-md) 0 0;
   overflow: hidden;
@@ -55,24 +118,76 @@
 
 .calendary-page .weekdays div {
   text-align: center;
-  padding: 15px;
-  font-weight: bold;
+  padding: var(--space-sm) var(--space-xs);
+  font-size: 0.875rem;
+  font-weight: 700;
   background: var(--calendary-weekday-bg);
   border: 1px solid var(--color-border);
   color: var(--calendary-weekday-text);
 }
 
 .calendary-page .calendar-grid {
+  flex: 1;
   display: grid;
   grid-template-columns: repeat(7, 1fr);
+  grid-auto-rows: 1fr;
+  min-height: 0;
 }
 
 .calendary-page .day-cell {
-  height: 120px;
+  min-height: 0;
   background: var(--calendary-day-bg);
   border: 1px solid var(--color-border);
-
-  padding: 8px;
-  font-size: 14px;
+  padding: var(--space-sm);
+  font-size: 0.875rem;
 }
 
+.calendary-page .day-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.75rem;
+  min-height: 1.75rem;
+  font-weight: 600;
+  color: var(--color-ink);
+}
+
+.calendary-page .day-number--other-month {
+  color: var(--color-ink-muted);
+}
+
+.calendary-page .day-number--weekend {
+  color: var(--calendary-weekend-color);
+}
+
+.calendary-page .day-number--other-month.day-number--weekend {
+  color: var(--calendary-weekend-color);
+  opacity: 0.65;
+}
+
+.calendary-page .day-number--today {
+  background: var(--color-primary-accent);
+  color: var(--color-on-primary);
+  border-radius: 50%;
+  opacity: 1;
+}
+
+@media (max-width: 768px) {
+  .calendary-page {
+    padding: var(--space-xs) var(--space-sm);
+  }
+
+  .calendary-page .calendar-title {
+    font-size: 1.125rem;
+  }
+
+  .calendary-page .calendar-btn--today {
+    padding: 0 var(--space-md);
+    font-size: 0.9375rem;
+  }
+
+  .calendary-page .weekdays div {
+    padding: var(--space-xs);
+    font-size: 0.75rem;
+  }
+}

@@ -19,3 +19,7 @@ server/.env
 # Guía local de base de datos (lectura personal / equipo)
 guia-base-de-datos.md
 
+# Notas locales de cambios y features
+cambios/
+calendario-cambios-local.md
+

@@ -7,4 +7,5 @@ export const ROUTES = {
   REGISTER: '/register',
   RECOVER_PASSWORD: '/recuperar-contrasena',
   CALENDARY: '/calendario',
+  PREFERENCES: '/preferencias',
 } as const;

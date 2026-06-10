@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState, type KeyboardEvent } from "react";
-import { ArrowLeft, Plus, User } from "lucide-react";
+import { ArrowLeft, ExternalLink, Plus, Trash2, User } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { DashboardLayout } from "../components/layout/DashboardLayout";
 import { EmailChipInput } from "../components/projects/EmailChipInput";
@@ -89,6 +89,7 @@ export default function ProjectConfigPage() {
   const [ownerEmail, setOwnerEmail] = useState<string | null>(null);
   const [form, setForm] = useState<ConfigFormState | null>(null);
   const [saved, setSaved] = useState<ConfigFormState | null>(null);
+  const [docNameDraft, setDocNameDraft] = useState("");
   const [docDraft, setDocDraft] = useState("");
 
   const creatorEmail = user?.email ?? ownerEmail;
@@ -171,13 +172,31 @@ export default function ProjectConfigPage() {
   function addDocument() {
     const url = docDraft.trim();
     if (!url || !form) return;
+    const name = docNameDraft.trim() || documentNameFromUrl(url);
     patchForm({
-      documents: [
-        ...form.documents,
-        { name: documentNameFromUrl(url), url },
-      ],
+      documents: [...form.documents, { name, url }],
     });
+    setDocNameDraft("");
     setDocDraft("");
+  }
+
+  function removeDocument(index: number) {
+    if (!form) return;
+    patchForm({
+      documents: form.documents.filter((_, i) => i !== index),
+    });
+  }
+
+  function updateDocument(
+    index: number,
+    patch: Partial<Pick<ProjectDocument, "name" | "url">>
+  ) {
+    if (!form) return;
+    patchForm({
+      documents: form.documents.map((doc, i) =>
+        i === index ? { ...doc, ...patch } : doc
+      ),
+    });
   }
 
   function handleDocKeyDown(e: KeyboardEvent<HTMLInputElement>) {
@@ -334,12 +353,6 @@ export default function ProjectConfigPage() {
                   disabled={readOnly}
                 />
               </label>
-              <LinkField
-                label="Documentacion de Respaldo"
-                value={form.backupLink}
-                onChange={(backupLink) => patchForm({ backupLink })}
-                disabled={readOnly}
-              />
             </div>
           ) : null}
 
@@ -367,7 +380,7 @@ export default function ProjectConfigPage() {
                           memberEmails: ensureCreatorInMembers(memberEmails, creatorEmail),
                         })
                       }
-                      placeholder="Ingrese el Correo del Usuario"
+                      placeholder="DNI, correo o nombre del usuario"
                     />
                   </div>
                   <p className="project-config__member-meta">
@@ -379,22 +392,30 @@ export default function ProjectConfigPage() {
           ) : null}
 
           {tab === "calificaciones" ? (
-            <div className="project-config__field">
-              <span className="project-config__label">Aprobacion del Anteproyecto</span>
-              <label className="project-config__checkbox-row">
-                <input
-                  type="checkbox"
-                  checked={form.preprojectValidated}
-                  onChange={(e) => patchForm({ preprojectValidated: e.target.checked })}
-                  disabled={!canApprove}
-                />
-                Proyecto Validado/Viable
-              </label>
-              {!canApprove ? (
-                <p className="project-config__member-meta">
-                  Solo un usuario con rol Profesor puede aprobar el anteproyecto.
-                </p>
-              ) : null}
+            <div>
+              <div className="project-config__field">
+                <span className="project-config__label">Aprobacion del Anteproyecto</span>
+                <label className="project-config__checkbox-row">
+                  <input
+                    type="checkbox"
+                    checked={form.preprojectValidated}
+                    onChange={(e) => patchForm({ preprojectValidated: e.target.checked })}
+                    disabled={!canApprove}
+                  />
+                  Proyecto Validado/Viable
+                </label>
+                {!canApprove ? (
+                  <p className="project-config__member-meta">
+                    Solo un usuario con rol Profesor puede aprobar el anteproyecto.
+                  </p>
+                ) : null}
+              </div>
+              <LinkField
+                label="Documentacion de Respaldo"
+                value={form.backupLink}
+                onChange={(backupLink) => patchForm({ backupLink })}
+                disabled={readOnly}
+              />
             </div>
           ) : null}
 
@@ -402,15 +423,25 @@ export default function ProjectConfigPage() {
             <div>
               <div className="project-config__field">
                 <span className="project-config__label">Agregar Documento:</span>
-                <div className="project-config__add-row">
+                <div className="project-config__add-doc-row">
+                  <input
+                    type="text"
+                    className="project-config__doc-name-input"
+                    value={docNameDraft}
+                    onChange={(e) => setDocNameDraft(e.target.value)}
+                    placeholder="Nombre"
+                    disabled={readOnly}
+                    aria-label="Nombre del documento"
+                  />
                   <input
                     type="url"
-                    className="project-config__input"
+                    className="project-config__doc-url-input"
                     value={docDraft}
                     onChange={(e) => setDocDraft(e.target.value)}
                     onKeyDown={handleDocKeyDown}
-                    placeholder="Ingrese el Link de el Documento"
+                    placeholder="Ingrese el link del documento"
                     disabled={readOnly}
+                    aria-label="Link del documento"
                   />
                   <button
                     type="button"
@@ -426,16 +457,38 @@ export default function ProjectConfigPage() {
               <ul className="project-config__doc-list">
                 {form.documents.map((doc, index) => (
                   <li key={`${doc.url}-${index}`} className="project-config__doc-item">
-                    <span className="project-config__label">Documento</span>
-                    <span className="project-config__doc-link-box" title={doc.url}>
-                      {doc.name}
-                    </span>
+                    <input
+                      type="text"
+                      className="project-config__doc-name-input"
+                      value={doc.name}
+                      onChange={(e) => updateDocument(index, { name: e.target.value })}
+                      disabled={readOnly}
+                      aria-label={`Nombre del documento ${doc.url}`}
+                    />
+                    <input
+                      type="url"
+                      className="project-config__doc-url-input"
+                      value={doc.url}
+                      onChange={(e) => updateDocument(index, { url: e.target.value })}
+                      disabled={readOnly}
+                      aria-label={`Link del documento ${doc.name}`}
+                    />
                     <button
                       type="button"
-                      className="project-config__open-btn"
+                      className="project-config__doc-open-btn"
                       onClick={() => openExternalUrl(doc.url)}
+                      aria-label={`Abrir ${doc.name}`}
                     >
-                      Abrir
+                      <ExternalLink size={18} aria-hidden />
+                    </button>
+                    <button
+                      type="button"
+                      className="project-config__remove-btn"
+                      onClick={() => removeDocument(index)}
+                      disabled={readOnly}
+                      aria-label={`Eliminar ${doc.name}`}
+                    >
+                      <Trash2 size={18} aria-hidden />
                     </button>
                   </li>
                 ))}

@@ -8,6 +8,7 @@ import DashboardPage from "./pages/DashboardPage";
 import LoginPage from "./pages/LoginPage";
 import ProjectConfigPage from "./pages/ProjectConfigPage";
 import ProjectsPage from "./pages/ProjectsPage";
+import PreferencesPage from "./pages/PreferencesPage";
 import RecoverPasswordPage from "./pages/RecoverPasswordPage";
 import RegisterPage from "./pages/RegisterPage";
 import { ROUTES } from "./routes";
@@ -40,6 +41,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <CalendaryPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path={ROUTES.PREFERENCES}
+            element={
+              <ProtectedRoute>
+                <PreferencesPage />
               </ProtectedRoute>
             }
           />

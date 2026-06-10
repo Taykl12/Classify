@@ -3,5 +3,6 @@ export interface UserSearchHit {
   email: string;
   firstName: string;
   lastName: string;
+  dni: string;
   label: string;
 }

@@ -1,0 +1,284 @@
+.preferences-page__layout {
+  display: grid;
+  grid-template-columns: minmax(220px, 300px) 1fr;
+  gap: var(--space-lg);
+  align-items: start;
+}
+
+.preferences-page__aside {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.preferences-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  box-shadow: var(--shadow-soft);
+}
+
+.preferences-card--profile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.preferences-avatar {
+  position: relative;
+  margin-bottom: var(--space-md);
+}
+
+.preferences-avatar__image-wrap {
+  width: 128px;
+  height: 128px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 3px solid var(--color-border);
+  background: var(--color-panel);
+}
+
+.preferences-avatar__image,
+.preferences-avatar__placeholder {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.preferences-avatar__placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-ink-muted);
+}
+
+.preferences-avatar__camera-btn {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: 2px solid var(--color-surface);
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+  box-shadow: var(--shadow-soft);
+}
+
+.preferences-avatar__camera-btn:hover {
+  background: var(--color-primary-accent);
+}
+
+.preferences-card__name {
+  margin: 0 0 var(--space-sm);
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--color-ink);
+}
+
+.preferences-card__badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: var(--color-neutral-bg);
+  color: var(--color-neutral-text);
+  border: 1px solid var(--color-border);
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+
+.preferences-page__form {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-lg);
+  box-shadow: var(--shadow-soft);
+  min-width: 0;
+}
+
+.preferences-page__message {
+  margin: 0 0 var(--space-md);
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-md);
+  font-weight: 600;
+}
+
+.preferences-page__message--error {
+  background: var(--color-error-bg);
+  color: var(--color-error-text);
+}
+
+.preferences-page__message--success {
+  background: var(--color-success-bg);
+  color: var(--color-success-text);
+}
+
+.preferences-section + .preferences-section {
+  margin-top: var(--space-lg);
+  padding-top: var(--space-lg);
+  border-top: 1px solid var(--color-border);
+}
+
+.preferences-section__heading {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-md);
+  padding-bottom: var(--space-sm);
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-primary);
+}
+
+.preferences-section__title {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 800;
+  color: var(--color-ink);
+}
+
+.preferences-section__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-md);
+}
+
+.preferences-section__stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.preferences-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.preferences-field__label {
+  font-weight: 700;
+  color: var(--color-ink-muted);
+  font-size: 0.9375rem;
+}
+
+.preferences-field__input {
+  width: 100%;
+  min-height: var(--touch-min);
+  padding: 12px 16px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-modal-input);
+  color: var(--color-ink);
+  font: inherit;
+}
+
+.preferences-field__input:focus {
+  outline: 2px solid var(--color-primary-accent);
+  outline-offset: 2px;
+}
+
+.preferences-field__password-wrap {
+  position: relative;
+}
+
+.preferences-field__password-wrap .preferences-field__input {
+  padding-right: 48px;
+}
+
+.preferences-field__toggle-password {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--color-ink-muted);
+}
+
+.preferences-field__toggle-password:hover {
+  color: var(--color-primary-accent);
+  background: var(--color-panel);
+}
+
+.preferences-page__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--space-sm);
+  margin-top: var(--space-xl);
+  padding-top: var(--space-lg);
+  border-top: 1px solid var(--color-border);
+}
+
+.preferences-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  min-height: var(--touch-min);
+  padding: 0 var(--space-lg);
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: var(--font-size-body);
+  box-shadow: var(--shadow-soft);
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.preferences-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.preferences-btn--muted {
+  background: var(--color-surface);
+  color: var(--color-ink-muted);
+}
+
+.preferences-btn--muted:hover:not(:disabled) {
+  background: var(--color-panel);
+  color: var(--color-ink);
+}
+
+.preferences-btn--primary {
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+  border-color: var(--color-primary);
+}
+
+.preferences-btn--primary:hover:not(:disabled) {
+  background: var(--color-primary-accent);
+  border-color: var(--color-primary-accent);
+}
+
+@media (max-width: 900px) {
+  .preferences-page__layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .preferences-section__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .preferences-page__actions {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+
+  .preferences-btn {
+    width: 100%;
+  }
+}

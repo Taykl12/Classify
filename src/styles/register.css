@@ -1,3 +1,13 @@
 .auth-page--register {
   background: linear-gradient(to right, #6a8aff, #b2fbff);
 }
+
+[data-theme="dark"] .auth-page--register {
+  background: linear-gradient(
+    160deg,
+    var(--color-dashboard-gradient-start) 0%,
+    var(--color-dashboard-gradient-mid) 40%,
+    var(--color-dashboard-gradient-end) 75%,
+    var(--color-canvas) 100%
+  );
+}

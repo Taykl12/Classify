@@ -2,6 +2,18 @@ import { Router } from "express";
 import { requireAuth, getUserSupabase } from "../middleware/auth.js";
 import type { AuthedRequest } from "../middleware/auth.js";
 
+function buildUserSearchLabel(
+  dni: string | null | undefined,
+  email: string,
+  firstName: string,
+  lastName: string
+): string {
+  const dniPart = dni?.trim() || "—";
+  const namePart =
+    [firstName, lastName].filter(Boolean).join(" ").trim() || "Sin nombre";
+  return `${dniPart} - ${email} - ${namePart}`;
+}
+
 const router = Router();
 
 router.get("/search", requireAuth, async (req, res) => {
@@ -25,13 +37,20 @@ router.get("/search", requireAuth, async (req, res) => {
         email: string;
         nombre: string | null;
         apellido: string | null;
-      }) => ({
-        id: row.id_usuario,
-        email: row.email,
-        firstName: row.nombre ?? "",
-        lastName: row.apellido ?? "",
-        label: `${row.email} - ${[row.nombre, row.apellido].filter(Boolean).join(" ") || "Sin nombre"}`,
-      })
+        dni: string | null;
+      }) => {
+        const firstName = row.nombre ?? "";
+        const lastName = row.apellido ?? "";
+        const dni = row.dni ?? "";
+        return {
+          id: row.id_usuario,
+          email: row.email,
+          firstName,
+          lastName,
+          dni,
+          label: buildUserSearchLabel(dni, row.email, firstName, lastName),
+        };
+      }
     );
     res.json(results);
   } catch (e) {

@@ -1,9 +1,56 @@
-import { useEffect, useRef, useState, type KeyboardEvent } from "react";
+import { useEffect, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
 import { X } from "lucide-react";
 import { apiFetch } from "../../lib/api";
 import type { UserSearchHit } from "../../types/users";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+function highlightText(text: string, query: string): ReactNode {
+  const trimmedQuery = query.trim();
+  if (!trimmedQuery) return text;
+
+  const lowerText = text.toLowerCase();
+  const lowerQuery = trimmedQuery.toLowerCase();
+  const parts: ReactNode[] = [];
+  let start = 0;
+  let idx = lowerText.indexOf(lowerQuery, start);
+
+  while (idx !== -1) {
+    if (idx > start) parts.push(text.slice(start, idx));
+    parts.push(
+      <strong key={`${start}-${idx}`} className="email-chips__suggest-match">
+        {text.slice(idx, idx + trimmedQuery.length)}
+      </strong>
+    );
+    start = idx + trimmedQuery.length;
+    idx = lowerText.indexOf(lowerQuery, start);
+  }
+
+  if (start < text.length) parts.push(text.slice(start));
+  return parts.length > 0 ? <>{parts}</> : text;
+}
+
+function UserSearchSuggestionLabel({
+  hit,
+  query,
+}: {
+  hit: UserSearchHit;
+  query: string;
+}) {
+  const dni = hit.dni.trim() || "—";
+  const name =
+    [hit.firstName, hit.lastName].filter(Boolean).join(" ").trim() || "Sin nombre";
+
+  return (
+    <>
+      {highlightText(dni, query)}
+      {" - "}
+      {highlightText(hit.email, query)}
+      {" - "}
+      {highlightText(name, query)}
+    </>
+  );
+}
 
 interface EmailChipInputProps {
   emails: string[];
@@ -20,7 +67,7 @@ function normalizeEmail(raw: string): string {
 export function EmailChipInput({
   emails,
   onChange,
-  placeholder = "Ingrese el Correo del Usuario",
+  placeholder = "DNI, correo o nombre del usuario",
   id,
   autoFocus = false,
 }: EmailChipInputProps) {
@@ -105,7 +152,9 @@ export function EmailChipInput({
       e.preventDefault();
       e.stopPropagation();
       const q = normalizeEmail(draft);
-      const exact = suggestions.find((s) => s.email === q);
+      const exact = suggestions.find(
+        (s) => s.email === q || s.dni.trim() === draft.trim()
+      );
       if (exact) pickSuggestion(exact);
       else if (suggestions.length > 0) pickSuggestion(suggestions[0]);
       else addEmail(draft);
@@ -145,7 +194,7 @@ export function EmailChipInput({
         <input
           ref={inputRef}
           type="text"
-          inputMode="email"
+          inputMode="text"
           autoComplete="off"
           className="email-chips__input"
           value={draft}
@@ -157,7 +206,7 @@ export function EmailChipInput({
             if (suggestions.length > 0) setListOpen(true);
           }}
           onKeyDown={handleKeyDown}
-          placeholder={emails.length === 0 ? placeholder : ""}
+          placeholder={placeholder}
           aria-label={placeholder}
           aria-expanded={showList}
           aria-controls={showList ? "email-suggest-list" : undefined}
@@ -183,7 +232,7 @@ export function EmailChipInput({
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={() => pickSuggestion(hit)}
               >
-                {hit.label}
+                <UserSearchSuggestionLabel hit={hit} query={draft} />
               </button>
             </li>
           ))}

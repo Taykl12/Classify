@@ -276,9 +276,13 @@
   text-align: left;
   font: inherit;
   font-size: 0.9rem;
-  font-weight: 500;
+  font-weight: 400;
   color: var(--color-ink);
   cursor: pointer;
+}
+
+.email-chips__suggest-match {
+  font-weight: 700;
 }
 
 .email-chips__suggest-item:hover {

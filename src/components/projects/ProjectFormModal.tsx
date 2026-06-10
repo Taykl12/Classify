@@ -113,7 +113,7 @@ function ProjectFormModalContent({
                       memberEmails: ensureCreatorInMembers(memberEmails, creatorEmail),
                     }))
                   }
-                  placeholder="Ingrese el Correo del Usuario"
+                  placeholder="DNI, correo o nombre del usuario"
                   autoFocus
                 />
               </div>

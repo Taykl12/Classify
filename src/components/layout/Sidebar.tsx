@@ -46,7 +46,12 @@ const MAIN_NAV: NavItem[] = [
 ];
 
 const FOOTER_NAV: NavItem[] = [
-  { id: "settings", label: "Preferencias", icon: <Settings size={22} aria-hidden /> },
+  {
+    id: "settings",
+    label: "Preferencias",
+    icon: <Settings size={22} aria-hidden />,
+    to: ROUTES.PREFERENCES,
+  },
   { id: "logout", label: "Cerrar Sesión", icon: <LogOut size={22} aria-hidden />, action: "logout" },
 ];
 
@@ -138,7 +143,15 @@ export function Sidebar() {
       <div className="sidebar__profile-block">
         <div className="sidebar__profile">
           <div className="sidebar__avatar" aria-hidden>
-            <User size={collapsed ? 20 : 24} />
+            {user?.profilePhotoUrl ? (
+              <img
+                src={user.profilePhotoUrl}
+                alt=""
+                className="sidebar__avatar-image"
+              />
+            ) : (
+              <User size={collapsed ? 20 : 24} />
+            )}
           </div>
           <p className="sidebar__profile-name">{profileLine}</p>
         </div>
