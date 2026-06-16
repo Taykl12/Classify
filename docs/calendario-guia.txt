@@ -1,0 +1,162 @@
+============================================
+  CALENDARIO - Guía de uso y configuración
+  Proyecto: Classify
+  Rama: Calendary-branch
+============================================
+
+════════════════════════════════════════════
+  1. ¿QUÉ ES?
+════════════════════════════════════════════
+
+El Calendario es una página dentro de Classify que muestra
+en un formato tipo Google Calendar las tareas que tienen
+fecha límite (fecha_limite) de todos tus proyectos.
+
+Podés:
+  - Navegar entre meses con las flechas ◀ ▶
+  - Volver al mes actual con el botón "Hoy"
+  - Ver las tareas como etiquetas de color en cada día
+  - Hacer clic en un día para ver los eventos detallados
+  - Crear nuevas tareas directamente desde el calendario
+
+════════════════════════════════════════════
+  2. CÓMO USARLO
+════════════════════════════════════════════
+
+  a) VER TAREAS EXISTENTES
+     - Las tareas con fecha límite aparecen automáticamente
+       en el calendario como etiquetas de color.
+     - Hacé clic en un día para ver el detalle de todas
+       las tareas de ese día (título, proyecto, descripción).
+
+  b) CREAR UNA TAREA NUEVA
+     - Hacé clic en el botón "Nueva tarea" (arriba a la
+       izquierda, al lado de "Hoy").
+     - O hacé clic en un día vacío del calendario.
+     - Se abre un formulario con:
+         * Título (obligatorio)
+         * Proyecto (seleccionás de tus proyectos)
+         * Descripción (opcional)
+         * Prioridad: Baja / Media / Alta
+         * Fecha límite (precargada si clickeaste un día)
+     - Hacé clic en "Crear tarea" para guardarla.
+     - El calendario se actualiza automáticamente.
+
+  c) CREAR TAREA DESDE LA VISTA DE EVENTOS
+     - Si un día tiene eventos, al clickearlo se abre
+       una ventana con la lista.
+     - Abajo hay un botón "Agregar tarea" para crear
+       otra tarea en ese mismo día.
+
+════════════════════════════════════════════
+  3. RUTA
+════════════════════════════════════════════
+
+  La página del calendario está en:
+  → /calendario
+
+  Ya está enlazada desde el menú lateral (Sidebar)
+  con el ícono de calendario y la etiqueta "Calendario".
+
+════════════════════════════════════════════
+  4. API (para desarrolladores)
+════════════════════════════════════════════
+
+  OBTENER EVENTOS
+  ───────────────
+  GET /api/calendar/events
+  Auth: Bearer token
+  Respuesta: Array de objetos:
+    {
+      id: string,
+      title: string,
+      description: string | null,
+      date: string (ISO),
+      projectName: string,
+      projectId: string,
+      type: "task",
+      priority?: string,
+      status?: string
+    }
+
+  CREAR TAREA
+  ───────────
+  POST /api/tasks
+  Auth: Bearer token
+  Body:
+    {
+      projectId: string (número),
+      title: string,
+      description?: string,
+      priority?: "Baja" | "Media" | "Alta",
+      deadline?: string (ISO o YYYY-MM-DD)
+    }
+
+════════════════════════════════════════════
+  5. BASE DE DATOS (Supabase)
+════════════════════════════════════════════
+
+  Los eventos se obtienen de la tabla tareas_grupo.
+  Solo se muestran tareas que tienen fecha_limite NO nula.
+
+  Si querés agregar migraciones nuevas a Supabase:
+  - Los archivos .sql están en: supabase/migrations/
+  - El archivo 010_create_tarea_rpc.sql crea la función
+    create_tarea_grupo() que permite crear tareas desde
+    la API sin problemas de RLS.
+
+  ⚠ IMPORTANTE: Para que funcione la creación de tareas,
+  tenés que ejecutar el archivo:
+    supabase/migrations/010_create_tarea_rpc.sql
+  en el editor SQL de tu proyecto de Supabase (Dashboard
+  → SQL Editor → pegar y ejecutar).
+
+════════════════════════════════════════════
+  6. ARCHIVOS DEL FRONTEND
+════════════════════════════════════════════
+
+  src/pages/Calendary.tsx
+    - Página principal del calendario
+    - Lógica de navegación entre meses
+    - Grilla de días
+    - Fetch de eventos desde /api/calendar/events
+    - Modal de eventos del día
+
+  src/styles/Calendary.css
+    - Todos los estilos del calendario
+    - Modo claro y oscuro
+    - Estilos del formulario de tareas
+
+  src/components/calendar/TaskFormModal.tsx
+    - Componente del formulario para crear tareas
+    - Selector de proyecto, prioridad, fecha
+
+  src/types/calendar.ts
+    - Tipos TypeScript para eventos (CalendarEvent)
+
+════════════════════════════════════════════
+  7. ARCHIVOS DEL BACKEND
+════════════════════════════════════════════
+
+  server/src/routes/calendar.ts
+    - Endpoint GET /api/calendar/events
+    - Busca tareas con fecha_limite en proyectos
+      accesibles para el usuario
+
+  server/src/routes/tasks.ts
+    - Endpoint POST /api/tasks
+    - Llama a la función RPC create_tarea_grupo()
+    - Requiere projectId y title; el resto opcional
+
+════════════════════════════════════════════
+  8. DEPLOY / SINCRONIZACIÓN
+════════════════════════════════════════════
+
+  1. La rama Calendary-branch ya tiene todo el código.
+  2. Ejecutar la migración SQL en Supabase (paso 5).
+  3. Reiniciar el servidor Express.
+  4. La página /calendario ya está disponible.
+
+════════════════════════════════════════════
+  FIN DEL DOCUMENTO
+════════════════════════════════════════════
