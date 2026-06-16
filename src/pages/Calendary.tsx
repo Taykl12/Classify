@@ -1,6 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import { DashboardLayout } from "../components/layout/DashboardLayout";
+import TaskFormModal from "../components/calendar/TaskFormModal";
 import { useAuth } from "../contexts/AuthContext";
 import { apiFetchWithRetry, isUnauthorizedError } from "../lib/api";
 import type { CalendarEvent } from "../types/calendar";
@@ -63,26 +64,31 @@ export default function CalendaryPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedDayEvents, setSelectedDayEvents] = useState<CalendarEvent[] | null>(null);
+  const [selectedDateKey, setSelectedDateKey] = useState<string | null>(null);
+  const [showTaskForm, setShowTaskForm] = useState(false);
+  const [taskFormDate, setTaskFormDate] = useState<string | null>(null);
 
-  useEffect(() => {
+  const fetchEvents = useCallback(async () => {
     if (authLoading || !user) return;
-    let cancelled = false;
     setLoading(true);
     setError(null);
-    (async () => {
-      try {
-        const data = await apiFetchWithRetry<CalendarEvent[]>("/api/calendar/events");
-        if (!cancelled) setEvents(data);
-      } catch (e) {
-        if (!cancelled && !isUnauthorizedError(e)) {
-          setError(e instanceof Error ? e.message : "Error al cargar eventos");
-        }
-      } finally {
-        if (!cancelled) setLoading(false);
+    try {
+      const data = await apiFetchWithRetry<CalendarEvent[]>("/api/calendar/events");
+      setEvents(data);
+    } catch (e) {
+      if (!isUnauthorizedError(e)) {
+        setError(e instanceof Error ? e.message : "Error al cargar eventos");
       }
-    })();
-    return () => { cancelled = true; };
+    } finally {
+      setLoading(false);
+    }
   }, [authLoading, user]);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetchEvents().then(() => { /* noop */ });
+    return () => { cancelled = true; };
+  }, [fetchEvents]);
 
   const eventsByDate = useMemo(() => {
     const map = new Map<string, CalendarEvent[]>();
@@ -126,13 +132,23 @@ export default function CalendaryPage() {
       <section className="calendary-page">
         <div className="calendar-container">
           <header className="calendar-header">
-            <button
-              type="button"
-              className="calendar-btn calendar-btn--today"
-              onClick={irAHoy}
-            >
-              Hoy
-            </button>
+            <div className="calendar-header__left">
+              <button
+                type="button"
+                className="calendar-btn calendar-btn--today"
+                onClick={irAHoy}
+              >
+                Hoy
+              </button>
+              <button
+                type="button"
+                className="calendar-btn calendar-btn--add"
+                onClick={() => { setTaskFormDate(null); setShowTaskForm(true); }}
+              >
+                <Plus size={18} aria-hidden />
+                Nueva tarea
+              </button>
+            </div>
 
             <div className="month-controls">
               <button
@@ -197,7 +213,15 @@ export default function CalendaryPage() {
                     type="button"
                     className="day-cell"
                     key={index}
-                    onClick={() => setSelectedDayEvents(dayEvents.length > 0 ? dayEvents : null)}
+                    onClick={() => {
+                      setSelectedDateKey(dateKey);
+                      if (dayEvents.length > 0) {
+                        setSelectedDayEvents(dayEvents);
+                      } else {
+                        setTaskFormDate(dateKey);
+                        setShowTaskForm(true);
+                      }
+                    }}
                   >
                     <span className={dayClasses}>{celda.day}</span>
                     {loading ? null : dayEvents.length > 0 && celda.monthOffset === 0 ? (
@@ -223,14 +247,14 @@ export default function CalendaryPage() {
           </div>
 
           {selectedDayEvents ? (
-            <div className="day-events-overlay" onClick={() => setSelectedDayEvents(null)}>
+            <div className="day-events-overlay" onClick={() => { setSelectedDayEvents(null); setSelectedDateKey(null); }}>
               <div className="day-events-modal" onClick={(e) => e.stopPropagation()}>
                 <div className="day-events-modal__header">
                   <h3>Eventos del día</h3>
                   <button
                     type="button"
                     className="calendar-btn calendar-btn--nav"
-                    onClick={() => setSelectedDayEvents(null)}
+                    onClick={() => { setSelectedDayEvents(null); setSelectedDateKey(null); }}
                     aria-label="Cerrar"
                   >
                     ✕
@@ -247,8 +271,34 @@ export default function CalendaryPage() {
                     </li>
                   ))}
                 </ul>
+                  <div className="day-events-modal__footer">
+                    <button
+                      type="button"
+                      className="calendar-btn calendar-btn--add"
+                      onClick={() => {
+                        setSelectedDayEvents(null);
+                        setTaskFormDate(selectedDateKey);
+                        setShowTaskForm(true);
+                      }}
+                    >
+                      <Plus size={18} aria-hidden />
+                      Agregar tarea
+                    </button>
+                  </div>
               </div>
             </div>
+          ) : null}
+
+          {showTaskForm ? (
+            <TaskFormModal
+              defaultDate={taskFormDate}
+              onClose={() => { setShowTaskForm(false); setTaskFormDate(null); }}
+              onTaskCreated={() => {
+                setShowTaskForm(false);
+                setTaskFormDate(null);
+                fetchEvents();
+              }}
+            />
           ) : null}
         </div>
       </section>
