@@ -5,9 +5,8 @@ export interface CalendarEvent {
   date: string;
   projectName: string;
   projectId: string;
-  type: "task" | "delivery";
+  type: "event";
   priority?: string;
-  status?: string;
 }
 
 export interface EventsByDate {

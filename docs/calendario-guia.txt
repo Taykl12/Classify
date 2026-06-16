@@ -9,44 +9,44 @@
 ════════════════════════════════════════════
 
 El Calendario es una página dentro de Classify que muestra
-en un formato tipo Google Calendar las tareas que tienen
-fecha límite (fecha_limite) de todos tus proyectos.
+en un formato tipo Google Calendar los eventos de todos
+tus proyectos.
 
 Podés:
   - Navegar entre meses con las flechas ◀ ▶
   - Volver al mes actual con el botón "Hoy"
-  - Ver las tareas como etiquetas de color en cada día
+  - Ver los eventos como etiquetas de color en cada día
   - Hacer clic en un día para ver los eventos detallados
-  - Crear nuevas tareas directamente desde el calendario
+  - Crear nuevos eventos directamente desde el calendario
 
 ════════════════════════════════════════════
   2. CÓMO USARLO
 ════════════════════════════════════════════
 
-  a) VER TAREAS EXISTENTES
-     - Las tareas con fecha límite aparecen automáticamente
-       en el calendario como etiquetas de color.
-     - Hacé clic en un día para ver el detalle de todas
-       las tareas de ese día (título, proyecto, descripción).
+  a) VER EVENTOS EXISTENTES
+     - Los eventos aparecen automáticamente en el calendario
+       como etiquetas de color.
+     - Hacé clic en un día para ver el detalle de todos
+       los eventos de ese día (título, proyecto, descripción).
 
-  b) CREAR UNA TAREA NUEVA
-     - Hacé clic en el botón "Nueva tarea" (arriba a la
-       izquierda, al lado de "Hoy").
+  b) CREAR UN EVENTO NUEVO
+     - Hacé clic en el botón "Añadir evento" (arriba a la
+       izquierda, al lado de "Hoy") — usa la fecha de hoy.
      - O hacé clic en un día vacío del calendario.
      - Se abre un formulario con:
+         * Fecha del evento (fija según el día elegido)
          * Título (obligatorio)
          * Proyecto (seleccionás de tus proyectos)
          * Descripción (opcional)
          * Prioridad: Baja / Media / Alta
-         * Fecha límite (precargada si clickeaste un día)
-     - Hacé clic en "Crear tarea" para guardarla.
+     - Hacé clic en "Crear evento" para guardarlo.
      - El calendario se actualiza automáticamente.
 
-  c) CREAR TAREA DESDE LA VISTA DE EVENTOS
+  c) CREAR EVENTO DESDE LA VISTA DE EVENTOS
      - Si un día tiene eventos, al clickearlo se abre
        una ventana con la lista.
-     - Abajo hay un botón "Agregar tarea" para crear
-       otra tarea en ese mismo día.
+     - Abajo hay un botón "Añadir evento" para crear
+       otro evento en ese mismo día.
 
 ════════════════════════════════════════════
   3. RUTA
@@ -71,43 +71,41 @@ Podés:
       id: string,
       title: string,
       description: string | null,
-      date: string (ISO),
+      date: string (YYYY-MM-DD),
       projectName: string,
       projectId: string,
-      type: "task",
-      priority?: string,
-      status?: string
+      type: "event",
+      priority?: string
     }
 
-  CREAR TAREA
-  ───────────
-  POST /api/tasks
+  CREAR EVENTO
+  ────────────
+  POST /api/calendar/events
   Auth: Bearer token
   Body:
     {
       projectId: string (número),
       title: string,
+      eventDate: string (YYYY-MM-DD, obligatorio),
       description?: string,
-      priority?: "Baja" | "Media" | "Alta",
-      deadline?: string (ISO o YYYY-MM-DD)
+      priority?: "Baja" | "Media" | "Alta"
     }
 
 ════════════════════════════════════════════
   5. BASE DE DATOS (Supabase)
 ════════════════════════════════════════════
 
-  Los eventos se obtienen de la tabla tareas_grupo.
-  Solo se muestran tareas que tienen fecha_limite NO nula.
+  Los eventos se almacenan en la tabla eventos_calendario.
+  Están separados de tareas_grupo (Kanban / pendientes).
 
   Si querés agregar migraciones nuevas a Supabase:
   - Los archivos .sql están en: supabase/migrations/
-  - El archivo 010_create_tarea_rpc.sql crea la función
-    create_tarea_grupo() que permite crear tareas desde
-    la API sin problemas de RLS.
+  - El archivo 011_eventos_calendario.sql crea la tabla,
+    políticas RLS y la función create_evento_calendario().
 
-  ⚠ IMPORTANTE: Para que funcione la creación de tareas,
+  ⚠ IMPORTANTE: Para que funcione la creación de eventos,
   tenés que ejecutar el archivo:
-    supabase/migrations/010_create_tarea_rpc.sql
+    supabase/migrations/011_eventos_calendario.sql
   en el editor SQL de tu proyecto de Supabase (Dashboard
   → SQL Editor → pegar y ejecutar).
 
@@ -125,11 +123,12 @@ Podés:
   src/styles/Calendary.css
     - Todos los estilos del calendario
     - Modo claro y oscuro
-    - Estilos del formulario de tareas
+    - Estilos del formulario de eventos
 
-  src/components/calendar/TaskFormModal.tsx
-    - Componente del formulario para crear tareas
-    - Selector de proyecto, prioridad, fecha
+  src/components/calendar/EventFormModal.tsx
+    - Componente del formulario para crear eventos
+    - Selector de proyecto y prioridad
+    - Fecha fija según el día seleccionado
 
   src/types/calendar.ts
     - Tipos TypeScript para eventos (CalendarEvent)
@@ -139,14 +138,8 @@ Podés:
 ════════════════════════════════════════════
 
   server/src/routes/calendar.ts
-    - Endpoint GET /api/calendar/events
-    - Busca tareas con fecha_limite en proyectos
-      accesibles para el usuario
-
-  server/src/routes/tasks.ts
-    - Endpoint POST /api/tasks
-    - Llama a la función RPC create_tarea_grupo()
-    - Requiere projectId y title; el resto opcional
+    - GET /api/calendar/events — lista eventos accesibles
+    - POST /api/calendar/events — crea evento vía RPC
 
 ════════════════════════════════════════════
   8. DEPLOY / SINCRONIZACIÓN

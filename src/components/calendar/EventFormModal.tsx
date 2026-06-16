@@ -2,17 +2,16 @@ import { useEffect, useRef, useState } from "react";
 import { apiFetchWithRetry } from "../../lib/api";
 import type { ProjectListItem } from "../../types/projects";
 
-interface TaskFormModalProps {
-  defaultDate: string | null;
+interface EventFormModalProps {
+  eventDate: string;
   onClose: () => void;
-  onTaskCreated: () => void;
+  onEventCreated: () => void;
 }
 
-export default function TaskFormModal({ defaultDate, onClose, onTaskCreated }: TaskFormModalProps) {
+export default function EventFormModal({ eventDate, onClose, onEventCreated }: EventFormModalProps) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [priority, setPriority] = useState("Media");
-  const [deadline, setDeadline] = useState(defaultDate ?? "");
   const [projectId, setProjectId] = useState("");
   const [projects, setProjects] = useState<ProjectListItem[]>([]);
   const [saving, setSaving] = useState(false);
@@ -44,23 +43,30 @@ export default function TaskFormModal({ defaultDate, onClose, onTaskCreated }: T
     setSaving(true);
     setError(null);
     try {
-      await apiFetchWithRetry("/api/tasks", {
+      await apiFetchWithRetry("/api/calendar/events", {
         method: "POST",
         body: JSON.stringify({
           projectId,
           title: title.trim(),
           description: description.trim() || undefined,
           priority,
-          deadline: deadline || undefined,
+          eventDate,
         }),
       });
-      onTaskCreated();
+      onEventCreated();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Error al crear tarea");
+      setError(err instanceof Error ? err.message : "Error al crear evento");
     } finally {
       setSaving(false);
     }
   }
+
+  const formattedDate = new Date(`${eventDate}T12:00:00`).toLocaleDateString("es-AR", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
 
   return (
     <div className="day-events-overlay" onClick={onClose}>
@@ -70,31 +76,32 @@ export default function TaskFormModal({ defaultDate, onClose, onTaskCreated }: T
         ref={dialogRef}
         role="dialog"
         aria-modal="true"
-        aria-label="Nueva tarea"
+        aria-label="Nuevo evento"
       >
         <div className="task-form-modal__header">
-          <h3>Nueva tarea</h3>
+          <h3>Nuevo evento</h3>
           <button type="button" className="calendar-btn calendar-btn--nav" onClick={onClose} aria-label="Cerrar">
             ✕
           </button>
         </div>
         <form className="task-form" onSubmit={handleSubmit}>
+          <p className="task-form__date-hint">{formattedDate}</p>
           <div className="task-form__field">
-            <label htmlFor="task-title">Título</label>
+            <label htmlFor="event-title">Título</label>
             <input
-              id="task-title"
+              id="event-title"
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               required
-              placeholder="Ej: Terminar informe"
+              placeholder="Ej: Reunión de equipo"
               autoFocus
             />
           </div>
           <div className="task-form__field">
-            <label htmlFor="task-project">Proyecto</label>
+            <label htmlFor="event-project">Proyecto</label>
             <select
-              id="task-project"
+              id="event-project"
               value={projectId}
               onChange={(e) => setProjectId(e.target.value)}
               required
@@ -106,37 +113,26 @@ export default function TaskFormModal({ defaultDate, onClose, onTaskCreated }: T
             </select>
           </div>
           <div className="task-form__field">
-            <label htmlFor="task-desc">Descripción</label>
+            <label htmlFor="event-desc">Descripción</label>
             <textarea
-              id="task-desc"
+              id="event-desc"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={3}
               placeholder="Detalles opcionales"
             />
           </div>
-          <div className="task-form__row">
-            <div className="task-form__field">
-              <label htmlFor="task-priority">Prioridad</label>
-              <select
-                id="task-priority"
-                value={priority}
-                onChange={(e) => setPriority(e.target.value)}
-              >
-                <option value="Baja">Baja</option>
-                <option value="Media">Media</option>
-                <option value="Alta">Alta</option>
-              </select>
-            </div>
-            <div className="task-form__field">
-              <label htmlFor="task-deadline">Fecha límite</label>
-              <input
-                id="task-deadline"
-                type="date"
-                value={deadline}
-                onChange={(e) => setDeadline(e.target.value)}
-              />
-            </div>
+          <div className="task-form__field">
+            <label htmlFor="event-priority">Prioridad</label>
+            <select
+              id="event-priority"
+              value={priority}
+              onChange={(e) => setPriority(e.target.value)}
+            >
+              <option value="Baja">Baja</option>
+              <option value="Media">Media</option>
+              <option value="Alta">Alta</option>
+            </select>
           </div>
           {error ? <p className="task-form__error" role="alert">{error}</p> : null}
           <div className="task-form__actions">
@@ -148,7 +144,7 @@ export default function TaskFormModal({ defaultDate, onClose, onTaskCreated }: T
               className="calendar-btn calendar-btn--today task-form__submit"
               disabled={saving || !title.trim() || !projectId}
             >
-              {saving ? "Guardando…" : "Crear tarea"}
+              {saving ? "Guardando…" : "Crear evento"}
             </button>
           </div>
         </form>

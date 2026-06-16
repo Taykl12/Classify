@@ -12,9 +12,26 @@ interface CalendarEventRow {
   date: string;
   projectName: string;
   projectId: string;
-  type: "task" | "delivery";
+  type: "event";
   priority?: string;
-  status?: string;
+}
+
+function mapEventRow(row: Record<string, unknown>): CalendarEventRow {
+  const gp = row.grupos_proyectos as { nombre_proyecto?: string } | { nombre_proyecto?: string }[] | null;
+  const projectName = Array.isArray(gp)
+    ? (gp[0]?.nombre_proyecto ?? "Proyecto")
+    : (gp?.nombre_proyecto ?? "Proyecto");
+
+  return {
+    id: String(row.id_evento),
+    title: (row.titulo_evento as string)?.trim() || "Evento sin título",
+    description: (row.descripcion_evento as string) ?? null,
+    date: String(row.fecha_evento).split("T")[0] ?? String(row.fecha_evento),
+    projectName,
+    projectId: String(row.id_grupo),
+    type: "event",
+    priority: row.prioridad_evento as string,
+  };
 }
 
 router.get("/events", requireAuth, async (req, res) => {
@@ -27,39 +44,55 @@ router.get("/events", requireAuth, async (req, res) => {
       return;
     }
 
-    const { data: tareas, error: tError } = await supabase
-      .from("tareas_grupo")
+    const { data: eventos, error: eError } = await supabase
+      .from("eventos_calendario")
       .select(
-        "id_tarea, titulo_tarea, descripcion_tarea, fecha_limite, prioridad_tarea, estado_tarea, id_grupo, grupos_proyectos(nombre_proyecto)"
+        "id_evento, titulo_evento, descripcion_evento, fecha_evento, prioridad_evento, id_grupo, grupos_proyectos(nombre_proyecto)"
       )
       .in("id_grupo", ids)
-      .not("fecha_limite", "is", null)
-      .order("fecha_limite", { ascending: true });
+      .order("fecha_evento", { ascending: true });
 
-    if (tError) {
-      res.status(500).json({ error: tError.message });
+    if (eError) {
+      res.status(500).json({ error: eError.message });
       return;
     }
 
-    const events: CalendarEventRow[] = (tareas ?? []).map((row: Record<string, unknown>) => {
-      const gp = row.grupos_proyectos as { nombre_proyecto?: string } | { nombre_proyecto?: string }[] | null;
-      const projectName = Array.isArray(gp)
-        ? (gp[0]?.nombre_proyecto ?? "Proyecto")
-        : (gp?.nombre_proyecto ?? "Proyecto");
-      return {
-        id: String(row.id_tarea),
-        title: (row.titulo_tarea as string)?.trim() || "Tarea sin título",
-        description: (row.descripcion_tarea as string) ?? null,
-        date: row.fecha_limite as string,
-        projectName,
-        projectId: String(row.id_grupo),
-        type: "task",
-        priority: row.prioridad_tarea as string,
-        status: row.estado_tarea as string,
-      };
+    const events: CalendarEventRow[] = (eventos ?? []).map(mapEventRow);
+    res.json(events);
+  } catch (e) {
+    res.status(500).json({ error: e instanceof Error ? e.message : "Error interno" });
+  }
+});
+
+router.post("/events", requireAuth, async (req, res) => {
+  try {
+    const { projectId, title, description, priority, eventDate } = req.body;
+
+    if (!projectId || !title?.trim()) {
+      res.status(400).json({ error: "projectId y title son obligatorios" });
+      return;
+    }
+
+    if (!eventDate) {
+      res.status(400).json({ error: "eventDate es obligatorio" });
+      return;
+    }
+
+    const supabase = getUserSupabase(req as AuthedRequest);
+    const { data, error } = await supabase.rpc("create_evento_calendario", {
+      p_id_grupo: Number(projectId),
+      p_titulo: String(title).trim(),
+      p_fecha_evento: String(eventDate),
+      p_descripcion: description ? String(description).trim() : null,
+      p_prioridad: priority ?? "Media",
     });
 
-    res.json(events);
+    if (error) {
+      res.status(500).json({ error: error.message });
+      return;
+    }
+
+    res.status(201).json(data);
   } catch (e) {
     res.status(500).json({ error: e instanceof Error ? e.message : "Error interno" });
   }

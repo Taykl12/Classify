@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import { DashboardLayout } from "../components/layout/DashboardLayout";
-import TaskFormModal from "../components/calendar/TaskFormModal";
+import EventFormModal from "../components/calendar/EventFormModal";
 import { useAuth } from "../contexts/AuthContext";
 import { apiFetchWithRetry, isUnauthorizedError } from "../lib/api";
 import type { CalendarEvent } from "../types/calendar";
@@ -49,10 +49,23 @@ function toDateKey(year: number, month: number, day: number): string {
   return `${year}-${m}-${d}`;
 }
 
-function getEventDateKey(iso: string): string {
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return iso.split("T")[0] ?? iso;
+function getEventDateKey(dateStr: string): string {
+  const plain = dateStr.split("T")[0] ?? dateStr;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(plain)) return plain;
+  const d = new Date(dateStr);
+  if (Number.isNaN(d.getTime())) return plain;
   return toDateKey(d.getFullYear(), d.getMonth(), d.getDate());
+}
+
+function priorityBadgeClass(priority?: string): string {
+  switch (priority) {
+    case "Alta":
+      return "calendar-priority-badge calendar-priority-badge--alta";
+    case "Baja":
+      return "calendar-priority-badge calendar-priority-badge--baja";
+    default:
+      return "calendar-priority-badge calendar-priority-badge--media";
+  }
 }
 
 export default function CalendaryPage() {
@@ -65,8 +78,8 @@ export default function CalendaryPage() {
   const [error, setError] = useState<string | null>(null);
   const [selectedDayEvents, setSelectedDayEvents] = useState<CalendarEvent[] | null>(null);
   const [selectedDateKey, setSelectedDateKey] = useState<string | null>(null);
-  const [showTaskForm, setShowTaskForm] = useState(false);
-  const [taskFormDate, setTaskFormDate] = useState<string | null>(null);
+  const [showEventForm, setShowEventForm] = useState(false);
+  const [eventFormDate, setEventFormDate] = useState<string | null>(null);
 
   const fetchEvents = useCallback(async () => {
     if (authLoading || !user) return;
@@ -85,9 +98,7 @@ export default function CalendaryPage() {
   }, [authLoading, user]);
 
   useEffect(() => {
-    let cancelled = false;
-    fetchEvents().then(() => { /* noop */ });
-    return () => { cancelled = true; };
+    fetchEvents();
   }, [fetchEvents]);
 
   const eventsByDate = useMemo(() => {
@@ -143,10 +154,13 @@ export default function CalendaryPage() {
               <button
                 type="button"
                 className="calendar-btn calendar-btn--add"
-                onClick={() => { setTaskFormDate(null); setShowTaskForm(true); }}
+                onClick={() => {
+                  setEventFormDate(toDateKey(hoy.getFullYear(), hoy.getMonth(), hoy.getDate()));
+                  setShowEventForm(true);
+                }}
               >
                 <Plus size={18} aria-hidden />
-                Nueva tarea
+                Añadir evento
               </button>
             </div>
 
@@ -218,8 +232,8 @@ export default function CalendaryPage() {
                       if (dayEvents.length > 0) {
                         setSelectedDayEvents(dayEvents);
                       } else {
-                        setTaskFormDate(dateKey);
-                        setShowTaskForm(true);
+                        setEventFormDate(dateKey);
+                        setShowEventForm(true);
                       }
                     }}
                   >
@@ -227,13 +241,19 @@ export default function CalendaryPage() {
                     {loading ? null : dayEvents.length > 0 && celda.monthOffset === 0 ? (
                       <div className="day-events">
                         {dayEvents.slice(0, 3).map((ev) => (
-                          <span
+                          <button
+                            type="button"
                             key={ev.id}
                             className="day-event-dot"
-                            title={`${ev.title} - ${ev.projectName}`}
+                            title={`${ev.title} - ${ev.projectName}${ev.priority ? ` (${ev.priority})` : ""}`}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedDateKey(dateKey);
+                              setSelectedDayEvents(dayEvents);
+                            }}
                           >
                             {ev.title}
-                          </span>
+                          </button>
                         ))}
                         {dayEvents.length > 3 ? (
                           <span className="day-event-more">+{dayEvents.length - 3} más</span>
@@ -263,7 +283,12 @@ export default function CalendaryPage() {
                 <ul className="day-events-modal__list">
                   {selectedDayEvents.map((ev) => (
                     <li key={ev.id} className="day-events-modal__item">
-                      <strong>{ev.title}</strong>
+                      <div className="day-events-modal__item-header">
+                        <strong>{ev.title}</strong>
+                        {ev.priority ? (
+                          <span className={priorityBadgeClass(ev.priority)}>{ev.priority}</span>
+                        ) : null}
+                      </div>
                       <span className="day-events-modal__project">{ev.projectName}</span>
                       {ev.description ? (
                         <p className="day-events-modal__desc">{ev.description}</p>
@@ -277,25 +302,25 @@ export default function CalendaryPage() {
                       className="calendar-btn calendar-btn--add"
                       onClick={() => {
                         setSelectedDayEvents(null);
-                        setTaskFormDate(selectedDateKey);
-                        setShowTaskForm(true);
+                        setEventFormDate(selectedDateKey);
+                        setShowEventForm(true);
                       }}
                     >
                       <Plus size={18} aria-hidden />
-                      Agregar tarea
+                      Añadir evento
                     </button>
                   </div>
               </div>
             </div>
           ) : null}
 
-          {showTaskForm ? (
-            <TaskFormModal
-              defaultDate={taskFormDate}
-              onClose={() => { setShowTaskForm(false); setTaskFormDate(null); }}
-              onTaskCreated={() => {
-                setShowTaskForm(false);
-                setTaskFormDate(null);
+          {showEventForm && eventFormDate ? (
+            <EventFormModal
+              eventDate={eventFormDate}
+              onClose={() => { setShowEventForm(false); setEventFormDate(null); }}
+              onEventCreated={() => {
+                setShowEventForm(false);
+                setEventFormDate(null);
                 fetchEvents();
               }}
             />
