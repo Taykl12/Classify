@@ -1,5 +1,9 @@
 export const ROUTES = {
   HOME: '/',
+  ADMIN: '/admin',
+  ADMIN_USERS: '/admin/usuarios',
+  ADMIN_COURSES: '/admin/cursos',
+  ADMIN_SUBJECTS: '/admin/materias',
   DASHBOARD: '/dashboard',
   PROJECTS: '/proyectos',
   projectConfig: (id: string) => `/proyectos/${id}/config`,

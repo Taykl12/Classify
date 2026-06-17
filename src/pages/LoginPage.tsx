@@ -5,6 +5,7 @@ import { AuthLayout } from "../components/auth/AuthLayout";
 import { AuthNav } from "../components/auth/AuthNav";
 import { useAuth } from "../contexts/AuthContext";
 import { ApiError } from "../lib/api";
+import { landingRouteForRole } from "../lib/roles";
 import { ROUTES } from "../routes";
 import "../styles/auth.css";
 import "../styles/login.css";
@@ -18,7 +19,7 @@ export default function LoginPage() {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    if (user) navigate(ROUTES.DASHBOARD, { replace: true });
+    if (user) navigate(landingRouteForRole(user.roleLabel), { replace: true });
   }, [user, navigate]);
 
   async function handleSubmit(e: FormEvent) {
@@ -27,7 +28,6 @@ export default function LoginPage() {
     setSubmitting(true);
     try {
       await login(email, password);
-      navigate(ROUTES.DASHBOARD, { replace: true });
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "No se pudo iniciar sesión");
     } finally {

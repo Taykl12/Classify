@@ -2,6 +2,7 @@
 import express from "express";
 import { config } from "./config.js";
 import authRouter from "./routes/auth.js";
+import adminRouter from "./routes/admin.js";
 import projectsRouter from "./routes/projects.js";
 import dashboardRouter from "./routes/dashboard.js";
 import usersRouter from "./routes/users.js";
@@ -24,6 +25,7 @@ export function createApp() {
   });
 
   app.use("/api/auth", authRouter);
+  app.use("/api/admin", adminRouter);
   app.use("/api/projects", projectsRouter);
   app.use("/api/dashboard", dashboardRouter);
   app.use("/api/users", usersRouter);

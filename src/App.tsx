@@ -1,9 +1,14 @@
 ﻿import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
+import { AdminRoute } from "./components/auth/AdminRoute";
 import { HomeRedirect } from "./components/auth/HomeRedirect";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import CalendaryPage from "./pages/Calendary";
+import AdminCursosPage from "./pages/admin/AdminCursosPage";
+import AdminDashboardPage from "./pages/admin/AdminDashboardPage";
+import AdminMateriasPage from "./pages/admin/AdminMateriasPage";
+import AdminUsersPage from "./pages/admin/AdminUsersPage";
 import DashboardPage from "./pages/DashboardPage";
 import LoginPage from "./pages/LoginPage";
 import ProjectConfigPage from "./pages/ProjectConfigPage";
@@ -20,6 +25,38 @@ function App() {
         <BrowserRouter>
         <Routes>
           <Route path={ROUTES.HOME} element={<HomeRedirect />} />
+          <Route
+            path={ROUTES.ADMIN}
+            element={
+              <AdminRoute>
+                <AdminDashboardPage />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path={ROUTES.ADMIN_USERS}
+            element={
+              <AdminRoute>
+                <AdminUsersPage />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path={ROUTES.ADMIN_COURSES}
+            element={
+              <AdminRoute>
+                <AdminCursosPage />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path={ROUTES.ADMIN_SUBJECTS}
+            element={
+              <AdminRoute>
+                <AdminMateriasPage />
+              </AdminRoute>
+            }
+          />
           <Route
             path={ROUTES.DASHBOARD}
             element={
