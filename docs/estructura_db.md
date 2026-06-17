@@ -447,6 +447,8 @@ Esta sección documenta el **estado real** de la base desplegada para la aplicac
 
 ### 6.3 Migraciones aplicadas (`supabase/migrations/`)
 
+> Detalle cronológico, políticas, RPC y Storage: **[`migraciones.md`](./migraciones.md)**.
+
 | # | Archivo | Cambios |
 |---|---------|---------|
 | 001 | `001_grupos_proyectos_ui_columns.sql` | `estado_proyecto`, `escuela` (luego eliminada), CHECK Abierto/Cerrado, seed roles `admin`/`profesor`/`alumno`. |
@@ -456,13 +458,15 @@ Esta sección documenta el **estado real** de la base desplegada para la aplicac
 | 005 | `005_create_grupo_proyecto_rpc.sql` | Función `create_grupo_proyecto(nombre, descripcion)` — crea grupo + vínculo dueño en una transacción. |
 | 006 | `006_rls_member_access.sql` | Integrantes pueden **leer** proyectos y tareas de sus grupos (`grupos_proyectos_select_member`, `grupo_estudiante_select_own`, `tareas_grupo_select_member`). |
 | 007 | `007_project_config_columns.sql` | `alcance_detalle`, `notas_alcance`, `anteproyecto_validado`, `link_respaldo`, `link_calificaciones`, `documentos`; RPC `get_project_owner_email`. |
+| 008 | `008_profile_avatars_storage.sql` | Bucket Storage `avatars` (público, 2 MB, jpeg/png/webp) + políticas CRUD en carpeta `{user_id}/`. |
+| 009 | `009_search_usuarios_dni.sql` | RPC `search_usuarios_for_invite` ampliada: devuelve `dni` y busca por DNI, email, nombre o apellido. |
 
 **Migraciones adicionales vía Supabase MCP** (mismo proyecto, sin archivo local separado):
 
 - Políticas RLS iniciales: `usuarios`, `roles`, `proyecto_profesor`, `grupos_proyectos` (select dueño), `tareas_grupo`.
 - `find_user_id_by_email(p_email)` — busca UUID en `auth.users`.
 - `get_group_member_emails(p_id_grupo)` — emails de integrantes.
-- `search_usuarios_for_invite(p_query)` — autocompletado por email, nombre o apellido.
+- `search_usuarios_for_invite(p_query)` — autocompletado por DNI, email, nombre o apellido (ver migración 009).
 - RLS `grupo_estudiante`: SELECT/INSERT/DELETE para el **dueño** del proyecto (`proyecto_profesor`).
 
 ### 6.4 Funciones RPC (`SECURITY DEFINER`)
@@ -472,7 +476,7 @@ Esta sección documenta el **estado real** de la base desplegada para la aplicac
 | `create_grupo_proyecto(p_nombre, p_descripcion?)` | POST `/api/projects` — evita fallo RLS al crear y devolver el grupo. |
 | `find_user_id_by_email(p_email)` | Resolver email → `auth.users.id` al invitar integrantes. |
 | `get_group_member_emails(p_id_grupo)` | GET detalle de proyecto — lista de emails. |
-| `search_usuarios_for_invite(p_query)` | GET `/api/users/search?q=` — chips de invitación. |
+| `search_usuarios_for_invite(p_query)` | GET `/api/users/search?q=` — chips de invitación (DNI, email, nombre, apellido). |
 | `get_project_owner_email(p_id_grupo)` | Email del creador (dueño en `proyecto_profesor`). |
 
 Todas con `GRANT EXECUTE` a `authenticated` (revocado de `PUBLIC`).
@@ -531,3 +535,5 @@ Se reemplaza la tabla `Documentacion_Aprobacion` para el flujo actual de la app 
 | 2026 | RLS acceso integrantes (ver proyectos compartidos). |
 | 2026 | RPC `create_grupo_proyecto` (fix RLS al crear). |
 | 2026 | Configuración proyecto: alcance, notas, aprobación, links, documentos JSONB. |
+| 2026 | Storage `avatars` para foto de perfil (`/preferencias`). |
+| 2026 | Búsqueda de integrantes por DNI en `search_usuarios_for_invite`. |

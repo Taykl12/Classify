@@ -2,3 +2,14 @@
 .auth-page--recover {
   background: linear-gradient(to right, #4162da, #89e6eb);
 }
+
+[data-theme="dark"] .auth-page--login,
+[data-theme="dark"] .auth-page--recover {
+  background: linear-gradient(
+    160deg,
+    var(--color-dashboard-gradient-start) 0%,
+    var(--color-dashboard-gradient-mid) 40%,
+    var(--color-dashboard-gradient-end) 75%,
+    var(--color-canvas) 100%
+  );
+}

@@ -2,9 +2,14 @@
 import express from "express";
 import { config } from "./config.js";
 import authRouter from "./routes/auth.js";
+import adminRouter from "./routes/admin.js";
 import projectsRouter from "./routes/projects.js";
 import dashboardRouter from "./routes/dashboard.js";
 import usersRouter from "./routes/users.js";
+import profileRouter from "./routes/profile.js";
+import calendarRouter from "./routes/calendar.js";
+import tasksRouter from "./routes/tasks.js";
+import professorRouter from "./routes/professor.js";
 
 export function createApp() {
   const app = express();
@@ -21,9 +26,14 @@ export function createApp() {
   });
 
   app.use("/api/auth", authRouter);
+  app.use("/api/admin", adminRouter);
   app.use("/api/projects", projectsRouter);
   app.use("/api/dashboard", dashboardRouter);
   app.use("/api/users", usersRouter);
+  app.use("/api/profile", profileRouter);
+  app.use("/api/calendar", calendarRouter);
+  app.use("/api/tasks", tasksRouter);
+  app.use("/api/professor", professorRouter);
 
   return app;
 }

@@ -1,21 +1,24 @@
 .projects-table-wrapper {
   width: 100%;
   overflow-x: auto;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
 }
 
 .projects-table {
   width: 100%;
-  border-collapse: separate;
-  border-spacing: 0 var(--space-md);
+  border-collapse: collapse;
 }
 
 .projects-table thead th {
-  padding: 0 var(--space-lg) var(--space-md);
+  padding: 10px var(--space-lg);
   font-size: var(--font-size-table-head);
   font-weight: 700;
   color: var(--color-primary);
   text-align: left;
   letter-spacing: 0;
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-neutral-bg);
 }
 
 .projects-table thead th:last-child {
@@ -24,8 +27,15 @@
 
 .projects-table tbody tr {
   background: var(--color-surface);
-  box-shadow: var(--shadow-soft);
-  border: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.projects-table tbody tr:nth-child(even) {
+  background: var(--color-neutral-bg);
+}
+
+.projects-table tbody tr:last-child {
+  border-bottom: none;
 }
 
 .projects-table tbody td {
@@ -34,12 +44,7 @@
   font-size: var(--font-size-body);
 }
 
-.projects-table tbody td:first-child {
-  border-radius: var(--radius-lg) 0 0 var(--radius-lg);
-}
-
 .projects-table tbody td:last-child {
-  border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
   text-align: right;
 }
 
@@ -85,7 +90,7 @@
   height: 36px;
   padding: 0;
   border: none;
-  border-radius: var(--radius-md);
+  border-radius: 0;
   background: transparent;
   color: var(--color-ink-muted);
   cursor: pointer;
@@ -114,21 +119,21 @@
 
 .projects-badge--school {
   padding: 4px 10px;
-  border-radius: var(--radius-sm);
+  border-radius: 0;
   background: var(--color-warning-bg);
   color: var(--color-warning-text);
 }
 
 .projects-badge--status-open {
   padding: 4px 12px;
-  border-radius: 999px;
+  border-radius: 0;
   background: var(--color-success-bg);
   color: var(--color-success-text);
 }
 
 .projects-badge--status-closed {
   padding: 4px 12px;
-  border-radius: 999px;
+  border-radius: 0;
   background: var(--color-neutral-bg);
   color: var(--color-neutral-text);
 }
@@ -140,7 +145,7 @@
   min-height: var(--touch-min);
   padding: 0 var(--space-md);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
+  border-radius: 0;
   background: var(--color-surface);
   color: var(--color-primary);
   font-size: var(--font-size-body);
@@ -168,7 +173,7 @@
   text-align: center;
   color: var(--color-ink-muted);
   background: var(--color-surface);
-  border-radius: var(--radius-lg);
+  border-radius: 0;
   border: 1px solid var(--color-border);
 }
 
@@ -180,7 +185,8 @@
   .projects-table tbody tr {
     display: block;
     margin-bottom: var(--space-md);
-    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-border);
+    border-radius: 0;
   }
 
   .projects-table tbody td {
@@ -192,6 +198,11 @@
     text-align: left;
     max-width: none;
     white-space: normal;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .projects-table tbody td:last-child {
+    border-bottom: none;
   }
 
   .projects-table__cell--muted {
@@ -211,7 +222,7 @@
 
   .projects-table tbody td:last-child {
     justify-content: flex-end;
-    border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+    border-radius: 0;
   }
 
   .projects-table__action {

@@ -6,6 +6,7 @@ export interface AuthUserDto {
   firstName?: string;
   lastName?: string;
   roleLabel?: string;
+  profilePhotoUrl?: string | null;
 }
 
 function roleNameFromJoin(
@@ -35,7 +36,7 @@ export async function buildAuthUser(
 
   const { data: perfil } = await userClient
     .from("usuarios")
-    .select("nombre, apellido, roles(nombre_rol)")
+    .select("nombre, apellido, foto_perfil, roles(nombre_rol)")
     .eq("id_usuario", userId)
     .maybeSingle();
 
@@ -47,5 +48,6 @@ export async function buildAuthUser(
     roleLabel: roleNameFromJoin(
       perfil?.roles as { nombre_rol: string } | { nombre_rol: string }[] | null | undefined
     ),
+    profilePhotoUrl: perfil?.foto_perfil ?? null,
   };
 }

@@ -1,0 +1,155 @@
+============================================
+  CALENDARIO - Guía de uso y configuración
+  Proyecto: Classify
+  Rama: Calendary-branch
+============================================
+
+════════════════════════════════════════════
+  1. ¿QUÉ ES?
+════════════════════════════════════════════
+
+El Calendario es una página dentro de Classify que muestra
+en un formato tipo Google Calendar los eventos de todos
+tus proyectos.
+
+Podés:
+  - Navegar entre meses con las flechas ◀ ▶
+  - Volver al mes actual con el botón "Hoy"
+  - Ver los eventos como etiquetas de color en cada día
+  - Hacer clic en un día para ver los eventos detallados
+  - Crear nuevos eventos directamente desde el calendario
+
+════════════════════════════════════════════
+  2. CÓMO USARLO
+════════════════════════════════════════════
+
+  a) VER EVENTOS EXISTENTES
+     - Los eventos aparecen automáticamente en el calendario
+       como etiquetas de color.
+     - Hacé clic en un día para ver el detalle de todos
+       los eventos de ese día (título, proyecto, descripción).
+
+  b) CREAR UN EVENTO NUEVO
+     - Hacé clic en el botón "Añadir evento" (arriba a la
+       izquierda, al lado de "Hoy") — usa la fecha de hoy.
+     - O hacé clic en un día vacío del calendario.
+     - Se abre un formulario con:
+         * Fecha del evento (fija según el día elegido)
+         * Título (obligatorio)
+         * Proyecto (seleccionás de tus proyectos)
+         * Descripción (opcional)
+         * Prioridad: Baja / Media / Alta
+     - Hacé clic en "Crear evento" para guardarlo.
+     - El calendario se actualiza automáticamente.
+
+  c) CREAR EVENTO DESDE LA VISTA DE EVENTOS
+     - Si un día tiene eventos, al clickearlo se abre
+       una ventana con la lista.
+     - Abajo hay un botón "Añadir evento" para crear
+       otro evento en ese mismo día.
+
+════════════════════════════════════════════
+  3. RUTA
+════════════════════════════════════════════
+
+  La página del calendario está en:
+  → /calendario
+
+  Ya está enlazada desde el menú lateral (Sidebar)
+  con el ícono de calendario y la etiqueta "Calendario".
+
+════════════════════════════════════════════
+  4. API (para desarrolladores)
+════════════════════════════════════════════
+
+  OBTENER EVENTOS
+  ───────────────
+  GET /api/calendar/events
+  Auth: Bearer token
+  Respuesta: Array de objetos:
+    {
+      id: string,
+      title: string,
+      description: string | null,
+      date: string (YYYY-MM-DD),
+      projectName: string,
+      projectId: string,
+      type: "event",
+      priority?: string
+    }
+
+  CREAR EVENTO
+  ────────────
+  POST /api/calendar/events
+  Auth: Bearer token
+  Body:
+    {
+      projectId: string (número),
+      title: string,
+      eventDate: string (YYYY-MM-DD, obligatorio),
+      description?: string,
+      priority?: "Baja" | "Media" | "Alta"
+    }
+
+════════════════════════════════════════════
+  5. BASE DE DATOS (Supabase)
+════════════════════════════════════════════
+
+  Los eventos se almacenan en la tabla eventos_calendario.
+  Están separados de tareas_grupo (Kanban / pendientes).
+
+  Si querés agregar migraciones nuevas a Supabase:
+  - Los archivos .sql están en: supabase/migrations/
+  - El archivo 011_eventos_calendario.sql crea la tabla,
+    políticas RLS y la función create_evento_calendario().
+
+  ⚠ IMPORTANTE: Para que funcione la creación de eventos,
+  tenés que ejecutar el archivo:
+    supabase/migrations/011_eventos_calendario.sql
+  en el editor SQL de tu proyecto de Supabase (Dashboard
+  → SQL Editor → pegar y ejecutar).
+
+════════════════════════════════════════════
+  6. ARCHIVOS DEL FRONTEND
+════════════════════════════════════════════
+
+  src/pages/Calendary.tsx
+    - Página principal del calendario
+    - Lógica de navegación entre meses
+    - Grilla de días
+    - Fetch de eventos desde /api/calendar/events
+    - Modal de eventos del día
+
+  src/styles/Calendary.css
+    - Todos los estilos del calendario
+    - Modo claro y oscuro
+    - Estilos del formulario de eventos
+
+  src/components/calendar/EventFormModal.tsx
+    - Componente del formulario para crear eventos
+    - Selector de proyecto y prioridad
+    - Fecha fija según el día seleccionado
+
+  src/types/calendar.ts
+    - Tipos TypeScript para eventos (CalendarEvent)
+
+════════════════════════════════════════════
+  7. ARCHIVOS DEL BACKEND
+════════════════════════════════════════════
+
+  server/src/routes/calendar.ts
+    - GET /api/calendar/events — lista eventos accesibles
+    - POST /api/calendar/events — crea evento vía RPC
+
+════════════════════════════════════════════
+  8. DEPLOY / SINCRONIZACIÓN
+════════════════════════════════════════════
+
+  1. La rama Calendary-branch ya tiene todo el código.
+  2. Ejecutar la migración SQL en Supabase (paso 5).
+  3. Reiniciar el servidor Express.
+  4. La página /calendario ya está disponible.
+
+════════════════════════════════════════════
+  FIN DEL DOCUMENTO
+════════════════════════════════════════════
