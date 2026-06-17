@@ -2,7 +2,7 @@
 
 Documentación del funcionamiento de la aplicación web: arquitectura, flujos principales y puntos que conviene tener presentes al desarrollar.
 
-> Complementa: [`estructura_db.md`](./estructura_db.md) (base de datos), [`migraciones.md`](./migraciones.md) (SQL), [`calendario.md`](./calendario.md) y [`preferencias.md`](./preferencias.md) (páginas concretas).
+> Complementa: [`estructura_db.md`](./estructura_db.md) (base de datos), [`migraciones.md`](./migraciones.md) (SQL), [`calendario.md`](./calendario.md), [`preferencias.md`](./preferencias.md) y [`profesor.md`](./profesor.md) (páginas concretas).
 
 ---
 
@@ -49,6 +49,8 @@ src/                          Frontend React
 ├── lib/api.ts                fetch con token, retry, logout en 401
 ├── contexts/                 AuthContext, ThemeContext
 ├── pages/                    Una página por ruta principal
+│   ├── professor/            Panel profesor, cursos, asistencia
+│   └── admin/                Panel admin (cursos, materias, usuarios)
 ├── components/               UI reutilizable (layout, auth, projects, dashboard)
 ├── types/                    Interfaces TypeScript compartidas
 ├── styles/                   CSS vanilla por página/componente
@@ -93,6 +95,9 @@ Definidas en `src/routes.ts`. Rutas protegidas usan `<ProtectedRoute>`: si no ha
 | `/proyectos/:id/config` | Configuración | Pestañas alcance, docs, equipo, calificaciones |
 | `/calendario` | Calendario mensual | Ver [`calendario.md`](./calendario.md) |
 | `/preferencias` | Perfil de cuenta | Ver [`preferencias.md`](./preferencias.md) |
+| `/admin` | Panel administración | Solo rol admin |
+| `/profesor` | Panel profesor | Ver [`profesor.md`](./profesor.md) |
+| `/profesor/cursos`, `/profesor/asistencia` | Cursos y asistencia | Subrutas del panel profesor |
 
 ### 4.3 Layout autenticado
 
@@ -148,6 +153,8 @@ Routers bajo prefijo `/api`:
 | `/api/dashboard` | `routes/dashboard.ts` | Favoritos destacados, tareas pendientes |
 | `/api/users` | `routes/users.ts` | Búsqueda de usuarios para invitar |
 | `/api/profile` | `routes/profile.ts` | GET/PATCH perfil + avatar |
+| `/api/professor` | `routes/professor.ts` | Cursos, alumnos y asistencia (solo profesor) |
+| `/api/admin` | `routes/admin.ts` | Gestión académica y usuarios (solo admin) |
 
 Health check: `GET /api/health`.
 
@@ -167,6 +174,7 @@ Hay dos clientes en `lib/supabase.ts`:
 |---------|-----|
 | `createAnonClient()` | Login, registro, validar token (sin sesión de usuario en el cliente) |
 | `createUserClient(token)` | Operaciones autenticadas con RLS |
+| `createAdminClient()` | Rutas admin y profesor que necesitan leer/escribir sin depender de RLS del JWT |
 
 ### 5.3 Registro y perfil
 
@@ -181,6 +189,18 @@ Hay dos clientes en `lib/supabase.ts`:
 - Actualiza `usuarios` (nombre, apellido, DNI, `foto_perfil`)
 - Avatar: base64 → Storage bucket `avatars` → URL pública en `foto_perfil`
 - Email y contraseña: `auth.updateUser` del cliente con token del usuario
+
+### 5.4 Roles y landing
+
+`src/lib/roles.ts` define helpers por etiqueta de rol (`isAdmin`, `isProfessor`). Tras el login, `landingRouteForRole()` envía a:
+
+- Admin → `/admin`
+- Profesor → `/profesor`
+- Resto (alumno, etc.) → `/dashboard`
+
+El sidebar (`Sidebar.tsx`) elige el menú según rol: `ADMIN_NAV`, `PROFESSOR_NAV` o `MAIN_NAV`.
+
+Detalle del módulo profesor: [`profesor.md`](./profesor.md).
 
 ---
 

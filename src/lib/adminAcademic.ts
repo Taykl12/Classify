@@ -134,12 +134,122 @@ export function defaultScheduleEndTime(
   return { hour: "23", minute: "59" };
 }
 
-export interface ParsedHorario {
-  days: string[];
+export interface ScheduleSlot {
+  day: string;
   startHour: string;
   startMinute: string;
   endHour: string;
   endMinute: string;
+}
+
+export interface ParsedHorario {
+  slots: ScheduleSlot[];
+}
+
+const WEEKDAY_PATTERN = SCHEDULE_WEEKDAY_OPTIONS.join("|");
+const SLOT_SEGMENT_RE = new RegExp(
+  `(${WEEKDAY_PATTERN})\\s+(\\d{2}:\\d{2})\\s*-\\s*(\\d{2}:\\d{2})`,
+  "g"
+);
+
+export function emptyScheduleSlot(day: ScheduleWeekday = "Lunes"): ScheduleSlot {
+  return {
+    day,
+    startHour: "16",
+    startMinute: "00",
+    endHour: "17",
+    endMinute: "00",
+  };
+}
+
+function parseSlotSegment(day: string, start: string, end: string): ScheduleSlot {
+  const startParts = parseTime(start);
+  const endParts = parseTime(end);
+  let endHour = endParts.hour;
+  let endMinute = endParts.minute;
+  if (compareTimes(startParts.hour, startParts.minute, endHour, endMinute) >= 0) {
+    const adjusted = defaultScheduleEndTime(startParts.hour, startParts.minute);
+    endHour = adjusted.hour;
+    endMinute = adjusted.minute;
+  }
+  return {
+    day,
+    startHour: startParts.hour,
+    startMinute: startParts.minute,
+    endHour,
+    endMinute,
+  };
+}
+
+function parseLegacyHorario(trimmed: string): ScheduleSlot[] | null {
+  const timeMatch = trimmed.match(/\b(\d{2}:\d{2})\s*-\s*(\d{2}:\d{2})\s*$/);
+  if (!timeMatch || timeMatch.index === undefined) return null;
+
+  const days = parseDaysPart(trimmed.slice(0, timeMatch.index));
+  if (days.length === 0) return null;
+
+  const start = parseTime(timeMatch[1]);
+  const end = parseTime(timeMatch[2]);
+  return days.map((day) => {
+    let endHour = end.hour;
+    let endMinute = end.minute;
+    if (compareTimes(start.hour, start.minute, endHour, endMinute) >= 0) {
+      const adjusted = defaultScheduleEndTime(start.hour, start.minute);
+      endHour = adjusted.hour;
+      endMinute = adjusted.minute;
+    }
+    return {
+      day,
+      startHour: start.hour,
+      startMinute: start.minute,
+      endHour,
+      endMinute,
+    };
+  });
+}
+
+export function composeHorario(slots: ScheduleSlot[]): string {
+  return slots
+    .filter((slot) => isScheduleWeekday(slot.day))
+    .map(
+      (slot) =>
+        `${slot.day} ${composeTime(slot.startHour, slot.startMinute)} - ${composeTime(slot.endHour, slot.endMinute)}`
+    )
+    .join(", ");
+}
+
+export function emptyParsedHorario(): ParsedHorario {
+  return { slots: [emptyScheduleSlot()] };
+}
+
+export function parseHorario(horario: string): ParsedHorario {
+  const trimmed = horario.trim();
+  if (!trimmed) return emptyParsedHorario();
+
+  const slots: ScheduleSlot[] = [];
+  for (const match of trimmed.matchAll(SLOT_SEGMENT_RE)) {
+    slots.push(parseSlotSegment(match[1], match[2], match[3]));
+  }
+  if (slots.length > 0) return { slots };
+
+  const legacy = parseLegacyHorario(trimmed);
+  if (legacy) return { slots: legacy };
+
+  return emptyParsedHorario();
+}
+
+export function nextAvailableWeekdayFromSlots(slots: ScheduleSlot[]): ScheduleWeekday | null {
+  return nextAvailableWeekday(slots.map((slot) => slot.day));
+}
+
+export function updateScheduleSlot(
+  slots: ScheduleSlot[],
+  index: number,
+  patch: Partial<ScheduleSlot>
+): ScheduleSlot[] {
+  return slots.map((slot, slotIndex) =>
+    slotIndex === index ? { ...slot, ...patch } : slot
+  );
 }
 
 function parseDaysPart(dayPart: string): string[] {
@@ -165,62 +275,6 @@ function parseDaysPart(dayPart: string): string[] {
   if (legacyMatch) return [...legacyMatch[1]];
 
   return ["Lunes"];
-}
-
-export function composeHorario(
-  days: string[],
-  startHour: string,
-  startMinute: string,
-  endHour: string,
-  endMinute: string
-): string {
-  const uniqueDays = [...new Set(days.filter(isScheduleWeekday))];
-  if (uniqueDays.length === 0) return "";
-  const start = composeTime(startHour, startMinute);
-  const end = composeTime(endHour, endMinute);
-  return `${uniqueDays.join(", ")} ${start} - ${end}`;
-}
-
-export function emptyParsedHorario(): ParsedHorario {
-  return {
-    days: ["Lunes"],
-    startHour: "16",
-    startMinute: "00",
-    endHour: "17",
-    endMinute: "00",
-  };
-}
-
-export function parseHorario(horario: string): ParsedHorario {
-  const defaults = emptyParsedHorario();
-  const trimmed = horario.trim();
-  if (!trimmed) return defaults;
-
-  const timeMatch = trimmed.match(/\b(\d{2}:\d{2})\s*-\s*(\d{2}:\d{2})\s*$/);
-  if (!timeMatch || timeMatch.index === undefined) return defaults;
-
-  const start = parseTime(timeMatch[1]);
-  const end = parseTime(timeMatch[2]);
-  const days = parseDaysPart(trimmed.slice(0, timeMatch.index));
-
-  if (compareTimes(start.hour, start.minute, end.hour, end.minute) >= 0) {
-    const adjustedEnd = defaultScheduleEndTime(start.hour, start.minute);
-    return {
-      days,
-      startHour: start.hour,
-      startMinute: start.minute,
-      endHour: adjustedEnd.hour,
-      endMinute: adjustedEnd.minute,
-    };
-  }
-
-  return {
-    days,
-    startHour: start.hour,
-    startMinute: start.minute,
-    endHour: end.hour,
-    endMinute: end.minute,
-  };
 }
 
 export function divisionLabel(index: number): string {

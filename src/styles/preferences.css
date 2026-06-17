@@ -34,7 +34,7 @@
 .preferences-avatar__image-wrap {
   width: 128px;
   height: 128px;
-  border-radius: 50%;
+  border-radius: 0;
   overflow: hidden;
   border: 3px solid var(--color-border);
   background: var(--color-panel);
@@ -64,7 +64,7 @@
   width: 40px;
   height: 40px;
   border: 2px solid var(--color-surface);
-  border-radius: 50%;
+  border-radius: 0;
   background: var(--color-primary);
   color: var(--color-on-primary);
   box-shadow: var(--shadow-soft);
@@ -85,7 +85,7 @@
   display: inline-flex;
   align-items: center;
   padding: 6px 14px;
-  border-radius: 999px;
+  border-radius: 0;
   background: var(--color-neutral-bg);
   color: var(--color-neutral-text);
   border: 1px solid var(--color-border);
@@ -201,7 +201,7 @@
   width: 32px;
   height: 32px;
   border: none;
-  border-radius: 50%;
+  border-radius: 0;
   background: transparent;
   color: var(--color-ink-muted);
 }
@@ -229,7 +229,7 @@
   min-height: var(--touch-min);
   padding: 0 var(--space-lg);
   border: 1px solid var(--color-border);
-  border-radius: 999px;
+  border-radius: 0;
   font-weight: 700;
   font-size: var(--font-size-body);
   box-shadow: var(--shadow-soft);

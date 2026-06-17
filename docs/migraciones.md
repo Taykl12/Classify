@@ -14,7 +14,7 @@ Los archivos fuente viven en `supabase/migrations/`. Este documento describe **q
 2. **Supabase CLI** (si está configurado): `supabase db push` o `supabase migration up`.
 3. **MCP Supabase**: algunas funciones RPC iniciales (`find_user_id_by_email`, `get_group_member_emails`, políticas RLS base) se aplicaron directamente en el proyecto remoto antes de quedar versionadas en archivos locales; se documentan en la sección [Cambios previos vía MCP](#cambios-previos-vía-mcp).
 
-**Orden obligatorio:** `001` → `002` → … → `009`.
+**Orden obligatorio:** `001` → `002` → … → `014` (según dependencias; ver tabla).
 
 ---
 
@@ -31,6 +31,11 @@ Los archivos fuente viven en `supabase/migrations/`. Este documento describe **q
 | 007 | `007_project_config_columns.sql` | Configuración de proyecto + RPC email del dueño |
 | 008 | `008_profile_avatars_storage.sql` | Bucket Storage `avatars` + políticas |
 | 009 | `009_search_usuarios_dni.sql` | Búsqueda de usuarios ampliada (incluye DNI) |
+| 010 | `010_create_tarea_rpc.sql` | RPC para crear tareas de grupo |
+| 011 | `011_eventos_calendario.sql` | Tabla de eventos del calendario |
+| 012 | `012_admin_academic_schema.sql` | Cursos, materias, asignaciones académicas |
+| 013 | `013_curso_division_materia_horario.sql` | División en cursos y horario en materias |
+| 014 | `014_asistencias.sql` | Registro de asistencia por curso y fecha |
 
 ---
 
@@ -276,6 +281,67 @@ Reemplaza la versión anterior (solo email/nombre/apellido) con `DROP FUNCTION I
 
 ---
 
+## 012 — Esquema académico (admin)
+
+**Archivo:** `012_admin_academic_schema.sql`
+
+### Tablas nuevas
+
+| Tabla | Propósito |
+|-------|-----------|
+| `cursos` | Año lectivo, nombre, especialidad |
+| `cursos_usuarios_asignados` | Alumnos, profesores o preceptores por curso (`rol_en_curso`) |
+| `materias` | Materias de cada curso |
+| `materia_profesor` | Profesores asignados a cada materia |
+
+### Relación con la app
+
+- Panel admin: gestión de cursos, materias y asignación de usuarios/profesores.
+- Panel profesor: los cursos visibles salen de `cursos_usuarios_asignados` y/o `materia_profesor` (ver [`profesor.md`](./profesor.md)).
+
+---
+
+## 013 — División y horario
+
+**Archivo:** `013_curso_division_materia_horario.sql`
+
+### Cambios
+
+| Tabla | Columna | Uso |
+|-------|---------|-----|
+| `cursos` | `division` | División del curso (ej. `2ª`) para armar `1° 2ª T.E.P` |
+| `materias` | `horario` | Horario serializado (días y franjas elegidas en el admin) |
+
+### Relación con la app
+
+- Formularios de curso y materia en `AdminCursosPage` / `AdminMateriasPage`.
+- Helpers compartidos en `src/lib/adminAcademic.ts` y `server/src/lib/adminAcademic.ts`.
+
+---
+
+## 014 — Asistencias
+
+**Archivo:** `014_asistencias.sql`
+
+### Tabla `asistencias`
+
+| Campo | Descripción |
+|-------|-------------|
+| `id_curso`, `id_usuario`, `fecha` | Una fila por alumno, curso y día (índice único) |
+| `estado` | `Presente`, `Ausente`, `Tardanza`, `Justificado` |
+| `observaciones` | Comentario opcional del profesor |
+| `id_registrado_por` | UUID del profesor que cargó la asistencia |
+
+### Relación con la app
+
+- `POST /api/professor/cursos/:id/asistencias` — tomar o reemplazar asistencia de un día.
+- `GET .../asistencias` — historial con ratio presentes/total.
+- `GET .../asistencias/:fecha` — resumen detallado (modal "Ver resumen").
+
+Documentación de flujo: [`profesor.md`](./profesor.md).
+
+---
+
 ## Cambios previos vía MCP
 
 Algunos objetos existían en el proyecto Supabase **antes** de quedar en archivos numerados locales, o se aplicaron con el MCP de Supabase. Conviven con las migraciones 001–009:
@@ -336,3 +402,5 @@ flowchart TD
 | 2026 | 001–007 | Flujo proyectos, RLS, configuración |
 | 2026 | 008 | Preferencias — avatares |
 | 2026 | 009 | Invitaciones — búsqueda por DNI |
+| 2026 | 010–011 | Tareas RPC y calendario |
+| 2026 | 012–014 | Módulo académico admin + asistencia profesor |

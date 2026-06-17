@@ -1,0 +1,250 @@
+@import "./admin.css";
+
+.professor-hero__icon {
+  color: var(--color-on-primary);
+}
+
+.professor-course-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  color: var(--color-primary-accent);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.professor-course-link:hover {
+  text-decoration: underline;
+}
+
+.professor-student-cell {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.professor-student-cell__avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 0;
+  object-fit: cover;
+  border: 1px solid var(--color-border);
+  flex-shrink: 0;
+}
+
+.professor-student-cell__avatar--fallback {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-neutral-bg);
+  color: var(--color-ink-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.professor-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  margin-bottom: var(--space-md);
+  color: var(--color-on-primary);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.professor-back-link:hover {
+  text-decoration: underline;
+}
+
+.professor-attendance-modal__dialog {
+  width: min(100%, 920px);
+}
+
+.professor-attendance-modal {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.professor-attendance-modal__meta {
+  margin: 0;
+  color: var(--color-ink-muted);
+  font-size: 0.9rem;
+}
+
+.professor-attendance-modal__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-md);
+}
+
+.professor-attendance-modal__legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  color: var(--color-ink-muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.professor-attendance-modal__legend-item::before {
+  content: "";
+  width: 10px;
+  height: 10px;
+  border-radius: 0;
+}
+
+.professor-attendance-modal__legend-item--present::before {
+  background: var(--color-success-bg);
+}
+
+.professor-attendance-modal__legend-item--absent::before {
+  background: var(--color-error-bg);
+}
+
+.professor-attendance-modal__legend-item--late::before {
+  background: var(--color-neutral-bg);
+}
+
+.professor-attendance-modal__table-wrap {
+  max-height: 52vh;
+  overflow: auto;
+}
+
+.project-modal__dialog.admin-modal__dialog {
+  width: min(100%, 920px);
+}
+
+.professor-attendance-modal__note {
+  width: 100%;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--color-ink);
+  font: inherit;
+  padding: 6px 8px;
+}
+
+.professor-attendance-modal__note:hover,
+.professor-attendance-modal__note:focus {
+  outline: none;
+  border-color: var(--color-border);
+  background: var(--color-surface);
+}
+
+.professor-attendance-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  flex-wrap: wrap;
+}
+
+.professor-attendance-status__option {
+  cursor: pointer;
+}
+
+.professor-attendance-status__option input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.professor-attendance-status__pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 34px;
+  padding: 4px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: 0;
+  color: var(--color-ink-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.professor-attendance-status__option input:checked + .professor-attendance-status__pill--presente {
+  background: var(--color-success-bg);
+  border-color: var(--color-success-text);
+  color: var(--color-success-text);
+}
+
+.professor-attendance-status__option input:checked + .professor-attendance-status__pill--ausente {
+  background: var(--color-error-bg);
+  border-color: var(--color-error-text);
+  color: var(--color-error-text);
+}
+
+.professor-attendance-status__option input:checked + .professor-attendance-status__pill--tardanza {
+  background: var(--color-neutral-bg);
+  border-color: var(--color-ink-muted);
+  color: var(--color-ink);
+}
+
+.professor-attendance-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  margin-bottom: var(--space-md);
+}
+
+.professor-attendance-ratio {
+  font-weight: 700;
+  color: var(--color-ink);
+}
+
+.professor-attendance-summary {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.professor-attendance-summary__date {
+  margin: 0;
+  color: var(--color-ink-muted);
+  font-size: 0.95rem;
+}
+
+.professor-attendance-summary__ratio {
+  margin: 0;
+  font-weight: 700;
+  color: var(--color-ink);
+}
+
+.professor-attendance-summary__status {
+  margin: 0;
+  color: var(--color-ink-muted);
+}
+
+.professor-attendance-summary__badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 0;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.professor-attendance-summary__badge--presente {
+  background: var(--color-success-bg);
+  color: var(--color-success-text);
+}
+
+.professor-attendance-summary__badge--ausente {
+  background: var(--color-error-bg);
+  color: var(--color-error-text);
+}
+
+.professor-attendance-summary__badge--tardanza {
+  background: var(--color-neutral-bg);
+  color: var(--color-ink);
+}
+
+@media (max-width: 768px) {
+  .professor-attendance-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

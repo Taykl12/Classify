@@ -6,6 +6,7 @@ import { AdminSubjectScheduleFields } from "../../components/admin/AdminSubjectS
 import { DashboardLayout } from "../../components/layout/DashboardLayout";
 import { ApiError, apiFetch, apiFetchWithRetry } from "../../lib/api";
 import { composeHorario, emptyParsedHorario, parseHorario } from "../../lib/adminAcademic";
+import type { ScheduleSlot } from "../../lib/adminAcademic";
 import type {
   AdminCourse,
   AdminCoursesResponse,
@@ -19,23 +20,14 @@ import "../../styles/admin.css";
 interface SubjectFormState {
   name: string;
   courseId: string;
-  scheduleDays: string[];
-  scheduleStartHour: string;
-  scheduleStartMinute: string;
-  scheduleEndHour: string;
-  scheduleEndMinute: string;
+  scheduleSlots: ScheduleSlot[];
 }
 
 function emptySubjectForm(): SubjectFormState {
-  const defaults = emptyParsedHorario();
   return {
     name: "",
     courseId: "",
-    scheduleDays: defaults.days,
-    scheduleStartHour: defaults.startHour,
-    scheduleStartMinute: defaults.startMinute,
-    scheduleEndHour: defaults.endHour,
-    scheduleEndMinute: defaults.endMinute,
+    scheduleSlots: emptyParsedHorario().slots,
   };
 }
 
@@ -46,11 +38,7 @@ function subjectToForm(subject: AdminSubject): SubjectFormState {
   return {
     name: subject.name,
     courseId: subject.courseId,
-    scheduleDays: parsed.days,
-    scheduleStartHour: parsed.startHour,
-    scheduleStartMinute: parsed.startMinute,
-    scheduleEndHour: parsed.endHour,
-    scheduleEndMinute: parsed.endMinute,
+    scheduleSlots: parsed.slots,
   };
 }
 
@@ -165,13 +153,7 @@ export default function AdminMateriasPage() {
     const payload = {
       name: form.name,
       courseId: Number(form.courseId),
-      horario: composeHorario(
-        form.scheduleDays,
-        form.scheduleStartHour,
-        form.scheduleStartMinute,
-        form.scheduleEndHour,
-        form.scheduleEndMinute
-      ),
+      horario: composeHorario(form.scheduleSlots),
     };
     try {
       if (editingSubject) {
@@ -384,18 +366,8 @@ export default function AdminMateriasPage() {
             </select>
           </label>
           <AdminSubjectScheduleFields
-            days={form.scheduleDays}
-            startHour={form.scheduleStartHour}
-            startMinute={form.scheduleStartMinute}
-            endHour={form.scheduleEndHour}
-            endMinute={form.scheduleEndMinute}
-            onDaysChange={(scheduleDays) => setForm({ ...form, scheduleDays })}
-            onStartHourChange={(scheduleStartHour) => setForm({ ...form, scheduleStartHour })}
-            onStartMinuteChange={(scheduleStartMinute) =>
-              setForm({ ...form, scheduleStartMinute })
-            }
-            onEndHourChange={(scheduleEndHour) => setForm({ ...form, scheduleEndHour })}
-            onEndMinuteChange={(scheduleEndMinute) => setForm({ ...form, scheduleEndMinute })}
+            slots={form.scheduleSlots}
+            onSlotsChange={(scheduleSlots) => setForm({ ...form, scheduleSlots })}
           />
         </form>
       </AdminModal>

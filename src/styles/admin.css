@@ -98,7 +98,7 @@
   justify-content: center;
   width: 44px;
   height: 44px;
-  border-radius: 999px;
+  border-radius: 0;
   background: var(--color-primary);
   color: var(--color-on-primary);
 }
@@ -157,7 +157,7 @@
   max-width: 520px;
   padding: 0 var(--space-md);
   border: 1px solid var(--color-border);
-  border-radius: 999px;
+  border-radius: 0;
   background: var(--color-surface);
   color: var(--color-ink-muted);
   box-shadow: var(--shadow-soft);
@@ -263,9 +263,19 @@
   align-items: end;
 }
 
-.admin-schedule-range {
+.admin-schedule-slot {
   display: flex;
   flex-direction: column;
+  gap: var(--space-sm);
+  padding: var(--space-sm);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-neutral-bg);
+}
+
+.admin-schedule-slot .admin-schedule-range__inputs {
+  display: flex;
+  align-items: center;
   gap: var(--space-sm);
 }
 
@@ -296,7 +306,7 @@
   font-weight: 500;
   padding: 14px 18px;
   border: none;
-  border-radius: 999px;
+  border-radius: 0;
   background: var(--color-modal-input);
   color: var(--color-ink);
   box-shadow: inset 0 0 0 1px var(--color-border);
@@ -453,7 +463,7 @@
   min-width: 32px;
   height: 32px;
   padding: 0 var(--space-sm);
-  border-radius: 999px;
+  border-radius: 0;
   background: var(--color-neutral-bg);
   color: var(--color-ink-muted);
   font-weight: 800;
@@ -490,7 +500,7 @@
   position: absolute;
   inset: var(--space-sm) auto var(--space-sm) 0;
   width: 4px;
-  border-radius: 999px;
+  border-radius: 0;
   background: transparent;
 }
 
@@ -511,7 +521,7 @@
 .admin-course-card__badge {
   align-self: flex-start;
   padding: 3px 8px;
-  border-radius: 999px;
+  border-radius: 0;
   background: var(--color-primary);
   color: var(--color-on-primary);
   font-size: 0.75rem;

@@ -26,6 +26,12 @@ const SCHEDULE_MINUTE_OPTIONS = Array.from({ length: 60 }, (_, index) =>
   String(index).padStart(2, "0")
 );
 
+const WEEKDAY_PATTERN = SCHEDULE_WEEKDAY_OPTIONS.join("|");
+const SLOT_SEGMENT_RE = new RegExp(
+  `(${WEEKDAY_PATTERN})\\s+(\\d{2}:\\d{2})\\s*-\\s*(\\d{2}:\\d{2})`,
+  "g"
+);
+
 export function isSuperiorYear(year: number): boolean {
   return year >= 3;
 }
@@ -94,18 +100,43 @@ function isValidTimePart(hour: string, minute: string): boolean {
   );
 }
 
-function parseDaysPart(dayPart: string): string[] {
-  const trimmed = dayPart.trim();
-  if (!trimmed) return [];
-
-  if (trimmed.includes(",")) {
-    return trimmed
-      .split(",")
-      .map((day) => day.trim())
-      .filter(isValidWeekday);
+function validateTimeRange(startHour: string, startMinute: string, endHour: string, endMinute: string): void {
+  if (!isValidTimePart(startHour, startMinute) || !isValidTimePart(endHour, endMinute)) {
+    throw Object.assign(new Error("Horario inválido"), { status: 400 });
   }
+  const start = `${startHour}:${startMinute}`;
+  const end = `${endHour}:${endMinute}`;
+  if (start >= end) {
+    throw Object.assign(new Error("La hora de fin debe ser posterior al inicio"), {
+      status: 400,
+    });
+  }
+}
 
-  return isValidWeekday(trimmed) ? [trimmed] : [];
+function parseLegacyHorarioSegments(trimmed: string): Array<{
+  day: string;
+  startHour: string;
+  startMinute: string;
+  endHour: string;
+  endMinute: string;
+}> {
+  const timeMatch = trimmed.match(/\b(\d{2}):(\d{2})\s*-\s*(\d{2}):(\d{2})\s*$/);
+  if (!timeMatch || timeMatch.index === undefined) return [];
+
+  const dayPart = trimmed.slice(0, timeMatch.index).trim();
+  const days = dayPart.includes(",")
+    ? dayPart.split(",").map((day) => day.trim()).filter(isValidWeekday)
+    : isValidWeekday(dayPart)
+      ? [dayPart]
+      : [];
+
+  return days.map((day) => ({
+    day,
+    startHour: timeMatch[1],
+    startMinute: timeMatch[2],
+    endHour: timeMatch[3],
+    endMinute: timeMatch[4],
+  }));
 }
 
 export function validateHorario(horario: string | null): void {
@@ -113,30 +144,41 @@ export function validateHorario(horario: string | null): void {
   const trimmed = horario.trim();
   if (!trimmed) return;
 
-  const timeMatch = trimmed.match(/\b(\d{2}):(\d{2})\s*-\s*(\d{2}):(\d{2})\s*$/);
-  if (!timeMatch || timeMatch.index === undefined) {
-    throw Object.assign(new Error("Horario inválido"), { status: 400 });
+  const segments: Array<{
+    day: string;
+    startHour: string;
+    startMinute: string;
+    endHour: string;
+    endMinute: string;
+  }> = [];
+
+  for (const match of trimmed.matchAll(SLOT_SEGMENT_RE)) {
+    segments.push({
+      day: match[1],
+      startHour: match[2].slice(0, 2),
+      startMinute: match[2].slice(3, 5),
+      endHour: match[3].slice(0, 2),
+      endMinute: match[3].slice(3, 5),
+    });
   }
 
-  const startHour = timeMatch[1];
-  const startMinute = timeMatch[2];
-  const endHour = timeMatch[3];
-  const endMinute = timeMatch[4];
-  const days = parseDaysPart(trimmed.slice(0, timeMatch.index));
+  if (segments.length === 0) {
+    segments.push(...parseLegacyHorarioSegments(trimmed));
+  }
 
-  if (days.length === 0) {
+  if (segments.length === 0) {
     throw Object.assign(new Error("Horario inválido: día requerido"), { status: 400 });
   }
 
-  if (!isValidTimePart(startHour, startMinute) || !isValidTimePart(endHour, endMinute)) {
-    throw Object.assign(new Error("Horario inválido"), { status: 400 });
-  }
-
-  const start = `${startHour}:${startMinute}`;
-  const end = `${endHour}:${endMinute}`;
-  if (start >= end) {
-    throw Object.assign(new Error("La hora de fin debe ser posterior al inicio"), {
-      status: 400,
-    });
+  for (const segment of segments) {
+    if (!isValidWeekday(segment.day)) {
+      throw Object.assign(new Error("Horario inválido"), { status: 400 });
+    }
+    validateTimeRange(
+      segment.startHour,
+      segment.startMinute,
+      segment.endHour,
+      segment.endMinute
+    );
   }
 }

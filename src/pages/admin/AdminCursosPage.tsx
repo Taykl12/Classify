@@ -20,6 +20,7 @@ import {
   parseHorario,
   yearSelectLabel,
 } from "../../lib/adminAcademic";
+import type { ScheduleSlot } from "../../lib/adminAcademic";
 import type {
   AdminCourse,
   AdminCoursesResponse,
@@ -39,11 +40,7 @@ interface CourseFormState {
 interface SubjectFormState {
   name: string;
   courseId: string;
-  scheduleDays: string[];
-  scheduleStartHour: string;
-  scheduleStartMinute: string;
-  scheduleEndHour: string;
-  scheduleEndMinute: string;
+  scheduleSlots: ScheduleSlot[];
 }
 
 const EMPTY_COURSE_FORM: CourseFormState = {
@@ -53,15 +50,10 @@ const EMPTY_COURSE_FORM: CourseFormState = {
 };
 
 function emptySubjectForm(): SubjectFormState {
-  const defaults = emptyParsedHorario();
   return {
     name: "",
     courseId: "",
-    scheduleDays: defaults.days,
-    scheduleStartHour: defaults.startHour,
-    scheduleStartMinute: defaults.startMinute,
-    scheduleEndHour: defaults.endHour,
-    scheduleEndMinute: defaults.endMinute,
+    scheduleSlots: emptyParsedHorario().slots,
   };
 }
 
@@ -81,11 +73,7 @@ function subjectToForm(subject: AdminSubject): SubjectFormState {
   return {
     name: subject.name,
     courseId: subject.courseId,
-    scheduleDays: parsed.days,
-    scheduleStartHour: parsed.startHour,
-    scheduleStartMinute: parsed.startMinute,
-    scheduleEndHour: parsed.endHour,
-    scheduleEndMinute: parsed.endMinute,
+    scheduleSlots: parsed.slots,
   };
 }
 
@@ -368,13 +356,7 @@ export default function AdminCursosPage() {
     const payload = {
       name: subjectForm.name,
       courseId: Number(subjectForm.courseId),
-      horario: composeHorario(
-        subjectForm.scheduleDays,
-        subjectForm.scheduleStartHour,
-        subjectForm.scheduleStartMinute,
-        subjectForm.scheduleEndHour,
-        subjectForm.scheduleEndMinute
-      ),
+      horario: composeHorario(subjectForm.scheduleSlots),
     };
     try {
       if (editingSubject) {
@@ -843,23 +825,9 @@ export default function AdminCursosPage() {
             </select>
           </label>
           <AdminSubjectScheduleFields
-            days={subjectForm.scheduleDays}
-            startHour={subjectForm.scheduleStartHour}
-            startMinute={subjectForm.scheduleStartMinute}
-            endHour={subjectForm.scheduleEndHour}
-            endMinute={subjectForm.scheduleEndMinute}
-            onDaysChange={(scheduleDays) => setSubjectForm({ ...subjectForm, scheduleDays })}
-            onStartHourChange={(scheduleStartHour) =>
-              setSubjectForm({ ...subjectForm, scheduleStartHour })
-            }
-            onStartMinuteChange={(scheduleStartMinute) =>
-              setSubjectForm({ ...subjectForm, scheduleStartMinute })
-            }
-            onEndHourChange={(scheduleEndHour) =>
-              setSubjectForm({ ...subjectForm, scheduleEndHour })
-            }
-            onEndMinuteChange={(scheduleEndMinute) =>
-              setSubjectForm({ ...subjectForm, scheduleEndMinute })
+            slots={subjectForm.scheduleSlots}
+            onSlotsChange={(scheduleSlots) =>
+              setSubjectForm({ ...subjectForm, scheduleSlots })
             }
           />
         </form>

@@ -9,6 +9,7 @@ import usersRouter from "./routes/users.js";
 import profileRouter from "./routes/profile.js";
 import calendarRouter from "./routes/calendar.js";
 import tasksRouter from "./routes/tasks.js";
+import professorRouter from "./routes/professor.js";
 
 export function createApp() {
   const app = express();
@@ -32,6 +33,7 @@ export function createApp() {
   app.use("/api/profile", profileRouter);
   app.use("/api/calendar", calendarRouter);
   app.use("/api/tasks", tasksRouter);
+  app.use("/api/professor", professorRouter);
 
   return app;
 }

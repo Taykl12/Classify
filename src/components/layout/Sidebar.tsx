@@ -2,6 +2,7 @@
 import {
   BookOpen,
   CalendarClock,
+  ClipboardCheck,
   GraduationCap,
   Home,
   Layers,
@@ -14,7 +15,7 @@ import {
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import { useSidebarCollapsed } from "../../hooks/useSidebarCollapsed";
-import { isAdmin } from "../../lib/roles";
+import { isAdmin, isProfessor } from "../../lib/roles";
 import { ROUTES } from "../../routes";
 import "../../styles/sidebar.css";
 import "../../styles/theme-toggle.css";
@@ -28,27 +29,6 @@ interface NavItem {
   to?: string;
   action?: "logout";
 }
-
-const MAIN_NAV: NavItem[] = [
-  {
-    id: "home",
-    label: "Inicio",
-    icon: <Home size={22} aria-hidden />,
-    to: ROUTES.DASHBOARD,
-  },
-  {
-    id: "projects",
-    label: "Proyectos",
-    icon: <Layers size={22} aria-hidden />,
-    to: ROUTES.PROJECTS,
-  },
-  {
-    id: "calendar",
-    label: "Calendario",
-    icon: <CalendarClock size={22} aria-hidden />,
-    to: ROUTES.CALENDARY,
-  },
-];
 
 const ADMIN_NAV: NavItem[] = [
   {
@@ -77,6 +57,48 @@ const ADMIN_NAV: NavItem[] = [
   },
 ];
 
+const MAIN_NAV: NavItem[] = [
+  {
+    id: "home",
+    label: "Inicio",
+    icon: <Home size={22} aria-hidden />,
+    to: ROUTES.DASHBOARD,
+  },
+  {
+    id: "projects",
+    label: "Proyectos",
+    icon: <Layers size={22} aria-hidden />,
+    to: ROUTES.PROJECTS,
+  },
+  {
+    id: "calendar",
+    label: "Calendario",
+    icon: <CalendarClock size={22} aria-hidden />,
+    to: ROUTES.CALENDARY,
+  },
+];
+
+const PROFESSOR_NAV: NavItem[] = [
+  {
+    id: "professor-home",
+    label: "Panel",
+    icon: <Home size={22} aria-hidden />,
+    to: ROUTES.PROFESSOR,
+  },
+  {
+    id: "professor-courses",
+    label: "Mis Cursos",
+    icon: <GraduationCap size={22} aria-hidden />,
+    to: ROUTES.PROFESSOR_COURSES,
+  },
+  {
+    id: "professor-attendance",
+    label: "Asistencia",
+    icon: <ClipboardCheck size={22} aria-hidden />,
+    to: ROUTES.PROFESSOR_ATTENDANCE,
+  },
+];
+
 const FOOTER_NAV: NavItem[] = [
   {
     id: "settings",
@@ -96,14 +118,17 @@ function navItemClassName(isActive: boolean): string {
 function NavLinkItem({ item, collapsed }: { item: NavItem; collapsed: boolean }) {
   const { pathname } = useLocation();
   if (!item.to) return null;
-  const isHome = item.to === ROUTES.DASHBOARD;
-  const isActive = isHome
-    ? pathname === ROUTES.DASHBOARD
-    : pathname === item.to || (item.to !== ROUTES.ADMIN && pathname.startsWith(`${item.to}/`));
+  const exactOnly =
+    item.to === ROUTES.DASHBOARD ||
+    item.to === ROUTES.PROFESSOR ||
+    item.to === ROUTES.ADMIN;
+  const isActive = exactOnly
+    ? pathname === item.to
+    : pathname === item.to || pathname.startsWith(`${item.to}/`);
   return (
     <NavLink
       to={item.to}
-      end={isHome}
+      end={exactOnly}
       className={navItemClassName(isActive)}
       aria-current={isActive ? "page" : undefined}
     >
@@ -158,7 +183,11 @@ export function Sidebar() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const modifier = collapsed ? "sidebar--collapsed" : "sidebar--expanded";
-  const navItems = isAdmin(user?.roleLabel) ? ADMIN_NAV : MAIN_NAV;
+  const navItems = isAdmin(user?.roleLabel)
+    ? ADMIN_NAV
+    : isProfessor(user?.roleLabel)
+      ? PROFESSOR_NAV
+      : MAIN_NAV;
   const fullName = user
     ? [user.firstName, user.lastName].filter(Boolean).join(" ") || user.email || "Usuario"
     : "Usuario";
