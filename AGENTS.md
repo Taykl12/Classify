@@ -11,18 +11,19 @@
 
 | Command | What |
 |---------|------|
-| `npm run dev` | Vite frontend on `:5173` |
-| `npm run dev:server` | Express API on `:3001` (via `tsx watch`) |
-| `npm run build` | `tsc -b && vite build` |
-| `npm run build:server` | `npm run build --prefix server` |
-| `npm run preview` | Vite preview of production build |
+| `pnpm run dev` | Vite frontend on `:5173` |
+| `pnpm run dev:server` | Express API on `:3001` (via `tsx watch`) |
+| `pnpm run build` | `tsc -b && vite build` |
+| `pnpm run build:server` | `pnpm --filter classify-server build` |
+| `pnpm run preview` | Vite preview of production build |
 
 Or use the `.bat` files on Windows: `start-api.bat`, `start-vite.bat`, `start-dev.bat`.
 
 ## Dev setup
 
 1. Copy `server/.env.example` → `server/.env` and fill `SUPABASE_ANON_KEY` (from Supabase project dashboard)
-2. `npm run dev:server` in one terminal, `npm run dev` in another
+2. `pnpm install` at repo root (workspace installs frontend + server)
+3. `pnpm run dev:server` in one terminal, `pnpm run dev` in another
 3. Vite proxy forwards `/api/*` → Express on `:3001`
 
 ## Project structure

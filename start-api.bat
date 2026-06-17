@@ -3,13 +3,8 @@ title Classify - API (Express)
 cd /d "%~dp0"
 
 if not exist "node_modules\" (
-  echo Instalando dependencias del frontend...
-  call npm install
-)
-
-if not exist "server\node_modules\" (
-  echo Instalando dependencias del servidor...
-  call npm install --prefix server
+  echo Instalando dependencias del workspace...
+  call pnpm install
 )
 
 if not exist "server\.env" (
@@ -23,5 +18,5 @@ if not exist "server\.env" (
 )
 
 echo Iniciando API en http://localhost:3001 ...
-call npm run dev:server
+call pnpm run dev:server
 pause

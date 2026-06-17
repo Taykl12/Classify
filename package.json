@@ -1,27 +1,29 @@
-{
-  "name": "classify-dashboard",
-  "private": true,
-  "version": "0.0.0",
-  "type": "module",
-  "scripts": {
-    "dev": "vite",
-    "dev:server": "npm run dev --prefix server",
-    "build": "tsc -b && vite build",
-    "build:server": "npm run build --prefix server",
-    "preview": "vite preview",
-    "doctor": "npx react-doctor@latest"
-  },
-  "dependencies": {
-    "lucide-react": "^0.511.0",
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0",
-    "react-router-dom": "^7.16.0"
-  },
-  "devDependencies": {
-    "@types/react": "^19.1.2",
-    "@types/react-dom": "^19.1.2",
-    "@vitejs/plugin-react": "^4.4.1",
-    "typescript": "~5.8.3",
-    "vite": "^6.3.5"
-  }
-}
+{
+  "name": "classify-dashboard",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "packageManager": "pnpm@10.12.1",
+  "scripts": {
+    "dev": "vite",
+    "dev:server": "pnpm --filter classify-server dev",
+    "build": "tsc -b && vite build",
+    "build:server": "pnpm --filter classify-server build",
+    "preview": "vite preview",
+    "doctor": "pnpm dlx react-doctor@latest"
+  },
+  "dependencies": {
+    "lucide-react": "^0.511.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "react-router-dom": "^7.16.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.1.2",
+    "@types/react-dom": "^19.1.2",
+    "@vitejs/plugin-react": "^4.4.1",
+    "typescript": "~5.8.3",
+    "vite": "^6.3.5"
+  }
+}
+
