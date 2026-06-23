@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState, type KeyboardEvent } from "react";
-import { ArrowLeft, ExternalLink, Plus, Trash2, User } from "lucide-react";
+import { ArrowLeft, ExternalLink, Lock, Plus, Trash2, User } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { DashboardLayout } from "../components/layout/DashboardLayout";
 import { EmailChipInput } from "../components/projects/EmailChipInput";
@@ -7,8 +7,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { ApiError, apiFetch, apiFetchWithRetry, isUnauthorizedError } from "../lib/api";
 import { ensureCreatorInMembers, sortMembersWithCreatorFirst } from "../lib/memberEmails";
 import { documentNameFromUrl, openExternalUrl } from "../lib/openUrl";
-import { isProfessor } from "../lib/roles";
-import type { ProjectConfigTab, ProjectDetail, ProjectDocument } from "../types/projects";
+import type { ProjectConfigTab, ProjectDetail, ProjectDocument, ProjectLocks } from "../types/projects";
 import { ROUTES } from "../routes";
 import "../styles/dashboard.css";
 import "../styles/project-config.css";
@@ -25,6 +24,12 @@ interface ConfigFormState {
   documents: ProjectDocument[];
   memberEmails: string[];
 }
+
+const DEFAULT_LOCKS: ProjectLocks = {
+  scope: false,
+  documentation: false,
+  team: false,
+};
 
 function detailToForm(detail: ProjectDetail, creatorEmail?: string | null): ConfigFormState {
   return {
@@ -77,6 +82,15 @@ function LinkField({
   );
 }
 
+function LockNotice({ locked }: { locked: boolean }) {
+  if (!locked) return null;
+  return (
+    <p className="project-config__member-meta" role="status">
+      Esta sección fue cerrada por el profesor.
+    </p>
+  );
+}
+
 export default function ProjectConfigPage() {
   const { projectId } = useParams<{ projectId: string }>();
   const navigate = useNavigate();
@@ -86,6 +100,9 @@ export default function ProjectConfigPage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isOwner, setIsOwner] = useState(false);
+  const [canManageProject, setCanManageProject] = useState(false);
+  const [canManageLocks, setCanManageLocks] = useState(false);
+  const [locks, setLocks] = useState<ProjectLocks>(DEFAULT_LOCKS);
   const [ownerEmail, setOwnerEmail] = useState<string | null>(null);
   const [form, setForm] = useState<ConfigFormState | null>(null);
   const [saved, setSaved] = useState<ConfigFormState | null>(null);
@@ -102,6 +119,9 @@ export default function ProjectConfigPage() {
     setForm(next);
     setSaved(next);
     setIsOwner(Boolean(detail.isOwner));
+    setCanManageProject(Boolean(detail.canManageProject));
+    setCanManageLocks(Boolean(detail.canManageLocks));
+    setLocks(detail.locks ?? DEFAULT_LOCKS);
     setOwnerEmail(detail.ownerEmail ?? null);
   }, [projectId, user?.email]);
 
@@ -130,6 +150,12 @@ export default function ProjectConfigPage() {
     return sortMembersWithCreatorFirst(form.memberEmails, ownerEmail ?? creatorEmail);
   }, [form, ownerEmail, creatorEmail]);
 
+  const scopeEditable = canManageLocks || (isOwner && !locks.scope);
+  const documentationEditable = canManageLocks || (isOwner && !locks.documentation);
+  const teamEditable = canManageLocks || (isOwner && !locks.team);
+  const canApprove = canManageLocks;
+  const canSave = canManageProject;
+
   function patchForm(patch: Partial<ConfigFormState>) {
     setForm((f) => (f ? { ...f, ...patch } : f));
   }
@@ -138,24 +164,49 @@ export default function ProjectConfigPage() {
     if (saved) setForm({ ...saved });
   }
 
+  function toggleLock(key: keyof ProjectLocks) {
+    setLocks((current) => ({ ...current, [key]: !current[key] }));
+  }
+
   async function handleSave() {
     if (!projectId || !form || !canSave) return;
     setSaving(true);
     setError(null);
     try {
-      const payload = isOwner
-        ? {
+      const payload: Record<string, unknown> = {};
+      if (canManageLocks) {
+        Object.assign(payload, {
+          name: form.name,
+          status: form.status,
+          objective: form.objective,
+          scopeDetail: form.scopeDetail,
+          scopeNotes: form.scopeNotes,
+          preprojectValidated: form.preprojectValidated,
+          backupLink: form.backupLink,
+          documents: form.documents,
+          memberEmails: ensureCreatorInMembers(form.memberEmails, creatorEmail),
+          locks,
+        });
+      } else if (isOwner) {
+        if (scopeEditable) {
+          Object.assign(payload, {
             name: form.name,
             status: form.status,
             objective: form.objective,
             scopeDetail: form.scopeDetail,
             scopeNotes: form.scopeNotes,
-            preprojectValidated: form.preprojectValidated,
+          });
+        }
+        if (documentationEditable) {
+          Object.assign(payload, {
             backupLink: form.backupLink,
             documents: form.documents,
-            memberEmails: ensureCreatorInMembers(form.memberEmails, creatorEmail),
-          }
-        : { preprojectValidated: form.preprojectValidated };
+          });
+        }
+        if (teamEditable) {
+          payload.memberEmails = ensureCreatorInMembers(form.memberEmails, creatorEmail);
+        }
+      }
 
       await apiFetch<ProjectDetail>(`/api/projects/${projectId}`, {
         method: "PUT",
@@ -205,11 +256,6 @@ export default function ProjectConfigPage() {
       addDocument();
     }
   }
-
-  const isProf = isProfessor(user?.roleLabel);
-  const readOnly = !isOwner;
-  const canApprove = isProf;
-  const canSave = isOwner || isProf;
 
   if (loading || !form) {
     return (
@@ -262,18 +308,43 @@ export default function ProjectConfigPage() {
         </p>
       ) : null}
 
+      {canManageLocks ? (
+        <section className="dashboard-panel project-config__locks" aria-label="Bloqueos por sección">
+          <h2 className="project-config__card-title">
+            <Lock size={18} aria-hidden /> Control de secciones
+          </h2>
+          {(
+            [
+              ["scope", "Alcance / Objetivo"],
+              ["documentation", "Documentación"],
+              ["team", "Equipo"],
+            ] as const
+          ).map(([key, label]) => (
+            <label key={key} className="project-config__checkbox-row">
+              <input
+                type="checkbox"
+                checked={locks[key]}
+                onChange={() => toggleLock(key)}
+              />
+              {label} {locks[key] ? "cerrada para alumnos" : "abierta"}
+            </label>
+          ))}
+        </section>
+      ) : null}
+
       <div className="project-config__layout">
         <aside className="project-config__milestones" aria-label="Hitos y estado">
           <div className="project-config__card">
             <h2 className="project-config__card-title">Hitos y Estado</h2>
             <p className="project-config__label">Estado Actual</p>
+            <LockNotice locked={!scopeEditable && isOwner} />
             <div className="project-config__status-pill">
               <select
                 value={form.status}
                 onChange={(e) =>
                   patchForm({ status: e.target.value as "Abierto" | "Cerrado" })
                 }
-                disabled={readOnly}
+                disabled={!scopeEditable}
                 aria-label="Estado del proyecto"
                 style={{
                   border: "none",
@@ -292,12 +363,13 @@ export default function ProjectConfigPage() {
           </div>
           <div className="project-config__card">
             <h2 className="project-config__card-title">Notas del Proyecto</h2>
+            <LockNotice locked={!scopeEditable && isOwner} />
             <textarea
               className="project-config__textarea"
               value={form.scopeNotes}
               onChange={(e) => patchForm({ scopeNotes: e.target.value })}
               placeholder="Notas de Alcance:"
-              disabled={readOnly}
+              disabled={!scopeEditable}
             />
           </div>
         </aside>
@@ -325,6 +397,7 @@ export default function ProjectConfigPage() {
 
           {tab === "alcance" ? (
             <div>
+              <LockNotice locked={!scopeEditable && isOwner} />
               <label className="project-config__field">
                 <span className="project-config__label">Titulo del Proyecto</span>
                 <input
@@ -332,7 +405,7 @@ export default function ProjectConfigPage() {
                   className="project-config__input"
                   value={form.name}
                   onChange={(e) => patchForm({ name: e.target.value })}
-                  disabled={readOnly}
+                  disabled={!scopeEditable}
                 />
               </label>
               <label className="project-config__field">
@@ -341,7 +414,7 @@ export default function ProjectConfigPage() {
                   className="project-config__input project-config__input--area"
                   value={form.objective}
                   onChange={(e) => patchForm({ objective: e.target.value })}
-                  disabled={readOnly}
+                  disabled={!scopeEditable}
                 />
               </label>
               <label className="project-config__field">
@@ -350,7 +423,7 @@ export default function ProjectConfigPage() {
                   className="project-config__input project-config__input--area"
                   value={form.scopeDetail}
                   onChange={(e) => patchForm({ scopeDetail: e.target.value })}
-                  disabled={readOnly}
+                  disabled={!scopeEditable}
                 />
               </label>
             </div>
@@ -358,6 +431,7 @@ export default function ProjectConfigPage() {
 
           {tab === "equipo" ? (
             <div>
+              <LockNotice locked={!teamEditable && isOwner} />
               <div className="project-config__team-grid">
                 {sortedMembers.map((email) => (
                   <article key={email} className="project-config__member-card">
@@ -369,7 +443,7 @@ export default function ProjectConfigPage() {
                   </article>
                 ))}
               </div>
-              {isOwner ? (
+              {teamEditable ? (
                 <>
                   <div className="project-config__field" style={{ marginTop: "1.5rem" }}>
                     <span className="project-config__label">Agregar integrantes</span>
@@ -406,21 +480,23 @@ export default function ProjectConfigPage() {
                 </label>
                 {!canApprove ? (
                   <p className="project-config__member-meta">
-                    Solo un usuario con rol Profesor puede aprobar el anteproyecto.
+                    Solo un profesor asignado o administrador puede aprobar el anteproyecto.
                   </p>
                 ) : null}
               </div>
+              <LockNotice locked={!documentationEditable && isOwner} />
               <LinkField
                 label="Documentacion de Respaldo"
                 value={form.backupLink}
                 onChange={(backupLink) => patchForm({ backupLink })}
-                disabled={readOnly}
+                disabled={!documentationEditable}
               />
             </div>
           ) : null}
 
           {tab === "documentaciones" ? (
             <div>
+              <LockNotice locked={!documentationEditable && isOwner} />
               <div className="project-config__field">
                 <span className="project-config__label">Agregar Documento:</span>
                 <div className="project-config__add-doc-row">
@@ -430,7 +506,7 @@ export default function ProjectConfigPage() {
                     value={docNameDraft}
                     onChange={(e) => setDocNameDraft(e.target.value)}
                     placeholder="Nombre"
-                    disabled={readOnly}
+                    disabled={!documentationEditable}
                     aria-label="Nombre del documento"
                   />
                   <input
@@ -440,14 +516,14 @@ export default function ProjectConfigPage() {
                     onChange={(e) => setDocDraft(e.target.value)}
                     onKeyDown={handleDocKeyDown}
                     placeholder="Ingrese el link del documento"
-                    disabled={readOnly}
+                    disabled={!documentationEditable}
                     aria-label="Link del documento"
                   />
                   <button
                     type="button"
                     className="project-config__add-btn"
                     onClick={addDocument}
-                    disabled={readOnly || !docDraft.trim()}
+                    disabled={!documentationEditable || !docDraft.trim()}
                     aria-label="Agregar documento"
                   >
                     <Plus size={22} strokeWidth={2.5} aria-hidden />
@@ -462,7 +538,7 @@ export default function ProjectConfigPage() {
                       className="project-config__doc-name-input"
                       value={doc.name}
                       onChange={(e) => updateDocument(index, { name: e.target.value })}
-                      disabled={readOnly}
+                      disabled={!documentationEditable}
                       aria-label={`Nombre del documento ${doc.url}`}
                     />
                     <input
@@ -470,7 +546,7 @@ export default function ProjectConfigPage() {
                       className="project-config__doc-url-input"
                       value={doc.url}
                       onChange={(e) => updateDocument(index, { url: e.target.value })}
-                      disabled={readOnly}
+                      disabled={!documentationEditable}
                       aria-label={`Link del documento ${doc.name}`}
                     />
                     <button
@@ -485,7 +561,7 @@ export default function ProjectConfigPage() {
                       type="button"
                       className="project-config__remove-btn"
                       onClick={() => removeDocument(index)}
-                      disabled={readOnly}
+                      disabled={!documentationEditable}
                       aria-label={`Eliminar ${doc.name}`}
                     >
                       <Trash2 size={18} aria-hidden />

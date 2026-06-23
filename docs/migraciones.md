@@ -14,7 +14,7 @@ Los archivos fuente viven en `supabase/migrations/`. Este documento describe **q
 2. **Supabase CLI** (si está configurado): `supabase db push` o `supabase migration up`.
 3. **MCP Supabase**: algunas funciones RPC iniciales (`find_user_id_by_email`, `get_group_member_emails`, políticas RLS base) se aplicaron directamente en el proyecto remoto antes de quedar versionadas en archivos locales; se documentan en la sección [Cambios previos vía MCP](#cambios-previos-vía-mcp).
 
-**Orden obligatorio:** `001` → `002` → … → `014` (según dependencias; ver tabla).
+**Orden obligatorio:** `001` → `002` → … → `015` (según dependencias; ver tabla).
 
 ---
 
@@ -36,6 +36,7 @@ Los archivos fuente viven en `supabase/migrations/`. Este documento describe **q
 | 012 | `012_admin_academic_schema.sql` | Cursos, materias, asignaciones académicas |
 | 013 | `013_curso_division_materia_horario.sql` | División en cursos y horario en materias |
 | 014 | `014_asistencias.sql` | Registro de asistencia por curso y fecha |
+| 015 | `015_project_locks_and_professor_assignment.sql` | Bloqueos por sección y profesores asignados |
 
 ---
 
@@ -339,6 +340,35 @@ Reemplaza la versión anterior (solo email/nombre/apellido) con `DROP FUNCTION I
 - `GET .../asistencias/:fecha` — resumen detallado (modal "Ver resumen").
 
 Documentación de flujo: [`profesor.md`](./profesor.md).
+
+---
+
+## 015 — Bloqueos de proyecto y profesores asignados
+
+**Archivo:** `015_project_locks_and_professor_assignment.sql`
+
+### Columnas en `grupos_proyectos`
+
+| Campo | Descripción |
+|-------|-------------|
+| `bloqueo_alcance` | Cierra alcance/objetivo/estado para alumnos |
+| `bloqueo_documentacion` | Cierra documentación de respaldo |
+| `bloqueo_equipo` | Cierra alta/baja de integrantes |
+
+### Tabla `proyecto_profesor_asignado`
+
+Profesores supervisores asignados por el admin (N:N con `grupos_proyectos`). Distinto de `proyecto_profesor` (dueño/creador del proyecto).
+
+### Funciones y RLS
+
+- `can_manage_proyecto(id_grupo)` — admin, dueño o profesor asignado.
+- `get_assigned_professor_emails(id_grupo)` — emails de profesores asignados.
+- Políticas adicionales en `grupos_proyectos` y `grupo_estudiante` para gestores.
+
+### Relación con la app
+
+- `GET/PUT/PATCH/DELETE /api/admin/proyectos` — gestión global admin.
+- `PUT /api/projects/:id` — respeta bloqueos para alumnos; profesores asignados ignoran locks.
 
 ---
 

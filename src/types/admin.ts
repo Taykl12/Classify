@@ -42,6 +42,39 @@ export interface AdminSummary {
   subjects: number;
 }
 
+export interface ProjectLocks {
+  scope: boolean;
+  documentation: boolean;
+  team: boolean;
+}
+
+export interface AdminProject {
+  id: string;
+  name: string;
+  status: "Abierto" | "Cerrado";
+  ownerEmail: string | null;
+  assignedProfessorIds: string[];
+  memberCount: number;
+  locks: ProjectLocks;
+  createdAt: string;
+  description?: string;
+  objective?: string;
+  scopeDetail?: string;
+  scopeNotes?: string;
+  preprojectValidated?: boolean;
+  backupLink?: string;
+  documents?: { name: string; url: string }[];
+  memberEmails?: string[];
+}
+
+export interface AdminProjectsResponse {
+  projects: AdminProject[];
+}
+
+export interface AdminProjectResponse {
+  project: AdminProject;
+}
+
 export interface AdminUsersResponse {
   users: AdminUser[];
   roles: AdminRole[];

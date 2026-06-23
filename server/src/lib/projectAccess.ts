@@ -1,20 +1,25 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { isAssignedProfessor } from "./projectLocks.js";
+import { userIsAdmin } from "./roles.js";
 
-/** Proyectos donde el usuario es dueño (creador) o integrante. */
+/** Proyectos donde el usuario es dueño, integrante o profesor asignado. */
 export async function getAccessibleGroupIds(
   supabase: SupabaseClient,
   userId: string
 ): Promise<number[]> {
-  const [asOwner, asMember] = await Promise.all([
+  const [asOwner, asMember, asAssigned] = await Promise.all([
     supabase.from("proyecto_profesor").select("id_grupo").eq("id_profesor", userId),
     supabase.from("grupo_estudiante").select("id_grupo").eq("id_usuario", userId),
+    supabase.from("proyecto_profesor_asignado").select("id_grupo").eq("id_profesor", userId),
   ]);
   if (asOwner.error) throw new Error(asOwner.error.message);
   if (asMember.error) throw new Error(asMember.error.message);
+  if (asAssigned.error) throw new Error(asAssigned.error.message);
 
   const ids = new Set<number>();
   for (const row of asOwner.data ?? []) ids.add(row.id_grupo as number);
   for (const row of asMember.data ?? []) ids.add(row.id_grupo as number);
+  for (const row of asAssigned.data ?? []) ids.add(row.id_grupo as number);
   return [...ids];
 }
 
@@ -26,6 +31,7 @@ export async function assertCanAccessGroup(
   userId: string,
   idGrupo: number
 ): Promise<void> {
+  if (await userIsAdmin(supabase, userId)) return;
   const ids = await getAccessibleGroupIds(supabase, userId);
   if (!ids.includes(idGrupo)) {
     const err = new Error("Proyecto no encontrado");
@@ -77,4 +83,19 @@ export function parseGroupId(id: string | string[] | undefined): number | null {
   if (!raw) return null;
   const n = Number(raw);
   return Number.isInteger(n) && n > 0 ? n : null;
+}
+
+export async function canManageProjectAccess(
+  supabase: SupabaseClient,
+  userId: string,
+  idGrupo: number
+): Promise<{ owns: boolean; isAssigned: boolean; isAdmin: boolean; canManage: boolean; canManageLocks: boolean }> {
+  const [owns, isAssigned, isAdmin] = await Promise.all([
+    isProjectOwner(supabase, userId, idGrupo),
+    isAssignedProfessor(supabase, userId, idGrupo),
+    userIsAdmin(supabase, userId),
+  ]);
+  const canManage = owns || isAssigned || isAdmin;
+  const canManageLocks = isAssigned || isAdmin;
+  return { owns, isAssigned, isAdmin, canManage, canManageLocks };
 }

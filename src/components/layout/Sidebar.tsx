@@ -55,6 +55,12 @@ const ADMIN_NAV: NavItem[] = [
     icon: <BookOpen size={22} aria-hidden />,
     to: ROUTES.ADMIN_SUBJECTS,
   },
+  {
+    id: "admin-projects",
+    label: "Proyectos",
+    icon: <Layers size={22} aria-hidden />,
+    to: ROUTES.ADMIN_PROJECTS,
+  },
 ];
 
 const MAIN_NAV: NavItem[] = [
@@ -96,6 +102,12 @@ const PROFESSOR_NAV: NavItem[] = [
     label: "Asistencia",
     icon: <ClipboardCheck size={22} aria-hidden />,
     to: ROUTES.PROFESSOR_ATTENDANCE,
+  },
+  {
+    id: "professor-projects",
+    label: "Proyectos",
+    icon: <Layers size={22} aria-hidden />,
+    to: ROUTES.PROJECTS,
   },
 ];
 

@@ -9,6 +9,7 @@ import CalendaryPage from "./pages/Calendary";
 import AdminCursosPage from "./pages/admin/AdminCursosPage";
 import AdminDashboardPage from "./pages/admin/AdminDashboardPage";
 import AdminMateriasPage from "./pages/admin/AdminMateriasPage";
+import AdminProyectosPage from "./pages/admin/AdminProyectosPage";
 import AdminUsersPage from "./pages/admin/AdminUsersPage";
 import ProfessorAttendanceCoursePage from "./pages/professor/ProfessorAttendanceCoursePage";
 import ProfessorAttendancePage from "./pages/professor/ProfessorAttendancePage";
@@ -60,6 +61,14 @@ function App() {
             element={
               <AdminRoute>
                 <AdminMateriasPage />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path={ROUTES.ADMIN_PROJECTS}
+            element={
+              <AdminRoute>
+                <AdminProyectosPage />
               </AdminRoute>
             }
           />

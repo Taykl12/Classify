@@ -10,6 +10,13 @@ Documento que resume todo lo implementado en el repositorio respecto al dashboar
 
 Se añadió una aplicación **React + TypeScript + Vite** con **CSS vanilla** (sin Tailwind) que reproduce el dashboard de los mockups: sidebar colapsable, carrusel de proyectos destacados con “peek” lateral y tabla de pendientes con acciones. **Login, registro y recuperar contraseña** están solo en React (`src/pages/`, `src/components/auth/`). Se eliminaron `Login.html`, `Register.html` y duplicados en `public/` (evitaban el bucle de redirección en `/login` en Windows).
 
+### Gestión global de proyectos (junio 2026)
+
+- **Admin:** nueva sección `/admin/proyectos` para listar, editar, eliminar proyectos y asignar profesores supervisores.
+- **Bloqueos por sección:** alcance/objetivo, documentación y equipo; configurables por admin o profesor asignado; restringen solo a alumnos dueños/integrantes.
+- **Migración 015:** columnas `bloqueo_*`, tabla `proyecto_profesor_asignado`, RLS `can_manage_proyecto`.
+- **API:** `/api/admin/proyectos` + permisos ampliados en `PUT /api/projects/:id`.
+
 ---
 
 ## Stack y dependencias nuevas

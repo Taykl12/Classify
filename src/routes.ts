@@ -4,6 +4,7 @@ export const ROUTES = {
   ADMIN_USERS: '/admin/usuarios',
   ADMIN_COURSES: '/admin/cursos',
   ADMIN_SUBJECTS: '/admin/materias',
+  ADMIN_PROJECTS: '/admin/proyectos',
   PROFESSOR: '/profesor',
   PROFESSOR_COURSES: '/profesor/cursos',
   professorCourse: (id: string) => `/profesor/cursos/${id}`,

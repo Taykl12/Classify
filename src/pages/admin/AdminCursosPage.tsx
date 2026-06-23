@@ -117,6 +117,8 @@ export default function AdminCursosPage() {
   const [assignmentOpen, setAssignmentOpen] = useState(false);
   const [assignedUsersMenuOpen, setAssignedUsersMenuOpen] = useState(false);
   const [subjectsMenuOpen, setSubjectsMenuOpen] = useState(false);
+  const [addSubjectPickerOpen, setAddSubjectPickerOpen] = useState(false);
+  const [subjectPickerQuery, setSubjectPickerQuery] = useState("");
   const [listMenuError, setListMenuError] = useState<string | null>(null);
   const [editingCourse, setEditingCourse] = useState<AdminCourse | null>(null);
   const [editingSubject, setEditingSubject] = useState<AdminSubject | null>(null);
@@ -145,6 +147,30 @@ export default function AdminCursosPage() {
       .map((id) => usersById.get(id))
       .filter((user): user is AdminUser => Boolean(user));
   }, [selectedCourse, usersById]);
+  const subjectNamesInSelectedCourse = useMemo(
+    () =>
+      new Set(
+        subjectsForSelectedCourse.map((subject) => subject.name.trim().toLowerCase())
+      ),
+    [subjectsForSelectedCourse]
+  );
+  const pickableSubjects = useMemo(() => {
+    if (!selectedCourse) return [];
+    const needle = subjectPickerQuery.trim().toLowerCase();
+    return subjects
+      .filter((subject) => subject.courseId !== selectedCourse.id)
+      .filter(
+        (subject) => !subjectNamesInSelectedCourse.has(subject.name.trim().toLowerCase())
+      )
+      .filter((subject) => {
+        if (!needle) return true;
+        return [subject.name, subject.courseName, subject.horario]
+          .join(" ")
+          .toLowerCase()
+          .includes(needle);
+      })
+      .sort((a, b) => a.name.localeCompare(b.name, "es"));
+  }, [subjects, selectedCourse, subjectNamesInSelectedCourse, subjectPickerQuery]);
   const courseDivisionOptions = useMemo(
     () => divisionOptionsForYear(Number(courseForm.year)),
     [courseForm.year]
@@ -224,6 +250,24 @@ export default function AdminCursosPage() {
     setSubjectFormOpen(true);
   }
 
+  function openAddSubjectPicker() {
+    if (!selectedCourse) return;
+    setSubjectPickerQuery("");
+    setListMenuError(null);
+    setAddSubjectPickerOpen(true);
+  }
+
+  function closeAddSubjectPicker() {
+    setAddSubjectPickerOpen(false);
+    setSubjectPickerQuery("");
+    setListMenuError(null);
+  }
+
+  function openCreateSubjectFromPicker() {
+    closeAddSubjectPicker();
+    openCreateSubject();
+  }
+
   function openEditSubject(subject: AdminSubject) {
     setEditingSubject(subject);
     setSubjectForm(subjectToForm(subject));
@@ -278,7 +322,30 @@ export default function AdminCursosPage() {
 
   function openAddSubjectFromMenu() {
     closeSubjectsMenu();
-    openCreateSubject();
+    openAddSubjectPicker();
+  }
+
+  async function handleAssignExistingSubject(source: AdminSubject) {
+    if (!selectedCourse) return;
+    setSubmitting(true);
+    setListMenuError(null);
+    try {
+      await apiFetch<{ subject: AdminSubject }>("/api/admin/materias", {
+        method: "POST",
+        body: JSON.stringify({
+          name: source.name,
+          courseId: Number(selectedCourse.id),
+          horario: source.horario || null,
+        }),
+      });
+      await loadData();
+      setSelectedCourseId(selectedCourse.id);
+      closeAddSubjectPicker();
+    } catch (e) {
+      setListMenuError(e instanceof ApiError ? e.message : "No se pudo agregar la materia");
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   async function handleRemoveUserFromCourse(user: AdminUser) {
@@ -547,7 +614,7 @@ export default function AdminCursosPage() {
                       <button
                         type="button"
                         className="projects-panel__action-btn projects-panel__action-btn--primary"
-                        onClick={openCreateSubject}
+                        onClick={openAddSubjectPicker}
                       >
                         Agregar Materia
                       </button>
@@ -918,6 +985,76 @@ export default function AdminCursosPage() {
                   disabled={submitting}
                 >
                   Eliminar
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </AdminModal>
+
+      <AdminModal
+        open={addSubjectPickerOpen}
+        title={`Agregar materia${selectedCourse ? ` a ${selectedCourse.name}` : ""}`}
+        error={listMenuError}
+        onClose={closeAddSubjectPicker}
+        footer={
+          <>
+            <button
+              type="button"
+              className="project-modal__btn project-modal__btn--muted"
+              onClick={closeAddSubjectPicker}
+            >
+              Cancelar
+            </button>
+            <button
+              type="button"
+              className="project-modal__btn project-modal__btn--primary"
+              onClick={openCreateSubjectFromPicker}
+              disabled={submitting}
+            >
+              Crear materia nueva
+            </button>
+          </>
+        }
+      >
+        <p className="admin-form__hint">
+          Elegí una materia ya creada en otro curso para agregarla aquí, o creá una nueva.
+        </p>
+        <label className="admin-search admin-assignment__search">
+          <Search size={18} aria-hidden />
+          <span className="sr-only">Buscar materias</span>
+          <input
+            type="search"
+            value={subjectPickerQuery}
+            onChange={(e) => setSubjectPickerQuery(e.target.value)}
+            placeholder="Buscar por nombre o curso de origen"
+          />
+        </label>
+        {pickableSubjects.length === 0 ? (
+          <p className="admin-course-menu__empty">
+            {subjects.length === 0
+              ? "No hay materias creadas en el sistema."
+              : subjectPickerQuery.trim()
+                ? "No se encontraron materias con ese criterio."
+                : "No hay materias de otros cursos disponibles para agregar."}
+          </p>
+        ) : (
+          <ul className="admin-course-menu__list">
+            {pickableSubjects.map((subject) => (
+              <li key={subject.id} className="admin-course-menu__item">
+                <div className="admin-course-menu__info">
+                  <strong>{subject.name}</strong>
+                  <small>
+                    {subject.courseName || "Sin curso"} — {subject.horario || "Sin horario"}
+                  </small>
+                </div>
+                <button
+                  type="button"
+                  className="projects-table__action"
+                  onClick={() => handleAssignExistingSubject(subject)}
+                  disabled={submitting}
+                >
+                  Agregar
                 </button>
               </li>
             ))}

@@ -9,7 +9,12 @@ import {
   type ProjectDocumentRow,
 } from "../lib/mappers.js";
 import { getProjectOwnerEmail } from "../lib/projectOwner.js";
-import { userIsProfessor } from "../lib/roles.js";
+import {
+  getAssignedProfessorEmails,
+  locksToDbPatch,
+  mapProjectLocks,
+  readLocksPayload,
+} from "../lib/projectLocks.js";
 import {
   getGroupMemberEmails,
   syncGroupMembers,
@@ -17,6 +22,7 @@ import {
 import {
   assertCanAccessGroup,
   assertIsProjectOwner,
+  canManageProjectAccess,
   getAccessibleGroupIds,
   isProjectOwner,
   parseGroupId,
@@ -30,6 +36,12 @@ function paramId(raw: string | string[]): string {
 
 type ProjectDocumentBody = { name?: string; url?: string };
 
+type ProjectLocksBody = {
+  scope?: boolean;
+  documentation?: boolean;
+  team?: boolean;
+};
+
 type ProjectBody = {
   name?: string;
   description?: string;
@@ -42,6 +54,7 @@ type ProjectBody = {
   backupLink?: string;
   gradesLink?: string;
   documents?: ProjectDocumentBody[];
+  locks?: ProjectLocksBody;
 };
 
 function buildConfigPatch(
@@ -77,6 +90,53 @@ function validateProjectBody(body: ProjectBody, partial = false): string | null 
     return "Estado inválido";
   }
   return null;
+}
+
+function assertSectionOpen(locked: boolean): void {
+  if (locked) {
+    throw Object.assign(new Error("Esta sección fue cerrada por el profesor"), { status: 403 });
+  }
+}
+
+function hasScopeFields(body: ProjectBody): boolean {
+  return (
+    body.name !== undefined ||
+    body.description !== undefined ||
+    body.objective !== undefined ||
+    body.scopeDetail !== undefined ||
+    body.scopeNotes !== undefined ||
+    body.status !== undefined
+  );
+}
+
+function hasDocumentationFields(body: ProjectBody): boolean {
+  return body.documents !== undefined || body.backupLink !== undefined || body.gradesLink !== undefined;
+}
+
+async function buildProjectDetailResponse(
+  supabase: ReturnType<typeof getUserSupabase>,
+  userId: string,
+  idGrupo: number,
+  grupo: GrupoProyectoRow
+) {
+  const [memberEmails, ownerEmail, access, assignedProfessorEmails] = await Promise.all([
+    getGroupMemberEmails(supabase, idGrupo),
+    getProjectOwnerEmail(supabase, idGrupo),
+    canManageProjectAccess(supabase, userId, idGrupo),
+    getAssignedProfessorEmails(supabase, idGrupo),
+  ]);
+  const locks = mapProjectLocks(grupo);
+  return {
+    ...mapProjectDetail(grupo),
+    locks,
+    memberEmails,
+    ownerEmail,
+    assignedProfessorEmails,
+    isOwner: access.owns,
+    isAssignedProfessor: access.isAssigned,
+    canManageProject: access.canManage,
+    canManageLocks: access.canManageLocks,
+  };
 }
 
 router.get("/", requireAuth, async (req, res) => {
@@ -122,17 +182,7 @@ router.get("/:id", requireAuth, async (req, res) => {
       res.status(404).json({ error: "Proyecto no encontrado" });
       return;
     }
-    const [memberEmails, ownerEmail, owns] = await Promise.all([
-      getGroupMemberEmails(supabase, idGrupo),
-      getProjectOwnerEmail(supabase, idGrupo),
-      isProjectOwner(supabase, userId, idGrupo),
-    ]);
-    res.json({
-      ...mapProjectDetail(grupo as GrupoProyectoRow),
-      memberEmails,
-      ownerEmail,
-      isOwner: owns,
-    });
+    res.json(await buildProjectDetailResponse(supabase, userId, idGrupo, grupo as GrupoProyectoRow));
   } catch (e) {
     const status = (e as Error & { status?: number }).status ?? 500;
     res.status(status).json({ error: e instanceof Error ? e.message : "Error interno" });
@@ -195,30 +245,50 @@ router.put("/:id", requireAuth, async (req, res) => {
     }
     const supabase = getUserSupabase(req as AuthedRequest);
     await assertCanAccessGroup(supabase, userId, idGrupo);
-    const [owns, isProf] = await Promise.all([
-      isProjectOwner(supabase, userId, idGrupo),
-      userIsProfessor(supabase, userId),
-    ]);
+
+    const { data: currentRow, error: fetchCurrentError } = await supabase
+      .from("grupos_proyectos")
+      .select(GRUPO_PROJECT_SELECT)
+      .eq("id_grupo", idGrupo)
+      .single();
+    if (fetchCurrentError || !currentRow) {
+      res.status(404).json({ error: "Proyecto no encontrado" });
+      return;
+    }
+    const current = currentRow as GrupoProyectoRow;
+    const locks = mapProjectLocks(current);
+    const access = await canManageProjectAccess(supabase, userId, idGrupo);
+    const bypass = access.isAssigned || access.isAdmin;
+    const locksBody = readLocksPayload(body);
+
+    if (!access.canManage) {
+      throw Object.assign(new Error("No tenés permiso para modificar este proyecto"), { status: 403 });
+    }
 
     const patch: Record<string, unknown> = {};
-    if (owns) {
-      Object.assign(patch, buildConfigPatch(body, { allowPreprojectApproval: isProf }));
+
+    if (bypass) {
+      Object.assign(patch, buildConfigPatch(body, { allowPreprojectApproval: true }));
       if (body.name !== undefined) patch.nombre_proyecto = body.name.trim();
       if (body.description !== undefined) patch.descripcion = body.description.trim() || null;
       if (body.status !== undefined) patch.estado_proyecto = body.status;
-    } else if (isProf && body.preprojectValidated !== undefined) {
-      patch.anteproyecto_validado = body.preprojectValidated;
+      Object.assign(patch, locksToDbPatch(locksBody));
+    } else if (access.owns) {
+      if (hasScopeFields(body)) assertSectionOpen(locks.scope);
+      if (hasDocumentationFields(body)) assertSectionOpen(locks.documentation);
+      if (body.memberEmails !== undefined) assertSectionOpen(locks.team);
+
+      Object.assign(patch, buildConfigPatch(body, { allowPreprojectApproval: false }));
+      if (body.name !== undefined) patch.nombre_proyecto = body.name.trim();
+      if (body.description !== undefined) patch.descripcion = body.description.trim() || null;
+      if (body.status !== undefined) patch.estado_proyecto = body.status;
     } else {
-      const err = new Error("No tenés permiso para modificar este proyecto");
-      (err as Error & { status: number }).status = 403;
-      throw err;
+      throw Object.assign(new Error("No tenés permiso para modificar este proyecto"), { status: 403 });
     }
 
     if (body.memberEmails !== undefined) {
-      if (!owns) {
-        const err = new Error("Solo el creador puede editar integrantes");
-        (err as Error & { status: number }).status = 403;
-        throw err;
+      if (!bypass && !access.owns) {
+        throw Object.assign(new Error("Solo el creador puede editar integrantes"), { status: 403 });
       }
     }
 
@@ -233,7 +303,7 @@ router.put("/:id", requireAuth, async (req, res) => {
       }
     }
 
-    if (body.memberEmails !== undefined) {
+    if (body.memberEmails !== undefined && (bypass || access.owns)) {
       const { notFound } = await syncGroupMembers(supabase, idGrupo, body.memberEmails);
       if (notFound.length > 0) {
         res.status(400).json({
@@ -252,16 +322,7 @@ router.put("/:id", requireAuth, async (req, res) => {
       res.status(404).json({ error: "Proyecto no encontrado" });
       return;
     }
-    const [memberEmails, ownerEmail] = await Promise.all([
-      getGroupMemberEmails(supabase, idGrupo),
-      getProjectOwnerEmail(supabase, idGrupo),
-    ]);
-    res.json({
-      ...mapProjectDetail(grupo as GrupoProyectoRow),
-      memberEmails,
-      ownerEmail,
-      isOwner: owns,
-    });
+    res.json(await buildProjectDetailResponse(supabase, userId, idGrupo, grupo as GrupoProyectoRow));
   } catch (e) {
     const status = (e as Error & { status?: number }).status ?? 500;
     res.status(status).json({ error: e instanceof Error ? e.message : "Error interno" });

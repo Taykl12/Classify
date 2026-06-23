@@ -17,6 +17,12 @@ export interface ProjectDocument {
   url: string;
 }
 
+export interface ProjectLocks {
+  scope: boolean;
+  documentation: boolean;
+  team: boolean;
+}
+
 export interface ProjectFormValues {
   name: string;
   memberEmails: string[];
@@ -31,7 +37,12 @@ export interface ProjectDetail extends ProjectListItem {
   gradesLink?: string;
   documents?: ProjectDocument[];
   ownerEmail?: string | null;
+  assignedProfessorEmails?: string[];
   isOwner?: boolean;
+  isAssignedProfessor?: boolean;
+  canManageProject?: boolean;
+  canManageLocks?: boolean;
+  locks?: ProjectLocks;
 }
 
 export const EMPTY_PROJECT_FORM: ProjectFormValues = {

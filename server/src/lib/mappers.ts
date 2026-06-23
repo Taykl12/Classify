@@ -18,10 +18,13 @@ export interface GrupoProyectoRow {
   link_respaldo?: string | null;
   link_calificaciones?: string | null;
   documentos?: ProjectDocumentRow[] | null;
+  bloqueo_alcance?: boolean;
+  bloqueo_documentacion?: boolean;
+  bloqueo_equipo?: boolean;
 }
 
 export const GRUPO_PROJECT_SELECT =
-  "id_grupo, nombre_proyecto, descripcion, fecha_creacion, estado_proyecto, es_favorito, alcance_detalle, notas_alcance, anteproyecto_validado, link_respaldo, link_calificaciones, documentos";
+  "id_grupo, nombre_proyecto, descripcion, fecha_creacion, estado_proyecto, es_favorito, alcance_detalle, notas_alcance, anteproyecto_validado, link_respaldo, link_calificaciones, documentos, bloqueo_alcance, bloqueo_documentacion, bloqueo_equipo";
 
 export function mapProjectConfig(row: GrupoProyectoRow) {
   const docs = Array.isArray(row.documentos) ? row.documentos : [];

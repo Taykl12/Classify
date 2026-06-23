@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { BookOpen, GraduationCap, Shield, Users } from "lucide-react";
+import { BookOpen, GraduationCap, Layers, Shield, Users } from "lucide-react";
 import { Link } from "react-router-dom";
 import { DashboardLayout } from "../../components/layout/DashboardLayout";
 import { apiFetchWithRetry } from "../../lib/api";
@@ -25,6 +25,12 @@ const QUICK_LINKS = [
     description: "Organizar materias y asignar profesores.",
     to: ROUTES.ADMIN_SUBJECTS,
     icon: <BookOpen size={24} aria-hidden />,
+  },
+  {
+    label: "Gestionar proyectos",
+    description: "Ver, editar, asignar profesores y bloquear secciones.",
+    to: ROUTES.ADMIN_PROJECTS,
+    icon: <Layers size={24} aria-hidden />,
   },
 ] as const;
 

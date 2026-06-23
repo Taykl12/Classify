@@ -369,6 +369,7 @@ El esquema completo se agrupa en cuatro subsistemas:
 |---------|----------|---------|-------------------|-------|
 | `grupos_proyectos` | N ↔ N | `materias` | `proyecto_materia` | Materias vinculadas al proyecto (diseño académico). |
 | `grupos_proyectos` | N ↔ N | `usuarios` (tutor) | `proyecto_profesor` | En la **app web**, quien crea el proyecto queda aquí como **dueño**. |
+| `grupos_proyectos` | N ↔ N | `usuarios` (profesor supervisor) | `proyecto_profesor_asignado` | Profesores asignados por admin; gestionan y bloquean secciones (migración 015). |
 | `grupos_proyectos` | N ↔ N | `usuarios` (integrante) | `grupo_estudiante` | Miembros invitados por email; ven el proyecto en su listado. |
 | `grupos_proyectos` | 1 → N | `tareas_grupo` | `tareas_grupo.id_grupo` | Kanban / pendientes del inicio. |
 | `grupos_proyectos` | 1 → N | `avances_proyecto` | `avances_proyecto.id_grupo` | Entregas parciales. |

@@ -155,6 +155,7 @@ Routers bajo prefijo `/api`:
 | `/api/profile` | `routes/profile.ts` | GET/PATCH perfil + avatar |
 | `/api/professor` | `routes/professor.ts` | Cursos, alumnos y asistencia (solo profesor) |
 | `/api/admin` | `routes/admin.ts` | Gestión académica y usuarios (solo admin) |
+| `/api/admin/proyectos` | `routes/adminProjects.ts` | Proyectos globales, profesores asignados, bloqueos |
 
 Health check: `GET /api/health`.
 
