@@ -37,6 +37,7 @@ Los archivos fuente viven en `supabase/migrations/`. Este documento describe **q
 | 013 | `013_curso_division_materia_horario.sql` | División en cursos y horario en materias |
 | 014 | `014_asistencias.sql` | Registro de asistencia por curso y fecha |
 | 015 | `015_project_locks_and_professor_assignment.sql` | Bloqueos por sección y profesores asignados |
+| 019 | `019_calificaciones_proyecto.sql` | Nota final individual por integrante del proyecto |
 
 ---
 
@@ -372,6 +373,56 @@ Profesores supervisores asignados por el admin (N:N con `grupos_proyectos`). Dis
 
 ---
 
+## 019 — Calificaciones por integrante
+
+**Archivo:** `019_calificaciones_proyecto.sql`
+
+### Tabla `calificaciones_proyecto`
+
+Una fila por integrante y proyecto (nota final única).
+
+| Campo | Tipo / restricciones | Descripción |
+|-------|----------------------|-------------|
+| `id_calificacion` | bigint, PK, identity | Identificador. |
+| `id_grupo` | integer, FK → `grupos_proyectos`, ON DELETE CASCADE | Proyecto. |
+| `id_usuario` | uuid, FK → `usuarios`, ON DELETE CASCADE | Alumno calificado. |
+| `nota` | numeric(4,2), NULL, CHECK 0–10 | Calificación final. `NULL` = sin nota. |
+| `id_calificado_por` | uuid, FK → `usuarios`, ON DELETE SET NULL | Profesor/admin que cargó la nota. |
+| `creado_en` / `actualizado_en` | timestamptz | Alta y última modificación. |
+
+`UNIQUE (id_grupo, id_usuario)` — el upsert del API usa `onConflict: "id_grupo,id_usuario"`.
+
+### Acceso y RLS
+
+**RLS habilitado sin policies** → deny-by-default para `anon` / `authenticated`. El acceso es exclusivamente vía `createAdminClient()` (service role) desde Express, el mismo patrón que `huellas` (migración 018).
+
+El control de permisos vive en el código Express (`assertCanAccessGroup` + `canGradeProject`), no en Postgres:
+
+| Acción | Quién |
+|--------|-------|
+| Leer todas las notas | Profesor asignado, admin, o dueño con rol `profesor` |
+| Leer una nota | El propio alumno (filtrado en el API) |
+| Cargar / editar notas | Profesor asignado, admin, o dueño con rol `profesor` |
+
+> **Por qué sin RPC:** el diseño inicial definía un RPC `get_project_members_with_grades` + policies. Se descartó porque `listProjectGradeMembers()` resuelve lo mismo con el cliente service-role y sin depender de la caché de funciones de PostgREST (un `PGRST202` por caché stale o migración no aplicada rompía la feature). Menos objetos = menos superficie de fallo.
+
+### Relación con la app
+
+- Pestaña **Calificaciones** de `/proyectos/:id/config` (`ProjectConfigPage.tsx`) — tabla "Notas por Integrante".
+- `GET /api/projects/:id/calificaciones` → `{ canGrade, members[] }`.
+- `PUT /api/projects/:id/calificaciones` → body `{ grades: [{ userId, grade }] }`.
+- `canGrade` = profesor asignado, admin, o dueño con rol **profesor**. El alumno ve la tabla en solo lectura (solo su fila).
+- La lista incluye **únicamente integrantes con rol global `alumno`** (`usuarios.id_rol` → `roles.nombre_rol`). El creador del proyecto se agrega automáticamente a `grupo_estudiante`, así que un profesor-dueño no aparece ni puede calificarse a sí mismo. La misma regla se valida en el `PUT`.
+- `members[].email` va vacío: `usuarios` no tiene columna email y `auth.users` no está expuesto por PostgREST. La UI usa `Apellido, Nombre` y cae a `DNI` como fallback.
+
+### Notas de aplicación
+
+- El script es **idempotente** (`IF NOT EXISTS`), se puede re-ejecutar sin riesgo.
+- Termina con `NOTIFY pgrst, 'reload schema';` para forzar la recarga de la caché de PostgREST (Supabase ya lo hace vía event trigger, pero la señal se pierde ocasionalmente).
+- El SQL Editor de Supabase ejecuta el script completo en **una sola transacción**: si una sentencia falla, se revierte todo. Si la tabla "no existe" después de ejecutarlo, revisá el error en rojo del editor.
+
+---
+
 ## Cambios previos vía MCP
 
 Algunos objetos existían en el proyecto Supabase **antes** de quedar en archivos numerados locales, o se aplicaron con el MCP de Supabase. Conviven con las migraciones 001–009:
@@ -434,3 +485,4 @@ flowchart TD
 | 2026 | 009 | Invitaciones — búsqueda por DNI |
 | 2026 | 010–011 | Tareas RPC y calendario |
 | 2026 | 012–014 | Módulo académico admin + asistencia profesor |
+| 2026 | 019 | Calificaciones por integrante (pestaña Calificaciones) |

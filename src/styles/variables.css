@@ -1,22 +1,27 @@
 :root {
+  /* ===== Superficies y texto (alineado con DESIGN.md - Educational Platform) ===== */
   --color-primary: #1e3a5f;
   --color-primary-hover: #23476a;
   --color-primary-accent: #1d4ed8;
-  --color-canvas: #edf1f6;
+  --color-canvas: #f5f7fa;
   --color-surface: #ffffff;
-  --color-border: #d5dde8;
+  --color-border: #e2e8f0;
   --color-ink: #111827;
-  --color-ink-muted: #4b5563;
+  --color-ink-muted: #6b7280;
   --color-panel: #e0eafc;
   --color-panel-strong: #c9defa;
   --color-sidebar-bg: rgba(223, 232, 247, 0.97);
+  --color-on-primary: #ffffff;
+  /* Contenido sobre botones/badges con fondo solido (primary-accent, primary). */
+  --color-on-accent: #ffffff;
+
+  /* ===== Gradientes (dashboard / auth) ===== */
   --color-dashboard-gradient-start: #3d56c4;
   --color-dashboard-gradient-mid: #6eb8d4;
   --color-dashboard-gradient-end: #e8f4f8;
   --color-dashboard-panel-bg: rgba(255, 255, 255, 0.88);
-  --color-gradient-start: #3d56c4;
-  --color-gradient-mid: #6eb8d4;
-  --color-gradient-end: #e8f4f8;
+
+  /* ===== Semánticos ===== */
   --color-success-bg: #dcfce7;
   --color-success-text: #166534;
   --color-warning-bg: #fef3c7;
@@ -25,43 +30,77 @@
   --color-error-text: #991b1b;
   --color-neutral-bg: #e7ecf3;
   --color-neutral-text: #334155;
+
+  /* ===== Superficies de modal ===== */
   --color-modal-backdrop: rgba(15, 23, 42, 0.4);
   --color-modal-surface: #e9eef4;
   --color-modal-panel: #ffffff;
   --color-modal-input: #ffffff;
+
+  /* ===== Controles neutros ===== */
   --color-btn-muted: #d1d5db;
   --color-btn-muted-hover: #c4c8d0;
   --color-btn-muted-active: #b8bcc4;
   --color-chip-bg: #e8eaed;
   --color-chip-text: #202124;
-  --color-on-primary: #ffffff;
-  --auth-pill-bg: #f2f2f2;
-  --auth-pill-hover: lightblue;
-  --auth-ink: #111827;
-  --auth-surface: rgb(255, 255, 255);
-  --auth-input-border: #000000;
-  --font-size-body: 1rem;
-  --font-size-table-head: 0.9375rem;
-  --font-size-title: 1.5rem;
-  --font-size-subtitle: 0.9375rem;
+
+  /* ===== Escalera de superficies (DESIGN.md) ===== */
+  --color-surface-2: #f1f5f9;
+  --color-hairline-strong: #cbd5e1;
+
+  /* ===== Tonos sólidos semánticos (fondos de botón) ===== */
+  --color-success-solid: #16a34a;
+  --color-success-solid-hover: #15803d;
+  --color-warning-solid: #d97706;
+
+  /* ===== Escala tipográfica (7 pasos) ===== */
+  --font-size-xs: 0.75rem; /* 12px - captions, badges */
+  --font-size-sm: 0.875rem; /* 14px - tablas, controles, meta */
+  --font-size-md: 1rem; /* 16px - cuerpo base */
+  --font-size-lg: 1.125rem; /* 18px - subtitulos */
+  --font-size-xl: 1.25rem; /* 20px - titulos de card */
+  --font-size-2xl: 1.5rem; /* 24px - titulo de pagina */
+  --font-size-3xl: 2rem; /* 32px - display / metricas */
   --line-height-body: 1.5;
-  --radius-sm: 0;
-  --radius-md: 0;
-  --radius-lg: 6px;
-  --radius-xl: 8px;
-  --sidebar-width-collapsed: 72px;
-  --sidebar-width-expanded: 260px;
+
+  /* Alias semánticos (apuntan a la escala; no definir tamaños sueltos) */
+  --font-size-body: var(--font-size-md);
+  --font-size-subtitle: var(--font-size-sm);
+  --font-size-table-head: var(--font-size-sm);
+  --font-size-title: var(--font-size-2xl);
+
+  /* ===== Radios (escala de DESIGN.md) ===== */
+  --radius-sm: 6px; /* chips, tags */
+  --radius-md: 8px; /* botones, inputs */
+  --radius-lg: 12px; /* cards */
+  --radius-xl: 16px; /* paneles grandes */
+
+  /* ===== Espaciado ===== */
+  --space-xs: 4px;
   --space-sm: 8px;
   --space-md: 16px;
   --space-lg: 24px;
   --space-xl: 32px;
-  --shadow-soft: none;
-  --shadow-panel: none;
+
+  /* ===== Layout ===== */
+  --sidebar-width-collapsed: 72px;
+  --sidebar-width-expanded: 260px;
   --touch-min: 44px;
-  --card-width: 280px;
   --card-gap: 20px;
-  --carousel-peek: 28px;
   --card-height: 140px;
+
+  /* ===== Elevación ===== */
+  --shadow-soft: 0 1px 2px rgba(15, 23, 42, 0.06);
+  --shadow-panel: 0 8px 24px rgba(15, 23, 42, 0.1);
+
+  /* ===== Movimiento ===== */
+  --motion-duration-fast: 160ms;
+  --motion-duration-base: 240ms;
+  --motion-duration-select: 800ms;
+  --motion-duration-panel: 520ms;
+  --motion-duration-label: 380ms;
+  --motion-ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --motion-ease-smooth: cubic-bezier(0.45, 0.05, 0.25, 1);
 }
 
 /* Modo oscuro opcional; el diseño base sigue siendo modo claro */
@@ -69,6 +108,8 @@
   --color-primary: #93c5fd;
   --color-primary-hover: #bfdbfe;
   --color-primary-accent: #60a5fa;
+  /* Texto sobre `--color-primary`: en oscuro el primario es claro, así que el
+     contenido va oscuro. Antes quedaba blanco sobre azul claro (contraste ~1.8:1). */
   --color-canvas: #0f172a;
   --color-surface: #1e293b;
   --color-border: #334155;
@@ -98,11 +139,12 @@
   --color-btn-muted-active: #94a3b8;
   --color-chip-bg: #475569;
   --color-chip-text: #f1f5f9;
-  --auth-pill-bg: #334155;
-  --auth-pill-hover: #475569;
-  --auth-ink: #f1f5f9;
-  --auth-surface: #1e293b;
-  --auth-input-border: #475569;
-  --shadow-soft: none;
-  --shadow-panel: none;
+  --color-on-accent: #0f172a;
+  --color-surface-2: #24334a;
+  --color-hairline-strong: #475569;
+  --color-success-solid: #22c55e;
+  --color-success-solid-hover: #16a34a;
+  --color-warning-solid: #fbbf24;
+  --shadow-soft: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-panel: 0 8px 24px rgba(0, 0, 0, 0.45);
 }

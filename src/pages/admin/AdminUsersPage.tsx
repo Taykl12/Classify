@@ -5,7 +5,6 @@ import {
   FingerprintEnrollModal,
   type FingerprintModalMode,
 } from "../../components/admin/FingerprintEnrollModal";
-import { DashboardLayout } from "../../components/layout/DashboardLayout";
 import { useAuth } from "../../contexts/AuthContext";
 import { ApiError, apiFetch, apiFetchWithRetry } from "../../lib/api";
 import type { AdminRole, AdminUser, AdminUsersResponse, FingerprintStatus } from "../../types/admin";
@@ -342,7 +341,7 @@ export default function AdminUsersPage() {
   }
 
   return (
-    <DashboardLayout>
+    <>
       <header className="admin-hero">
         <Users size={52} strokeWidth={2.25} className="admin-hero__icon" aria-hidden />
         <div>
@@ -537,6 +536,6 @@ export default function AdminUsersPage() {
         onClose={closeFingerprint}
         onSuccess={handleFingerprintSuccess}
       />
-    </DashboardLayout>
+    </>
   );
 }

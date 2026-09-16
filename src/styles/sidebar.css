@@ -4,22 +4,21 @@
   align-self: flex-start;
   display: flex;
   flex-direction: column;
+  /* `align-items` NO es animable: fijo en ambos estados (los hijos son width:100%). */
+  align-items: center;
   flex-shrink: 0;
   min-height: 100vh;
   height: 100vh;
   padding: var(--space-md) var(--space-sm);
   background: var(--color-sidebar-bg);
   border-right: 1px solid var(--color-border);
-  transition: width 0.25s ease;
+  transition: width var(--motion-duration-panel) var(--motion-ease-smooth);
   overflow-x: hidden;
   overflow-y: auto;
 }
 
 .sidebar--collapsed {
   width: var(--sidebar-width-collapsed);
-  align-items: center;
-  padding-left: var(--space-sm);
-  padding-right: var(--space-sm);
 }
 
 .sidebar--expanded {
@@ -28,38 +27,34 @@
 
 .sidebar__header {
   display: flex;
+  /* Fijo: con el toggle a width:100% en expandido, `center` y `stretch` son iguales. */
+  justify-content: center;
   width: 100%;
   margin-bottom: var(--space-sm);
   flex-shrink: 0;
-}
-
-.sidebar--collapsed .sidebar__header {
-  justify-content: center;
-}
-
-.sidebar--expanded .sidebar__header {
-  justify-content: stretch;
 }
 
 .sidebar__toggle {
   display: flex;
   align-items: center;
   justify-content: center;
+  /* gap 0 en colapsado: con el label a ancho 0, un gap fijo descentraría el ícono. */
+  gap: 0;
   border: 1px solid var(--color-border);
   background: var(--color-surface);
   color: var(--color-ink);
   transition:
-    background-color 0.2s ease,
-    width 0.25s ease,
-    min-height 0.25s ease,
-    border-radius 0.25s ease,
-    padding 0.25s ease;
+    background-color var(--motion-duration-fast) var(--motion-ease-standard),
+    gap var(--motion-duration-panel) var(--motion-ease-smooth),
+    width var(--motion-duration-panel) var(--motion-ease-smooth),
+    min-height var(--motion-duration-panel) var(--motion-ease-smooth),
+    padding var(--motion-duration-panel) var(--motion-ease-smooth);
 }
 
 .sidebar__toggle--collapsed {
   width: var(--touch-min);
   height: var(--touch-min);
-  border-radius: 0;
+  border-radius: var(--radius-md);
 }
 
 .sidebar__toggle--expanded {
@@ -83,24 +78,46 @@
   font-size: var(--font-size-body);
   font-weight: 700;
   color: var(--color-ink);
-  transition: opacity 0.2s ease;
+  white-space: nowrap;
+  overflow: hidden;
+  transition:
+    opacity var(--motion-duration-fast) var(--motion-ease-standard),
+    max-width var(--motion-duration-label) var(--motion-ease-smooth);
+}
+
+.sidebar__toggle--collapsed .sidebar__toggle-label {
+  opacity: 0;
+  max-width: 0;
+}
+
+.sidebar__toggle--expanded .sidebar__toggle-label {
+  opacity: 1;
+  max-width: 140px;
+  transition-delay: 130ms;
 }
 
 .sidebar__profile-block,
 .sidebar__nav-block,
 .sidebar__footer-block {
+  /* display/align-items fijos: evitan el salto block - flex. */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   background: transparent;
-  border: none;
-  border-radius: 0;
+  /* Borde transparente en vez de `none`: permite animar solo `border-color`, sin el salto de 1px. */
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
   padding: var(--space-md) 0;
   margin-bottom: var(--space-sm);
   box-shadow: none;
   width: 100%;
   flex-shrink: 0;
   transition:
-    width 0.25s ease,
-    height 0.25s ease,
-    padding 0.25s ease;
+    width var(--motion-duration-panel) var(--motion-ease-smooth),
+    height var(--motion-duration-panel) var(--motion-ease-smooth),
+    padding var(--motion-duration-panel) var(--motion-ease-smooth),
+    border-color var(--motion-duration-panel) var(--motion-ease-smooth),
+    background-color var(--motion-duration-panel) var(--motion-ease-smooth);
 }
 
 .sidebar--expanded .sidebar__profile-block {
@@ -115,17 +132,9 @@
 .sidebar--collapsed .sidebar__profile-block {
   width: 44px;
   height: 44px;
-  min-width: 44px;
-  max-width: 44px;
-  min-height: 44px;
-  max-height: 44px;
-  padding: 4px;
-  border-radius: 0;
-  border: 1px solid var(--color-border);
+  padding: var(--space-xs);
+  border-color: var(--color-border);
   background: var(--color-surface);
-  display: flex;
-  align-items: center;
-  justify-content: center;
   margin-bottom: var(--space-sm);
   overflow: hidden;
 }
@@ -135,28 +144,25 @@
   width: var(--touch-min);
   max-width: var(--touch-min);
   padding: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-xs, 6px);
   margin-bottom: var(--space-sm);
-  background: transparent;
-  border: none;
 }
 
 .sidebar__profile {
   display: flex;
   flex-direction: column;
   align-items: center;
+  /* Fijo en ambos estados: `justify-content` no es animable. */
+  justify-content: center;
   gap: var(--space-sm);
   text-align: center;
   width: 100%;
+  transition: gap var(--motion-duration-panel) var(--motion-ease-smooth);
 }
 
 .sidebar__avatar {
   width: var(--touch-min);
   height: var(--touch-min);
-  border-radius: 0;
+  border-radius: var(--radius-md);
   background: var(--color-panel-strong);
   display: flex;
   align-items: center;
@@ -164,6 +170,9 @@
   color: var(--color-ink-muted);
   flex-shrink: 0;
   overflow: hidden;
+  transition:
+    width var(--motion-duration-panel) var(--motion-ease-smooth),
+    height var(--motion-duration-panel) var(--motion-ease-smooth);
 }
 
 .sidebar__avatar-image {
@@ -174,9 +183,7 @@
 
 .sidebar--collapsed .sidebar__profile {
   gap: 0;
-  width: auto;
   height: 100%;
-  justify-content: center;
 }
 
 .sidebar--collapsed .sidebar__avatar {
@@ -191,11 +198,22 @@
   line-height: 1.35;
   color: var(--color-ink);
   max-width: 100%;
+  /* `max-height` animable en vez de `position`/`clip`: sin salto de layout. */
+  max-height: 8rem;
+  overflow: hidden;
   word-break: break-word;
+  transition:
+    opacity var(--motion-duration-fast) var(--motion-ease-standard),
+    max-height var(--motion-duration-label) var(--motion-ease-smooth),
+    transform var(--motion-duration-label) var(--motion-ease-smooth);
 }
 
 .sidebar--expanded .sidebar__profile-name {
-  display: block;
+  opacity: 1;
+  max-height: 8rem;
+  transform: translateY(0);
+  /* Mismo desfase que los labels: el texto entra con el panel ya abierto. */
+  transition-delay: 130ms;
 }
 
 .sidebar__nav {
@@ -217,30 +235,39 @@ a.sidebar__nav-item {
   width: 100%;
   min-height: var(--touch-min);
   padding: var(--space-sm) var(--space-md);
-  border: none;
+  /* Borde transparente (no `none`): así `border-color` anima sin salto de 1px. */
+  border: 1px solid transparent;
   border-radius: var(--radius-md);
   background: transparent;
   color: var(--color-ink);
   font-size: var(--font-size-body);
   font-weight: 700;
   text-align: left;
-  transition: background-color 0.2s ease;
+  transition:
+    background-color var(--motion-duration-base) var(--motion-ease-standard),
+    border-color var(--motion-duration-panel) var(--motion-ease-smooth),
+    box-shadow var(--motion-duration-select) var(--motion-ease-smooth),
+    width var(--motion-duration-panel) var(--motion-ease-smooth),
+    min-width var(--motion-duration-panel) var(--motion-ease-smooth),
+    min-height var(--motion-duration-panel) var(--motion-ease-smooth),
+    padding var(--motion-duration-panel) var(--motion-ease-smooth);
   cursor: pointer;
   box-sizing: border-box;
+  position: relative;
+  overflow: hidden;
 }
 
 .sidebar__nav-item:hover {
   background: var(--color-panel);
 }
 
-.sidebar--expanded .sidebar__nav-item--active {
-  background: var(--color-surface);
-}
-
 .sidebar__nav-item--active {
   background: var(--color-panel);
-  border-left: 3px solid var(--color-primary-accent);
-  padding-left: calc(var(--space-md) - 3px);
+  /* Marcador como box-shadow inset (animable), en vez de `border-left` (que salta). */
+}
+
+.sidebar--expanded .sidebar__nav-item--active {
+  background: var(--color-surface);
 }
 
 .sidebar__nav-item:focus-visible {
@@ -254,32 +281,43 @@ a.sidebar__nav-item {
   align-items: center;
   justify-content: center;
   width: 24px;
+  transition: color var(--motion-duration-select) var(--motion-ease-smooth);
 }
 
 .sidebar__label {
   white-space: nowrap;
   overflow: hidden;
-  transition: opacity 0.2s ease, max-width 0.25s ease;
+  transition:
+    color var(--motion-duration-select) var(--motion-ease-smooth),
+    opacity var(--motion-duration-fast) var(--motion-ease-standard),
+    max-width var(--motion-duration-label) var(--motion-ease-smooth),
+    transform var(--motion-duration-label) var(--motion-ease-smooth);
 }
 
 .sidebar--collapsed .sidebar__label {
   opacity: 0;
   max-width: 0;
+  transform: translateX(-6px);
   pointer-events: none;
 }
 
 .sidebar--expanded .sidebar__label {
   opacity: 1;
   max-width: 180px;
+  transform: translateX(0);
+  /* El texto aparece cuando el panel ya abrio un poco, no mientras esta clipeado.
+     Orden = color, opacity, max-width, transform: el color NO lleva delay, para que
+     el cambio de pestana activa vaya en sincronia con la barra. */
+  transition-delay: 0ms, 130ms, 130ms, 130ms;
 }
 
 .sidebar--collapsed .sidebar__nav-item {
-  justify-content: center;
   padding: var(--space-sm);
-  width: 36px;
-  min-width: 36px;
-  min-height: 36px;
-  border: 1px solid var(--color-border);
+  width: var(--touch-min);
+  min-width: var(--touch-min);
+  min-height: var(--touch-min);
+  /* Solo el color: el ancho del borde queda en 1px en ambos estados (sin salto). */
+  border-color: var(--color-border);
   background: var(--color-surface);
 }
 
@@ -288,19 +326,16 @@ a.sidebar__nav-item {
 }
 
 .sidebar--collapsed .sidebar__nav-item--active {
-  border-left: none;
-  padding-left: var(--space-sm);
   background: var(--color-surface);
+  /* Pasa de barra izquierda a anillo: box-shadow interpola, el borde ya no interviene. */
   box-shadow: inset 0 0 0 2px var(--color-primary-accent);
-  border-radius: 0;
+  border-radius: var(--radius-md);
 }
 
 .sidebar--collapsed .sidebar__profile-name {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
+  opacity: 0;
+  max-height: 0;
+  transform: translateY(-4px);
 }
 
 .sidebar__footer-block {
@@ -316,4 +351,37 @@ a.sidebar__nav-item {
     top: 0;
     box-shadow: var(--shadow-panel);
   }
+}
+
+/* Marcador de seleccion: barra que crece desde el centro al cambiar de pestana. */
+.sidebar__nav-item::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--color-primary-accent);
+  opacity: 0;
+  transform: scaleY(0);
+  transition:
+    transform var(--motion-duration-select) var(--motion-ease-smooth),
+    opacity var(--motion-duration-select) var(--motion-ease-smooth);
+}
+
+.sidebar__nav-item--active::before {
+  opacity: 1;
+  transform: scaleY(1);
+}
+
+/* El label y el icono del item activo si cambian de color (con transicion):
+   antes activo e inactivo usaban el mismo color, asi que no habia nada que animar. */
+.sidebar__nav-item--active .sidebar__nav-icon,
+.sidebar__nav-item--active .sidebar__label {
+  color: var(--color-primary-accent);
+}
+
+/* En colapsado el indicador es el anillo, no la barra. */
+.sidebar--collapsed .sidebar__nav-item::before {
+  display: none;
 }

@@ -1,4 +1,4 @@
-.project-config__hero {
+﻿.project-config__hero {
   display: flex;
   flex-wrap: wrap;
   align-items: flex-start;
@@ -21,7 +21,7 @@
   width: var(--touch-min);
   height: var(--touch-min);
   border: 1px solid var(--color-border);
-  border-radius: 0;
+  border-radius: var(--radius-md);
   background: var(--color-surface);
   color: var(--color-ink);
   flex-shrink: 0;
@@ -33,13 +33,13 @@
 
 .project-config__title {
   margin: 0;
-  font-size: 1.5rem;
+  font-size: var(--font-size-2xl);
   font-weight: 800;
   color: var(--color-ink);
 }
 
 .project-config__subtitle {
-  margin: 4px 0 0;
+  margin: var(--space-xs) 0 0;
   font-size: var(--font-size-subtitle);
   color: var(--color-ink-muted);
 }
@@ -54,9 +54,9 @@
   min-height: 44px;
   padding: 0 22px;
   border: none;
-  border-radius: 0;
+  border-radius: var(--radius-md);
   font-weight: 700;
-  font-size: 0.95rem;
+  font-size: var(--font-size-md);
   background: var(--color-btn-muted);
   color: var(--color-ink);
   cursor: pointer;
@@ -94,7 +94,7 @@
 
 .project-config__card-title {
   margin: 0 0 var(--space-sm);
-  font-size: 1rem;
+  font-size: var(--font-size-md);
   font-weight: 800;
   color: var(--color-ink);
 }
@@ -102,9 +102,9 @@
 .project-config__status-pill {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-sm);
   padding: 10px 16px;
-  border-radius: 0;
+  border-radius: var(--radius-md);
   background: var(--color-neutral-bg);
   color: var(--color-ink);
   font-weight: 700;
@@ -116,7 +116,7 @@
 .project-config__status-dot {
   width: 10px;
   height: 10px;
-  border-radius: 0;
+  border-radius: var(--radius-md);
   background: var(--color-primary-accent);
 }
 
@@ -156,7 +156,7 @@
 }
 
 .project-config__tab {
-  padding: 8px 4px 12px;
+  padding: var(--space-sm) 4px 12px;
   border: none;
   background: transparent;
   font: inherit;
@@ -175,7 +175,7 @@
 .project-config__field {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--space-sm);
   margin-bottom: var(--space-md);
 }
 
@@ -263,13 +263,13 @@
   min-width: 48px;
   border: none;
   border-radius: var(--radius-md);
-  background: #22c55e;
-  color: #fff;
+  background: var(--color-success-solid);
+  color: var(--color-on-accent);
   cursor: pointer;
 }
 
 .project-config__add-btn:hover:not(:disabled) {
-  background: #16a34a;
+  background: var(--color-success-solid-hover);
 }
 
 .project-config__add-btn:disabled {
@@ -332,13 +332,13 @@
 .project-config__doc-name-input {
   width: 100%;
   min-width: 0;
-  padding: 8px 10px;
+  padding: var(--space-sm) 10px;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   background: var(--color-surface);
   color: var(--color-ink);
   font: inherit;
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   cursor: text;
 }
 
@@ -361,7 +361,7 @@
   background: var(--color-neutral-bg);
   color: var(--color-ink);
   font: inherit;
-  font-size: 0.9rem;
+  font-size: var(--font-size-sm);
   cursor: text;
 }
 
@@ -386,7 +386,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-sm);
   padding: var(--space-md);
   border-radius: var(--radius-md);
   background: var(--color-neutral-bg);
@@ -397,7 +397,7 @@
 .project-config__member-avatar {
   width: 56px;
   height: 56px;
-  border-radius: 0;
+  border-radius: var(--radius-md);
   background: var(--color-panel-strong);
   display: flex;
   align-items: center;
@@ -414,7 +414,7 @@
 
 .project-config__member-meta {
   margin: 0;
-  font-size: 0.85rem;
+  font-size: var(--font-size-sm);
   color: var(--color-ink-muted);
 }
 
@@ -432,5 +432,120 @@
 
   .project-config__doc-item {
     grid-template-columns: 1fr;
+  }
+}
+
+.project-config__grades-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-sm);
+}
+
+.project-config__grades-table th {
+  padding: 10px 12px;
+  text-align: left;
+  font-size: var(--font-size-table-head);
+  font-weight: 800;
+  color: var(--color-ink-muted);
+  border-bottom: 2px solid var(--color-border);
+  white-space: nowrap;
+}
+
+.project-config__grades-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-ink);
+  vertical-align: middle;
+}
+
+.project-config__grades-cell--muted {
+  color: var(--color-ink-muted);
+}
+
+.project-config__grades-student {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.project-config__grades-avatar {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  border-radius: var(--radius-md);
+  object-fit: cover;
+  background: var(--color-panel-strong);
+}
+
+.project-config__grades-avatar--fallback {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-xs);
+  font-weight: 800;
+  color: var(--color-ink-muted);
+}
+
+.project-config__grades-name {
+  font-weight: 700;
+  color: var(--color-ink);
+  word-break: break-word;
+}
+
+.project-config__grade-input {
+  width: 96px;
+  padding: var(--space-sm) 10px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-modal-input);
+  color: var(--color-ink);
+  font: inherit;
+  font-size: var(--font-size-md);
+  text-align: center;
+}
+
+.project-config__grade-input:focus {
+  outline: 2px solid var(--color-primary-accent);
+  outline-offset: 2px;
+}
+
+.project-config__grade-input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+  .project-config__grades-table thead {
+    display: none;
+  }
+
+  .project-config__grades-table,
+  .project-config__grades-table tbody,
+  .project-config__grades-table tr,
+  .project-config__grades-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .project-config__grades-table tr {
+    padding: var(--space-sm) 0;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .project-config__grades-table td {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-sm);
+    padding: 6px 0;
+    border-bottom: none;
+  }
+
+  .project-config__grades-table td::before {
+    content: attr(data-label);
+    font-size: var(--font-size-xs);
+    font-weight: 800;
+    color: var(--color-ink-muted);
   }
 }

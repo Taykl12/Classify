@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
 import { Cpu } from "lucide-react";
-import { DashboardLayout } from "../../components/layout/DashboardLayout";
 import { apiFetchWithRetry } from "../../lib/api";
 import type { DeviceJobStatus, Esp32Status } from "../../types/admin";
 import "../../styles/admin.css";
@@ -166,7 +165,7 @@ export default function AdminEsp32Page() {
   const jobBusy = jobStatus?.active ?? false;
 
   return (
-    <DashboardLayout>
+    <>
       <header className="admin-hero">
         <Cpu size={52} strokeWidth={2.25} className="admin-hero__icon" aria-hidden />
         <div>
@@ -269,6 +268,6 @@ export default function AdminEsp32Page() {
           ) : null}
         </div>
       </section>
-    </DashboardLayout>
+    </>
   );
 }

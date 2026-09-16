@@ -1,4 +1,4 @@
-@import "./projects.css";
+﻿@import "./projects.css";
 @import "./projects-page.css";
 
 .admin-hero {
@@ -20,7 +20,7 @@
 
 .admin-hero__eyebrow {
   margin: 0 0 var(--space-xs);
-  font-size: 0.85rem;
+  font-size: var(--font-size-sm);
   font-weight: 800;
   letter-spacing: 0.08em;
   color: var(--color-on-primary);
@@ -67,7 +67,7 @@
 
 .admin-stat-card strong {
   color: var(--color-ink);
-  font-size: 2rem;
+  font-size: var(--font-size-3xl);
   line-height: 1;
 }
 
@@ -98,9 +98,9 @@
   justify-content: center;
   width: 44px;
   height: 44px;
-  border-radius: 0;
+  border-radius: var(--radius-md);
   background: var(--color-primary);
-  color: var(--color-on-primary);
+  color: var(--color-on-accent);
 }
 
 .admin-toolbar {
@@ -121,7 +121,7 @@
 
 .admin-page-header__eyebrow {
   margin: 0 0 var(--space-xs);
-  font-size: 0.85rem;
+  font-size: var(--font-size-sm);
   font-weight: 800;
   letter-spacing: 0.08em;
   color: var(--color-on-primary);
@@ -157,7 +157,7 @@
   max-width: 520px;
   padding: 0 var(--space-md);
   border: 1px solid var(--color-border);
-  border-radius: 0;
+  border-radius: var(--radius-md);
   background: var(--color-surface);
   color: var(--color-ink-muted);
   box-shadow: var(--shadow-soft);
@@ -174,7 +174,7 @@
 
 .admin-table__subtext {
   display: block;
-  margin-top: 4px;
+  margin-top: var(--space-xs);
   color: var(--color-ink-muted);
   font-weight: 500;
 }
@@ -206,7 +206,7 @@
 
 .admin-form__hint {
   margin: 0;
-  font-size: 0.85rem;
+  font-size: var(--font-size-sm);
   color: var(--color-ink-muted);
 }
 
@@ -306,7 +306,7 @@
   font-weight: 500;
   padding: 14px 18px;
   border: none;
-  border-radius: 0;
+  border-radius: var(--radius-md);
   background: var(--color-modal-input);
   color: var(--color-ink);
   box-shadow: inset 0 0 0 1px var(--color-border);
@@ -366,7 +366,7 @@
 
 .admin-time-picker__option--selected {
   background: var(--color-primary-accent);
-  color: #fff;
+  color: var(--color-on-accent);
 }
 
 .admin-time-picker__option--selected:hover {
@@ -453,7 +453,7 @@
 .admin-course-list__header h2 {
   margin: 0;
   color: var(--color-ink);
-  font-size: 1.05rem;
+  font-size: var(--font-size-md);
 }
 
 .admin-course-list__header span {
@@ -463,7 +463,7 @@
   min-width: 32px;
   height: 32px;
   padding: 0 var(--space-sm);
-  border-radius: 0;
+  border-radius: var(--radius-md);
   background: var(--color-neutral-bg);
   color: var(--color-ink-muted);
   font-weight: 800;
@@ -500,7 +500,7 @@
   position: absolute;
   inset: var(--space-sm) auto var(--space-sm) 0;
   width: 4px;
-  border-radius: 0;
+  border-radius: var(--radius-md);
   background: transparent;
 }
 
@@ -521,15 +521,15 @@
 .admin-course-card__badge {
   align-self: flex-start;
   padding: 3px 8px;
-  border-radius: 0;
+  border-radius: var(--radius-md);
   background: var(--color-primary);
-  color: var(--color-on-primary);
-  font-size: 0.75rem;
+  color: var(--color-on-accent);
+  font-size: var(--font-size-xs);
   font-weight: 800;
 }
 
 .admin-course-card strong {
-  font-size: 1rem;
+  font-size: var(--font-size-md);
   color: var(--color-ink);
 }
 
@@ -576,7 +576,7 @@
   height: 48px;
   border-radius: var(--radius-md);
   background: var(--color-primary);
-  color: var(--color-on-primary);
+  color: var(--color-on-accent);
   box-shadow: var(--shadow-soft);
 }
 
@@ -587,7 +587,7 @@
 }
 
 .admin-course-detail__title p {
-  margin: 4px 0 0;
+  margin: var(--space-xs) 0 0;
   color: var(--color-ink-muted);
 }
 
@@ -686,7 +686,7 @@
   display: block;
   margin-top: var(--space-xs);
   color: var(--color-ink);
-  font-size: 1.75rem;
+  font-size: var(--font-size-2xl);
   line-height: 1;
 }
 
@@ -705,7 +705,7 @@
 
 .admin-course-subjects__header h3 {
   margin: 0;
-  font-size: 1.05rem;
+  font-size: var(--font-size-md);
 }
 
 .admin-empty-detail {
@@ -779,7 +779,7 @@
   }
 
   .admin-hero__title {
-    font-size: 1.875rem;
+    font-size: var(--font-size-3xl);
   }
 
   .admin-form__row {
@@ -833,7 +833,7 @@
 
 .esp32-status__label {
   margin: 0;
-  font-size: 1.25rem;
+  font-size: var(--font-size-xl);
   font-weight: 700;
   color: var(--color-ink);
 }
@@ -858,7 +858,7 @@
 
 .esp32-status__meta {
   margin: 0;
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   color: var(--color-ink-muted);
 }
 
@@ -870,7 +870,7 @@
 
 .esp32-templates__status {
   margin: 0;
-  font-size: 1rem;
+  font-size: var(--font-size-md);
   font-weight: 600;
   color: var(--color-ink);
 }
@@ -894,7 +894,7 @@
   padding: var(--space-md);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  background: var(--color-surface-muted);
+  background: var(--color-surface-2);
 }
 
 .fingerprint-modal__name {
@@ -905,7 +905,7 @@
 
 .fingerprint-modal__slot {
   margin: var(--space-xs) 0 0;
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   color: var(--color-ink-muted);
 }
 
@@ -925,7 +925,7 @@
 }
 
 .fingerprint-modal__icon {
-  color: var(--color-accent);
+  color: var(--color-primary-accent);
 }
 
 .fingerprint-modal__icon--success {
@@ -939,7 +939,7 @@
   flex-direction: column;
   gap: var(--space-sm);
   color: var(--color-ink-muted);
-  font-size: 0.9375rem;
+  font-size: var(--font-size-sm);
 }
 
 .fingerprint-modal__steps li.is-active {
@@ -951,7 +951,7 @@
   display: inline-flex;
   align-items: center;
   gap: var(--space-xs);
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
 }
 
 .admin-table__fingerprint--assigned {

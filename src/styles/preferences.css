@@ -1,4 +1,4 @@
-.preferences-page__layout {
+﻿.preferences-page__layout {
   display: grid;
   grid-template-columns: minmax(220px, 300px) 1fr;
   gap: var(--space-lg);
@@ -34,7 +34,7 @@
 .preferences-avatar__image-wrap {
   width: 128px;
   height: 128px;
-  border-radius: 0;
+  border-radius: var(--radius-md);
   overflow: hidden;
   border: 3px solid var(--color-border);
   background: var(--color-panel);
@@ -64,9 +64,9 @@
   width: 40px;
   height: 40px;
   border: 2px solid var(--color-surface);
-  border-radius: 0;
+  border-radius: var(--radius-md);
   background: var(--color-primary);
-  color: var(--color-on-primary);
+  color: var(--color-on-accent);
   box-shadow: var(--shadow-soft);
 }
 
@@ -76,7 +76,7 @@
 
 .preferences-card__name {
   margin: 0 0 var(--space-sm);
-  font-size: 1.25rem;
+  font-size: var(--font-size-xl);
   font-weight: 800;
   color: var(--color-ink);
 }
@@ -85,11 +85,11 @@
   display: inline-flex;
   align-items: center;
   padding: 6px 14px;
-  border-radius: 0;
+  border-radius: var(--radius-md);
   background: var(--color-neutral-bg);
   color: var(--color-neutral-text);
   border: 1px solid var(--color-border);
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   font-weight: 700;
 }
 
@@ -137,7 +137,7 @@
 
 .preferences-section__title {
   margin: 0;
-  font-size: 1.125rem;
+  font-size: var(--font-size-lg);
   font-weight: 800;
   color: var(--color-ink);
 }
@@ -163,7 +163,7 @@
 .preferences-field__label {
   font-weight: 700;
   color: var(--color-ink-muted);
-  font-size: 0.9375rem;
+  font-size: var(--font-size-sm);
 }
 
 .preferences-field__input {
@@ -201,7 +201,7 @@
   width: 32px;
   height: 32px;
   border: none;
-  border-radius: 0;
+  border-radius: var(--radius-md);
   background: transparent;
   color: var(--color-ink-muted);
 }
@@ -229,7 +229,7 @@
   min-height: var(--touch-min);
   padding: 0 var(--space-lg);
   border: 1px solid var(--color-border);
-  border-radius: 0;
+  border-radius: var(--radius-md);
   font-weight: 700;
   font-size: var(--font-size-body);
   box-shadow: var(--shadow-soft);
@@ -253,7 +253,7 @@
 
 .preferences-btn--primary {
   background: var(--color-primary);
-  color: var(--color-on-primary);
+  color: var(--color-on-accent);
   border-color: var(--color-primary);
 }
 

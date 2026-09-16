@@ -3,7 +3,6 @@ import { BookOpen, GraduationCap, Search, SquareArrowOutUpRight } from "lucide-r
 import { AdminAssignmentList } from "../../components/admin/AdminAssignmentList";
 import { AdminModal } from "../../components/admin/AdminModal";
 import { AdminSubjectScheduleFields } from "../../components/admin/AdminSubjectScheduleFields";
-import { DashboardLayout } from "../../components/layout/DashboardLayout";
 import { ApiError, apiFetch, apiFetchWithRetry } from "../../lib/api";
 import {
   YEAR_OPTIONS,
@@ -496,7 +495,7 @@ export default function AdminCursosPage() {
   }
 
   return (
-    <DashboardLayout>
+    <>
       <header className="admin-page-header">
         <div>
           <p className="admin-page-header__eyebrow">Administración</p>
@@ -1112,6 +1111,6 @@ export default function AdminCursosPage() {
           </ul>
         )}
       </AdminModal>
-    </DashboardLayout>
+    </>
   );
 }

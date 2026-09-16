@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 import { Camera, CheckCircle, Eye, EyeOff, Lock, UserRound } from "lucide-react";
-import { DashboardLayout } from "../components/layout/DashboardLayout";
 import { useAuth } from "../contexts/AuthContext";
 import { ApiError, apiFetch, apiFetchWithRetry, isUnauthorizedError } from "../lib/api";
 import type { ProfileFormState, UserProfile } from "../types/profile";
@@ -204,7 +203,7 @@ export default function PreferencesPage() {
   const roleLabel = profile?.roleLabel ?? user?.roleLabel;
 
   return (
-    <DashboardLayout>
+    <>
       <section className="preferences-page dashboard-panel">
         <header className="preferences-page__header dashboard-panel__header">
           <h1 className="dashboard-panel__title">Configuración de la cuenta</h1>
@@ -403,6 +402,6 @@ export default function PreferencesPage() {
           </div>
         )}
       </section>
-    </DashboardLayout>
+    </>
   );
 }

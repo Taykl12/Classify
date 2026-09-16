@@ -19,14 +19,11 @@ export function SidebarToggle({ collapsed, onToggle }: SidebarToggleProps) {
       aria-expanded={!collapsed}
       aria-label={collapsed ? 'Abrir menú' : 'Ocultar menú'}
     >
-      {collapsed ? (
-        <Menu size={20} aria-hidden />
-      ) : (
-        <>
-          <PanelLeftClose size={20} aria-hidden />
-          <span className="sidebar__toggle-label">Ocultar menú</span>
-        </>
-      )}
+      {collapsed ? <Menu size={20} aria-hidden /> : <PanelLeftClose size={20} aria-hidden />}
+      {/* Siempre renderizado: si lo montáramos/desmontáramos, aparecería de golpe. */}
+      <span className="sidebar__toggle-label" aria-hidden="true">
+        Ocultar menú
+      </span>
     </button>
   );
 }

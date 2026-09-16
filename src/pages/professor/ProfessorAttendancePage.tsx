@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { ArrowRight, CalendarClock, Search } from "lucide-react";
 import { Link } from "react-router-dom";
-import { DashboardLayout } from "../../components/layout/DashboardLayout";
 import { apiFetchWithRetry } from "../../lib/api";
 import {
   courseOrientationLabel,
@@ -55,7 +54,7 @@ export default function ProfessorAttendancePage() {
   const visibleCourses = useMemo(() => filterCourses(courses, query), [courses, query]);
 
   return (
-    <DashboardLayout>
+    <>
       <header className="admin-hero">
         <CalendarClock
           size={52}
@@ -143,6 +142,6 @@ export default function ProfessorAttendancePage() {
           </div>
         )}
       </section>
-    </DashboardLayout>
+    </>
   );
 }

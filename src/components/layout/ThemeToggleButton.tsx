@@ -3,12 +3,10 @@ import { useTheme } from "../../contexts/ThemeContext";
 
 interface ThemeToggleButtonProps {
   className?: string;
-  collapsed?: boolean;
 }
 
 export function ThemeToggleButton({
   className = "theme-toggle",
-  collapsed = false,
 }: ThemeToggleButtonProps) {
   const { isDark, toggleTheme } = useTheme();
 
@@ -21,7 +19,9 @@ export function ThemeToggleButton({
       title={isDark ? "Modo claro" : "Modo oscuro"}
     >
       {isDark ? <Sun size={22} aria-hidden /> : <Moon size={22} aria-hidden />}
-      <span className={collapsed ? "sr-only" : "theme-toggle__label"}>
+      {/* Siempre renderizado: cada contexto decide si mostrarlo (ver theme-toggle.css).
+          Montarlo/desmontarlo lo haría aparecer de golpe al abrir el sidebar. */}
+      <span className="theme-toggle__label" aria-hidden="true">
         {isDark ? "Modo claro" : "Modo oscuro"}
       </span>
     </button>

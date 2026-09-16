@@ -1,4 +1,4 @@
-.projects-table-wrapper {
+﻿.projects-table-wrapper {
   width: 100%;
   overflow-x: auto;
   border: 1px solid var(--color-border);
@@ -90,7 +90,7 @@
   height: 36px;
   padding: 0;
   border: none;
-  border-radius: 0;
+  border-radius: var(--radius-md);
   background: transparent;
   color: var(--color-ink-muted);
   cursor: pointer;
@@ -103,7 +103,7 @@
 }
 
 .projects-favorite-btn--active {
-  color: #eab308;
+  color: var(--color-warning-solid);
 }
 
 .projects-table__action + .projects-table__action {
@@ -112,28 +112,28 @@
 
 .projects-badge {
   display: inline-block;
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   font-weight: 700;
   line-height: 1.4;
 }
 
 .projects-badge--school {
-  padding: 4px 10px;
-  border-radius: 0;
+  padding: var(--space-xs) 10px;
+  border-radius: var(--radius-md);
   background: var(--color-warning-bg);
   color: var(--color-warning-text);
 }
 
 .projects-badge--status-open {
-  padding: 4px 12px;
-  border-radius: 0;
+  padding: var(--space-xs) 12px;
+  border-radius: var(--radius-md);
   background: var(--color-success-bg);
   color: var(--color-success-text);
 }
 
 .projects-badge--status-closed {
-  padding: 4px 12px;
-  border-radius: 0;
+  padding: var(--space-xs) 12px;
+  border-radius: var(--radius-md);
   background: var(--color-neutral-bg);
   color: var(--color-neutral-text);
 }
@@ -145,7 +145,7 @@
   min-height: var(--touch-min);
   padding: 0 var(--space-md);
   border: 1px solid var(--color-border);
-  border-radius: 0;
+  border-radius: var(--radius-md);
   background: var(--color-surface);
   color: var(--color-primary);
   font-size: var(--font-size-body);
@@ -173,7 +173,7 @@
   text-align: center;
   color: var(--color-ink-muted);
   background: var(--color-surface);
-  border-radius: 0;
+  border-radius: var(--radius-md);
   border: 1px solid var(--color-border);
 }
 
@@ -186,7 +186,7 @@
     display: block;
     margin-bottom: var(--space-md);
     border: 1px solid var(--color-border);
-    border-radius: 0;
+    border-radius: var(--radius-md);
   }
 
   .projects-table tbody td {
@@ -194,7 +194,7 @@
     justify-content: space-between;
     align-items: center;
     padding: var(--space-sm) var(--space-md);
-    border-radius: 0;
+    border-radius: var(--radius-md);
     text-align: left;
     max-width: none;
     white-space: normal;
@@ -222,7 +222,7 @@
 
   .projects-table tbody td:last-child {
     justify-content: flex-end;
-    border-radius: 0;
+    border-radius: var(--radius-md);
   }
 
   .projects-table__action {

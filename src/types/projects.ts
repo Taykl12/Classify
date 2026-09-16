@@ -1,4 +1,4 @@
-﻿export type ProjectListStatus = "Abierto" | "Cerrado";
+export type ProjectListStatus = "Abierto" | "Cerrado";
 
 export interface ProjectListItem {
   id: string;
@@ -51,3 +51,18 @@ export const EMPTY_PROJECT_FORM: ProjectFormValues = {
 };
 
 export type ProjectConfigTab = "alcance" | "equipo" | "calificaciones" | "documentaciones";
+
+export interface ProjectGradeMember {
+  userId: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  dni: string;
+  profilePhotoUrl: string | null;
+  grade: number | null;
+}
+
+export interface ProjectGradesResponse {
+  canGrade: boolean;
+  members: ProjectGradeMember[];
+}

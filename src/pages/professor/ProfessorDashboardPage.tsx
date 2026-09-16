@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
-import { CalendarClock, GraduationCap, Users } from "lucide-react";
+import { CalendarClock, GraduationCap } from "lucide-react";
 import { Link } from "react-router-dom";
-import { DashboardLayout } from "../../components/layout/DashboardLayout";
 import { useAuth } from "../../contexts/AuthContext";
 import { apiFetchWithRetry } from "../../lib/api";
+import { roleDisplayLabel } from "../../lib/roles";
 import { ROUTES } from "../../routes";
 import type { ProfessorSummary } from "../../types/professor";
 import "../../styles/professor.css";
@@ -52,7 +52,7 @@ export default function ProfessorDashboardPage() {
   }, []);
 
   return (
-    <DashboardLayout>
+    <>
       <header className="admin-hero">
         <GraduationCap
           size={52}
@@ -89,8 +89,8 @@ export default function ProfessorDashboardPage() {
           </article>
           <article className="admin-stat-card">
             <span>Rol</span>
-            <strong>
-              <Users size={28} aria-hidden />
+            <strong className="professor-stat-card__role">
+              {roleDisplayLabel(user?.roleLabel)}
             </strong>
           </article>
         </div>
@@ -105,6 +105,6 @@ export default function ProfessorDashboardPage() {
           </Link>
         ))}
       </section>
-    </DashboardLayout>
+    </>
   );
 }

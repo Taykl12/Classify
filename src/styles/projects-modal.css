@@ -1,4 +1,4 @@
-.project-modal {
+﻿.project-modal {
   position: fixed;
   inset: 0;
   z-index: 200;
@@ -12,7 +12,7 @@
 .project-modal__dialog {
   width: min(100%, 400px);
   background: var(--color-modal-surface);
-  border-radius: 0;
+  border-radius: var(--radius-md);
   box-shadow: var(--shadow-panel);
   border: 1px solid var(--color-border);
   overflow: hidden;
@@ -27,7 +27,7 @@
 
 .project-modal__title {
   margin: 0;
-  font-size: 1.125rem;
+  font-size: var(--font-size-lg);
   font-weight: 800;
   color: var(--color-ink);
 }
@@ -36,8 +36,8 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
-  padding: 16px 14px;
-  border-radius: 0;
+  padding: var(--space-md) 14px;
+  border-radius: var(--radius-md);
   background: var(--color-modal-panel);
   box-shadow: inset 0 0 0 1px var(--color-border), var(--shadow-soft);
   animation: project-modal-panel-in 0.2s ease;
@@ -59,7 +59,7 @@
 }
 
 .project-modal__member-panel .email-chips__box {
-  border-radius: 0;
+  border-radius: var(--radius-md);
   min-height: 56px;
 }
 
@@ -70,7 +70,7 @@
 .project-modal__error {
   margin: 0;
   color: var(--color-error-text);
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   text-align: center;
 }
 
@@ -78,7 +78,7 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
-  font-size: 1.05rem;
+  font-size: var(--font-size-md);
   font-weight: 800;
   color: var(--color-ink);
 }
@@ -92,7 +92,7 @@
   font-weight: 500;
   padding: 14px 18px;
   border: none;
-  border-radius: 0;
+  border-radius: var(--radius-md);
   background: var(--color-modal-input);
   color: var(--color-ink);
   box-shadow: inset 0 0 0 1px var(--color-border);
@@ -112,7 +112,7 @@
 .project-modal__member-preview {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: var(--space-sm);
   margin: 0;
   padding: 0;
   list-style: none;
@@ -122,12 +122,12 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: var(--space-sm);
   min-height: 48px;
   padding: 0 22px;
   border: none;
-  border-radius: 0;
-  font-size: 1rem;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-md);
   font-weight: 700;
   cursor: pointer;
   transition: opacity 0.2s ease, transform 0.15s ease, background-color 0.2s ease;
@@ -155,13 +155,13 @@
 
 .project-modal__btn--block {
   width: 100%;
-  margin-top: 8px;
+  margin-top: var(--space-sm);
 }
 
 .project-modal__btn--primary {
   flex: 1;
   background: var(--color-primary-accent);
-  color: var(--color-on-primary);
+  color: var(--color-on-accent);
 }
 
 .project-modal__btn--primary:hover:not(:disabled) {
@@ -176,7 +176,7 @@
 .project-modal__footer {
   display: flex;
   gap: 12px;
-  margin-top: 8px;
+  margin-top: var(--space-sm);
 }
 
 .project-modal__footer--split {
@@ -188,10 +188,10 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-sm);
   min-height: 52px;
   padding: 10px 14px;
-  border-radius: 0;
+  border-radius: var(--radius-md);
   background: var(--color-modal-input);
   box-shadow: inset 0 0 0 1px var(--color-border);
 }
@@ -199,13 +199,13 @@
 .email-chips__chip {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--space-xs);
   max-width: 100%;
   padding: 6px 10px 6px 14px;
-  border-radius: 0;
+  border-radius: var(--radius-md);
   background: var(--color-chip-bg);
   color: var(--color-chip-text);
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   font-weight: 500;
 }
 
@@ -227,7 +227,7 @@
   height: 22px;
   padding: 0;
   border: none;
-  border-radius: 0;
+  border-radius: var(--radius-md);
   background: transparent;
   color: var(--color-ink-muted);
   cursor: pointer;
@@ -244,7 +244,7 @@
   outline: none;
   background: transparent;
   font: inherit;
-  font-size: 0.95rem;
+  font-size: var(--font-size-md);
   color: var(--color-ink);
 }
 
@@ -261,7 +261,7 @@
   list-style: none;
   max-height: 200px;
   overflow-y: auto;
-  border-radius: 0;
+  border-radius: var(--radius-md);
   background: var(--color-modal-panel);
   box-shadow: inset 0 0 0 1px var(--color-border), var(--shadow-soft);
 }
@@ -271,11 +271,11 @@
   width: 100%;
   padding: 10px 14px;
   border: none;
-  border-radius: 0;
+  border-radius: var(--radius-md);
   background: transparent;
   text-align: left;
   font: inherit;
-  font-size: 0.9rem;
+  font-size: var(--font-size-sm);
   font-weight: 400;
   color: var(--color-ink);
   cursor: pointer;

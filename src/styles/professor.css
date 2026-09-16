@@ -4,6 +4,12 @@
   color: var(--color-on-primary);
 }
 
+/* Tarjeta "Rol" del Panel Principal: el `strong` base mide 2rem (pensado para números). */
+.professor-stat-card__role {
+  font-size: var(--font-size-2xl);
+  color: var(--color-ink);
+}
+
 .professor-course-link {
   display: inline-flex;
   align-items: center;
@@ -26,7 +32,7 @@
 .professor-student-cell__avatar {
   width: 36px;
   height: 36px;
-  border-radius: 0;
+  border-radius: var(--radius-md);
   object-fit: cover;
   border: 1px solid var(--color-border);
   flex-shrink: 0;
@@ -38,7 +44,7 @@
   justify-content: center;
   background: var(--color-neutral-bg);
   color: var(--color-ink-muted);
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
   font-weight: 700;
 }
 
@@ -69,7 +75,7 @@
 .professor-attendance-modal__meta {
   margin: 0;
   color: var(--color-ink-muted);
-  font-size: 0.9rem;
+  font-size: var(--font-size-sm);
 }
 
 .professor-attendance-modal__legend {
@@ -83,7 +89,7 @@
   align-items: center;
   gap: var(--space-xs);
   color: var(--color-ink-muted);
-  font-size: 0.8rem;
+  font-size: var(--font-size-xs);
   font-weight: 600;
 }
 
@@ -91,7 +97,7 @@
   content: "";
   width: 10px;
   height: 10px;
-  border-radius: 0;
+  border-radius: var(--radius-md);
 }
 
 .professor-attendance-modal__legend-item--present::before {
@@ -155,11 +161,11 @@
   align-items: center;
   justify-content: center;
   min-width: 34px;
-  padding: 4px 10px;
+  padding: var(--space-xs) 10px;
   border: 1px solid var(--color-border);
-  border-radius: 0;
+  border-radius: var(--radius-md);
   color: var(--color-ink-muted);
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
   font-weight: 700;
   transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 }
@@ -204,7 +210,7 @@
 .professor-attendance-summary__date {
   margin: 0;
   color: var(--color-ink-muted);
-  font-size: 0.95rem;
+  font-size: var(--font-size-md);
 }
 
 .professor-attendance-summary__ratio {
@@ -221,9 +227,9 @@
 .professor-attendance-summary__badge {
   display: inline-flex;
   align-items: center;
-  padding: 4px 10px;
-  border-radius: 0;
-  font-size: 0.75rem;
+  padding: var(--space-xs) 10px;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-xs);
   font-weight: 700;
 }
 

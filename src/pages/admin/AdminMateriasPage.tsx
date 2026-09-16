@@ -3,7 +3,6 @@ import { BookOpen, Search } from "lucide-react";
 import { AdminAssignmentList } from "../../components/admin/AdminAssignmentList";
 import { AdminModal } from "../../components/admin/AdminModal";
 import { AdminSubjectScheduleFields } from "../../components/admin/AdminSubjectScheduleFields";
-import { DashboardLayout } from "../../components/layout/DashboardLayout";
 import { ApiError, apiFetch, apiFetchWithRetry } from "../../lib/api";
 import { composeHorario, emptyParsedHorario, parseHorario } from "../../lib/adminAcademic";
 import type { ScheduleSlot } from "../../lib/adminAcademic";
@@ -211,7 +210,7 @@ export default function AdminMateriasPage() {
   }
 
   return (
-    <DashboardLayout>
+    <>
       <header className="admin-hero">
         <BookOpen size={52} strokeWidth={2.25} className="admin-hero__icon" aria-hidden />
         <div>
@@ -409,6 +408,6 @@ export default function AdminMateriasPage() {
           onToggle={toggleProfessor}
         />
       </AdminModal>
-    </DashboardLayout>
+    </>
   );
 }

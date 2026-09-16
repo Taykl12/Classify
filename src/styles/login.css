@@ -1,6 +1,6 @@
-.auth-page--login,
+﻿.auth-page--login,
 .auth-page--recover {
-  background: linear-gradient(to right, #4162da, #89e6eb);
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-accent) 100%);
 }
 
 [data-theme="dark"] .auth-page--login,

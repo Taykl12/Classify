@@ -1,7 +1,6 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { FeaturedProjectsCarousel } from "../components/dashboard/FeaturedProjectsCarousel";
 import { PendingProjectsSection } from "../components/dashboard/PendingProjectsSection";
-import { DashboardLayout } from "../components/layout/DashboardLayout";
 import { useAuth } from "../contexts/AuthContext";
 import { apiFetchWithRetry, isUnauthorizedError } from "../lib/api";
 import type { PendingItem, Project } from "../types/dashboard";
@@ -41,7 +40,7 @@ export default function DashboardPage() {
   }, [authLoading, user]);
 
   return (
-    <DashboardLayout>
+    <>
       {error ? <p className="dashboard-error" role="alert">{error}</p> : null}
       {loading ? <p className="dashboard-loading">Cargando datos…</p> : null}
       <section className="dashboard-panel dashboard-panel--featured" aria-labelledby="featured-title">
@@ -66,6 +65,6 @@ export default function DashboardPage() {
         </div>
         <PendingProjectsSection items={pending} />
       </section>
-    </DashboardLayout>
+    </>
   );
 }

@@ -1,9 +1,8 @@
-﻿import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Laptop } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { ProjectFormModal } from "../components/projects/ProjectFormModal";
 import { ProjectsListSection } from "../components/projects/ProjectsListSection";
-import { DashboardLayout } from "../components/layout/DashboardLayout";
 import { useAuth } from "../contexts/AuthContext";
 import { ApiError, apiFetch, apiFetchWithRetry, isUnauthorizedError } from "../lib/api";
 import { ROUTES } from "../routes";
@@ -141,7 +140,7 @@ export default function ProjectsPage() {
   }
 
   return (
-    <DashboardLayout>
+    <>
       <header className="projects-page__hero">
         <Laptop size={52} strokeWidth={2.25} className="projects-page__hero-icon" aria-hidden />
         <h1 id="projects-page-title" className="projects-page__hero-title">
@@ -194,6 +193,6 @@ export default function ProjectsPage() {
         onClose={closeModal}
         onSubmit={handleFormSubmit}
       />
-    </DashboardLayout>
+    </>
   );
 }

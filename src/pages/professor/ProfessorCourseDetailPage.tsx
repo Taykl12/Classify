@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, GraduationCap, Search } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
-import { DashboardLayout } from "../../components/layout/DashboardLayout";
 import { apiFetchWithRetry } from "../../lib/api";
 import {
   courseOrientationLabel,
@@ -58,7 +57,7 @@ export default function ProfessorCourseDetailPage() {
   const visibleStudents = useMemo(() => filterStudents(students, query), [students, query]);
 
   return (
-    <DashboardLayout>
+    <>
       <Link to={ROUTES.PROFESSOR_COURSES} className="professor-back-link">
         <ArrowLeft size={18} aria-hidden />
         Volver a Mis Cursos
@@ -148,6 +147,6 @@ export default function ProfessorCourseDetailPage() {
           </div>
         )}
       </section>
-    </DashboardLayout>
+    </>
   );
 }

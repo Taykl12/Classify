@@ -2,7 +2,6 @@ import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react
 import { Layers, Search, Users } from "lucide-react";
 import { AdminAssignmentList } from "../../components/admin/AdminAssignmentList";
 import { AdminModal } from "../../components/admin/AdminModal";
-import { DashboardLayout } from "../../components/layout/DashboardLayout";
 import { ApiError, apiFetch, apiFetchWithRetry } from "../../lib/api";
 import type {
   AdminProject,
@@ -207,7 +206,7 @@ export default function AdminProyectosPage() {
   }
 
   return (
-    <DashboardLayout>
+    <>
       <header className="admin-page-header">
         <div>
           <p className="admin-page-header__eyebrow">Administración</p>
@@ -444,6 +443,6 @@ export default function AdminProyectosPage() {
           resetKey={selectedProject?.id}
         />
       </AdminModal>
-    </DashboardLayout>
+    </>
   );
 }

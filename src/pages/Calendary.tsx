@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
-import { DashboardLayout } from "../components/layout/DashboardLayout";
 import EventFormModal from "../components/calendar/EventFormModal";
 import { useAuth } from "../contexts/AuthContext";
 import { apiFetchWithRetry, isUnauthorizedError } from "../lib/api";
@@ -139,7 +138,7 @@ export default function CalendaryPage() {
   const hoy = new Date();
 
   return (
-    <DashboardLayout>
+    <>
       <section className="calendary-page">
         <div className="calendar-container">
           <header className="calendar-header">
@@ -327,6 +326,6 @@ export default function CalendaryPage() {
           ) : null}
         </div>
       </section>
-    </DashboardLayout>
+    </>
   );
 }

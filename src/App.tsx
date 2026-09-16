@@ -1,10 +1,11 @@
-﻿import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { AdminRoute } from "./components/auth/AdminRoute";
 import { ProfessorRoute } from "./components/auth/ProfessorRoute";
 import { HomeRedirect } from "./components/auth/HomeRedirect";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
+import { DashboardLayout } from "./components/layout/DashboardLayout";
 import CalendaryPage from "./pages/Calendary";
 import AdminCursosPage from "./pages/admin/AdminCursosPage";
 import AdminDashboardPage from "./pages/admin/AdminDashboardPage";
@@ -26,146 +27,68 @@ import RecoverPasswordPage from "./pages/RecoverPasswordPage";
 import RegisterPage from "./pages/RegisterPage";
 import { ROUTES } from "./routes";
 
+/**
+ * Las rutas privadas viven bajo un layout route sin path: `DashboardLayout` se
+ * monta UNA vez y sobrevive a la navegacion (las paginas ya no lo envuelven).
+ * Si cada pagina montara su propio layout, el Sidebar se remontaria en cada
+ * cambio de seccion y sus transiciones no tendrian estado previo que animar.
+ */
 function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
         <BrowserRouter>
-        <Routes>
-          <Route path={ROUTES.HOME} element={<HomeRedirect />} />
-          <Route
-            path={ROUTES.ADMIN}
-            element={
-              <AdminRoute>
-                <AdminDashboardPage />
-              </AdminRoute>
-            }
-          />
-          <Route
-            path={ROUTES.ADMIN_USERS}
-            element={
-              <AdminRoute>
-                <AdminUsersPage />
-              </AdminRoute>
-            }
-          />
-          <Route
-            path={ROUTES.ADMIN_COURSES}
-            element={
-              <AdminRoute>
-                <AdminCursosPage />
-              </AdminRoute>
-            }
-          />
-          <Route
-            path={ROUTES.ADMIN_SUBJECTS}
-            element={
-              <AdminRoute>
-                <AdminMateriasPage />
-              </AdminRoute>
-            }
-          />
-          <Route
-            path={ROUTES.ADMIN_PROJECTS}
-            element={
-              <AdminRoute>
-                <AdminProyectosPage />
-              </AdminRoute>
-            }
-          />
-          <Route
-            path={ROUTES.ADMIN_ESP32}
-            element={
-              <AdminRoute>
-                <AdminEsp32Page />
-              </AdminRoute>
-            }
-          />
-          <Route
-            path={ROUTES.PROFESSOR}
-            element={
-              <ProfessorRoute>
-                <ProfessorDashboardPage />
-              </ProfessorRoute>
-            }
-          />
-          <Route
-            path={ROUTES.PROFESSOR_COURSES}
-            element={
-              <ProfessorRoute>
-                <ProfessorCoursesPage />
-              </ProfessorRoute>
-            }
-          />
-          <Route
-            path="/profesor/cursos/:courseId"
-            element={
-              <ProfessorRoute>
-                <ProfessorCourseDetailPage />
-              </ProfessorRoute>
-            }
-          />
-          <Route
-            path={ROUTES.PROFESSOR_ATTENDANCE}
-            element={
-              <ProfessorRoute>
-                <ProfessorAttendancePage />
-              </ProfessorRoute>
-            }
-          />
-          <Route
-            path="/profesor/asistencia/:courseId"
-            element={
-              <ProfessorRoute>
-                <ProfessorAttendanceCoursePage />
-              </ProfessorRoute>
-            }
-          />
-          <Route
-            path={ROUTES.DASHBOARD}
-            element={
-              <ProtectedRoute>
-                <DashboardPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path={ROUTES.PROJECTS}
-            element={
-              <ProtectedRoute>
-                <ProjectsPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-           path={ROUTES.CALENDARY}
-            element={
-              <ProtectedRoute>
-                <CalendaryPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path={ROUTES.PREFERENCES}
-            element={
-              <ProtectedRoute>
-                <PreferencesPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route 
-            path="/proyectos/:projectId/config"
-            element={
-              <ProtectedRoute>
-                <ProjectConfigPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route path={ROUTES.LOGIN} element={<LoginPage />} />
-          <Route path={ROUTES.REGISTER} element={<RegisterPage />} />
-          <Route path={ROUTES.RECOVER_PASSWORD} element={<RecoverPasswordPage />} />
-          <Route path="*" element={<Navigate to={ROUTES.LOGIN} replace />} />
-        </Routes>
+          <Routes>
+            <Route path={ROUTES.HOME} element={<HomeRedirect />} />
+
+            <Route
+              element={
+                <AdminRoute>
+                  <DashboardLayout />
+                </AdminRoute>
+              }
+            >
+              <Route path={ROUTES.ADMIN} element={<AdminDashboardPage />} />
+              <Route path={ROUTES.ADMIN_USERS} element={<AdminUsersPage />} />
+              <Route path={ROUTES.ADMIN_COURSES} element={<AdminCursosPage />} />
+              <Route path={ROUTES.ADMIN_SUBJECTS} element={<AdminMateriasPage />} />
+              <Route path={ROUTES.ADMIN_PROJECTS} element={<AdminProyectosPage />} />
+              <Route path={ROUTES.ADMIN_ESP32} element={<AdminEsp32Page />} />
+            </Route>
+
+            <Route
+              element={
+                <ProfessorRoute>
+                  <DashboardLayout />
+                </ProfessorRoute>
+              }
+            >
+              <Route path={ROUTES.PROFESSOR} element={<ProfessorDashboardPage />} />
+              <Route path={ROUTES.PROFESSOR_COURSES} element={<ProfessorCoursesPage />} />
+              <Route path="/profesor/cursos/:courseId" element={<ProfessorCourseDetailPage />} />
+              <Route path={ROUTES.PROFESSOR_ATTENDANCE} element={<ProfessorAttendancePage />} />
+              <Route path="/profesor/asistencia/:courseId" element={<ProfessorAttendanceCoursePage />} />
+            </Route>
+
+            <Route
+              element={
+                <ProtectedRoute>
+                  <DashboardLayout />
+                </ProtectedRoute>
+              }
+            >
+              <Route path={ROUTES.DASHBOARD} element={<DashboardPage />} />
+              <Route path={ROUTES.PROJECTS} element={<ProjectsPage />} />
+              <Route path={ROUTES.CALENDARY} element={<CalendaryPage />} />
+              <Route path={ROUTES.PREFERENCES} element={<PreferencesPage />} />
+              <Route path="/proyectos/:projectId/config" element={<ProjectConfigPage />} />
+            </Route>
+
+            <Route path={ROUTES.LOGIN} element={<LoginPage />} />
+            <Route path={ROUTES.REGISTER} element={<RegisterPage />} />
+            <Route path={ROUTES.RECOVER_PASSWORD} element={<RecoverPasswordPage />} />
+            <Route path="*" element={<Navigate to={ROUTES.LOGIN} replace />} />
+          </Routes>
         </BrowserRouter>
       </AuthProvider>
     </ThemeProvider>

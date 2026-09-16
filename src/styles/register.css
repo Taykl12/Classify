@@ -1,5 +1,5 @@
-.auth-page--register {
-  background: linear-gradient(to right, #6a8aff, #b2fbff);
+﻿.auth-page--register {
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-accent) 100%);
 }
 
 [data-theme="dark"] .auth-page--register {

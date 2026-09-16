@@ -1,6 +1,6 @@
 /*
  * Classify — ESP32-C3 SuperMini + AS608
- * Heartbeat, botón BOOT y enrolamiento/eliminación de huellas hacia la API Express.
+ * 
  *
  * Dependencias (PlatformIO):
  *   - Board: esp32-c3-devkitm-1 (USB CDC On Boot: Enabled)

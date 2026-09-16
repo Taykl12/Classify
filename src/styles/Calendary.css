@@ -1,10 +1,10 @@
-.calendary-page {
+﻿.calendary-page {
   --calendary-bg-start: var(--color-panel);
   --calendary-bg-end: var(--color-canvas);
   --calendary-weekday-bg: var(--color-panel-strong);
   --calendary-weekday-text: var(--color-primary);
   --calendary-day-bg: var(--color-surface);
-  --calendary-weekend-color: #dc2626;
+  --calendary-weekend-color: var(--color-error-text);
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -21,21 +21,21 @@
 }
 
 [data-theme="dark"] .calendary-page {
-  --calendary-bg-start: #12233f;
+  --calendary-bg-start: var(--color-surface-2);
   --calendary-bg-end: var(--color-canvas);
-  --calendary-weekday-bg: #1e3a5f;
-  --calendary-weekday-text: #bfdbfe;
+  --calendary-weekday-bg: var(--color-surface-2);
+  --calendary-weekday-text: var(--color-primary);
   --calendary-day-bg: var(--color-surface);
-  --calendary-weekend-color: #f87171;
+  --calendary-weekend-color: var(--color-error-text);
 }
 
 [data-theme="dark"] .calendary-page .day-events-modal {
-  background: #1a2332;
-  border-color: #2a3a4f;
+  background: var(--color-surface-2);
+  border-color: var(--color-hairline-strong);
 }
 
 [data-theme="dark"] .calendary-page .day-events-modal__item {
-  background: #0f172a;
+  background: var(--color-canvas);
 }
 
 .calendary-page .calendar-container {
@@ -71,7 +71,7 @@
 
 .calendary-page .calendar-title {
   margin: 0;
-  font-size: 1.375rem;
+  font-size: var(--font-size-xl);
   font-weight: 700;
   color: var(--color-ink);
   text-transform: capitalize;
@@ -83,7 +83,7 @@
   align-items: center;
   justify-content: center;
   border: 1px solid var(--color-border);
-  border-radius: 0;
+  border-radius: var(--radius-md);
   background: var(--color-surface);
   color: var(--color-ink);
   font-weight: 600;
@@ -124,9 +124,9 @@
   font-size: var(--font-size-body);
   font-weight: 600;
   border: 1px solid var(--color-primary-accent);
-  border-radius: 0;
+  border-radius: var(--radius-md);
   background: var(--color-primary-accent);
-  color: var(--color-on-primary);
+  color: var(--color-on-accent);
   box-shadow: var(--shadow-soft);
   cursor: pointer;
   transition: opacity 0.2s ease;
@@ -160,7 +160,7 @@
 .calendary-page .weekdays div {
   text-align: center;
   padding: var(--space-sm) var(--space-xs);
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   font-weight: 700;
   background: var(--calendary-weekday-bg);
   border: 1px solid var(--color-border);
@@ -180,7 +180,7 @@
   background: var(--calendary-day-bg);
   border: 1px solid var(--color-border);
   padding: var(--space-sm);
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -212,14 +212,14 @@
 }
 
 .calendary-page .day-event-dot {
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
   font-weight: 500;
   line-height: 1.3;
-  padding: 4px 6px;
+  padding: var(--space-xs) 6px;
   min-height: 1.375rem;
-  border-radius: 0;
+  border-radius: var(--radius-md);
   background: var(--color-primary);
-  color: var(--color-on-primary);
+  color: var(--color-on-accent);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -249,14 +249,14 @@
 }
 
 .calendary-page .day-event-more {
-  font-size: 0.6875rem;
+  font-size: var(--font-size-xs);
   font-weight: 500;
   color: var(--color-ink-muted);
   padding: 2px 4px;
 }
 
 .calendary-page .calendar-error {
-  color: var(--color-danger);
+  color: var(--color-error-text);
   font-size: var(--font-size-sm);
   margin: var(--space-xs) 0;
 }
@@ -280,7 +280,7 @@
   width: 100%;
   max-height: 80vh;
   overflow-y: auto;
-  box-shadow: var(--shadow-lg);
+  box-shadow: var(--shadow-panel);
 }
 
 .calendary-page .day-events-modal__header {
@@ -293,7 +293,7 @@
 
 .calendary-page .day-events-modal__header h3 {
   margin: 0;
-  font-size: 1.125rem;
+  font-size: var(--font-size-lg);
   font-weight: 700;
 }
 
@@ -313,7 +313,7 @@
   border: 1px solid var(--color-border);
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--space-xs);
   cursor: default;
   transition:
     background-color 0.15s ease,
@@ -335,7 +335,7 @@
 }
 
 .calendary-page .day-events-modal__item strong {
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   flex: 1;
   min-width: 0;
 }
@@ -345,8 +345,8 @@
   align-items: center;
   flex-shrink: 0;
   padding: 2px 10px;
-  border-radius: 0;
-  font-size: 0.6875rem;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-xs);
   font-weight: 700;
   line-height: 1.4;
 }
@@ -367,13 +367,13 @@
 }
 
 .calendary-page .day-events-modal__project {
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
   color: var(--color-ink-muted);
 }
 
 .calendary-page .day-events-modal__desc {
   margin: 0;
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
   color: var(--color-ink);
   opacity: 0.8;
 }
@@ -393,7 +393,7 @@
   width: 100%;
   max-height: 90vh;
   overflow-y: auto;
-  box-shadow: var(--shadow-lg);
+  box-shadow: var(--shadow-panel);
 }
 
 .calendary-page .task-form-modal__header {
@@ -406,7 +406,7 @@
 
 .calendary-page .task-form-modal__header h3 {
   margin: 0;
-  font-size: 1.125rem;
+  font-size: var(--font-size-lg);
   font-weight: 700;
 }
 
@@ -419,8 +419,8 @@
 
 .calendary-page .task-form__date-hint {
   margin: 0;
-  font-size: 0.875rem;
-  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  color: var(--color-ink-muted);
   text-transform: capitalize;
 }
 
@@ -431,7 +431,7 @@
 }
 
 .calendary-page .task-form__field label {
-  font-size: 0.8125rem;
+  font-size: var(--font-size-sm);
   font-weight: 600;
   color: var(--color-ink);
 }
@@ -440,7 +440,7 @@
 .calendary-page .task-form__field textarea,
 .calendary-page .task-form__field select {
   font-family: inherit;
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   padding: var(--space-sm);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
@@ -464,7 +464,7 @@
 }
 
 .calendary-page .task-form__error {
-  color: var(--color-danger);
+  color: var(--color-error-text);
   font-size: var(--font-size-sm);
   margin: 0;
 }
@@ -478,7 +478,7 @@
 
 .calendary-page .task-form__submit {
   background: var(--color-primary-accent) !important;
-  color: var(--color-on-primary) !important;
+  color: var(--color-on-accent) !important;
   border-color: var(--color-primary-accent) !important;
 }
 
@@ -488,14 +488,14 @@
 }
 
 [data-theme="dark"] .calendary-page .task-form-modal {
-  background: #1a2332;
+  background: var(--color-surface-2);
 }
 
 [data-theme="dark"] .calendary-page .task-form__field input,
 [data-theme="dark"] .calendary-page .task-form__field textarea,
 [data-theme="dark"] .calendary-page .task-form__field select {
-  background: #0f172a;
-  border-color: #2a3a4f;
+  background: var(--color-canvas);
+  border-color: var(--color-hairline-strong);
 }
 
 .calendary-page .day-number {
@@ -523,8 +523,8 @@
 
 .calendary-page .day-number--today {
   background: var(--color-primary-accent);
-  color: var(--color-on-primary);
-  border-radius: 0;
+  color: var(--color-on-accent);
+  border-radius: var(--radius-md);
   opacity: 1;
 }
 
@@ -534,16 +534,16 @@
   }
 
   .calendary-page .calendar-title {
-    font-size: 1.125rem;
+    font-size: var(--font-size-lg);
   }
 
   .calendary-page .calendar-btn--today {
     padding: 0 var(--space-md);
-    font-size: 0.9375rem;
+    font-size: var(--font-size-sm);
   }
 
   .calendary-page .weekdays div {
     padding: var(--space-xs);
-    font-size: 0.75rem;
+    font-size: var(--font-size-xs);
   }
 }

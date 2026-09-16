@@ -14,7 +14,7 @@ export function AuthNav({ alternateLink }: AuthNavProps) {
   return (
     <nav className="barra-nav" aria-label="Navegación de autenticación">
       <div className="barra-nav__start">
-        <ThemeToggleButton className="theme-toggle theme-toggle--auth" collapsed />
+        <ThemeToggleButton className="theme-toggle theme-toggle--auth" />
         <Link to="/" className="logo">
           <AuthAvatar size="nav" />
           <span>Classify</span>

@@ -13,3 +13,10 @@ export function landingRouteForRole(
   if (isProfessor(roleLabel)) return "/profesor";
   return "/dashboard";
 }
+
+/** Etiqueta del rol lista para mostrar en UI (`"profesor"` → `"Profesor"`). */
+export function roleDisplayLabel(roleLabel?: string | null): string {
+  const raw = roleLabel?.trim();
+  if (!raw) return "Sin rol";
+  return raw.charAt(0).toUpperCase() + raw.slice(1).toLowerCase();
+}

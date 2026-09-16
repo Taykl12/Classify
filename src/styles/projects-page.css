@@ -1,4 +1,4 @@
-.projects-page__hero {
+﻿.projects-page__hero {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -49,7 +49,7 @@
   min-height: var(--touch-min);
   padding: 0 var(--space-lg);
   border: 1px solid var(--color-border);
-  border-radius: 0;
+  border-radius: var(--radius-md);
   background: var(--color-surface);
   color: var(--color-ink);
   font-size: var(--font-size-body);
@@ -75,7 +75,7 @@
 
 .projects-panel__action-btn--primary {
   background: var(--color-primary);
-  color: var(--color-on-primary);
+  color: var(--color-on-accent);
   border-color: var(--color-primary);
 }
 
@@ -95,7 +95,7 @@
   }
 
   .projects-page__hero-title {
-    font-size: 1.875rem;
+    font-size: var(--font-size-3xl);
   }
 
   .projects-panel__toolbar {

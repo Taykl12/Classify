@@ -1,4 +1,4 @@
-﻿import type { ReactNode } from "react";
+import type { ReactNode } from "react";
 import {
   BookOpen,
   CalendarClock,
@@ -245,10 +245,7 @@ export function Sidebar() {
         ))}
       </nav>
       <div className="sidebar__footer-block sidebar__nav" aria-label="Cuenta">
-        <ThemeToggleButton
-          className="sidebar__nav-item theme-toggle theme-toggle--sidebar"
-          collapsed={collapsed}
-        />
+        <ThemeToggleButton className="sidebar__nav-item theme-toggle theme-toggle--sidebar" />
         {FOOTER_NAV.map((item) => (
           <NavItemRow
             key={item.id}

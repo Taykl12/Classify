@@ -1,4 +1,4 @@
-.pending-table-wrapper {
+﻿.pending-table-wrapper {
   width: 100%;
   overflow-x: auto;
   border: 1px solid var(--color-border);
@@ -62,9 +62,9 @@
 
 .pending-badge {
   display: inline-block;
-  padding: 4px 12px;
-  border-radius: 0;
-  font-size: 0.875rem;
+  padding: var(--space-xs) 12px;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
   font-weight: 700;
   line-height: 1.4;
 }
@@ -101,7 +101,7 @@
   min-height: var(--touch-min);
   padding: 0 var(--space-md);
   border: 1px solid var(--color-border);
-  border-radius: 0;
+  border-radius: var(--radius-md);
   background: var(--color-surface);
   color: var(--color-primary);
   font-size: var(--font-size-body);
@@ -129,7 +129,7 @@
   text-align: center;
   color: var(--color-ink-muted);
   background: var(--color-surface);
-  border-radius: 0;
+  border-radius: var(--radius-md);
   border: 1px solid var(--color-border);
 }
 
@@ -142,7 +142,7 @@
     display: block;
     margin-bottom: var(--space-md);
     border: 1px solid var(--color-border);
-    border-radius: 0;
+    border-radius: var(--radius-md);
   }
 
   .pending-table tbody td {
@@ -150,7 +150,7 @@
     justify-content: space-between;
     align-items: center;
     padding: var(--space-sm) var(--space-md);
-    border-radius: 0;
+    border-radius: var(--radius-md);
     text-align: left;
     border-bottom: 1px solid var(--color-border);
   }
@@ -169,7 +169,7 @@
 
   .pending-table tbody td:last-child {
     justify-content: flex-end;
-    border-radius: 0;
+    border-radius: var(--radius-md);
   }
 
   .pending-table__action {

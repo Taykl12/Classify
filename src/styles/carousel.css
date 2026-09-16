@@ -1,4 +1,4 @@
-.carousel {
+﻿.carousel {
   position: relative;
   display: flex;
   align-items: center;
@@ -21,7 +21,7 @@
   width: var(--touch-min);
   height: var(--touch-min);
   border: 1px solid var(--color-border);
-  border-radius: 0;
+  border-radius: var(--radius-md);
   background: var(--color-surface);
   color: var(--color-ink);
   box-shadow: var(--shadow-soft);
@@ -106,10 +106,10 @@
   min-height: 36px;
   padding: 0 var(--space-md);
   border: 1px solid var(--color-border);
-  border-radius: 0;
+  border-radius: var(--radius-md);
   background: var(--color-panel);
   color: var(--color-primary-accent);
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   font-weight: 700;
   transition: background-color 0.2s ease, border-color 0.2s ease;
 }
@@ -126,14 +126,14 @@
 
 .project-card__title {
   margin: 0;
-  font-size: 1.125rem;
+  font-size: var(--font-size-lg);
   font-weight: 700;
   color: var(--color-ink);
 }
 
 .project-card__meta {
   margin: 0;
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   color: var(--color-ink-muted);
 }
 

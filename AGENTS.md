@@ -56,7 +56,7 @@ server/            Express backend
   src/routes/      auth.ts, projects.ts, dashboard.ts, users.ts
   src/lib/         authUser.ts, mappers.ts, projectAccess.ts, projectMembers.ts, projectOwner.ts, roles.ts
 
-supabase/migrations/  7 SQL migrations (001–007)
+supabase/migrations/  19 SQL migrations (001–019)
 ```
 
 ## API conventions
@@ -86,6 +86,7 @@ supabase/migrations/  7 SQL migrations (001–007)
 | Create | Any authenticated user (becomes owner) |
 | Edit name/desc/status/members | **Owner only** |
 | Toggle `anteproyecto_validado` | **Owner with `profesor` role only** (checked in API + UI) |
+| Assign grades per member | **Assigned professor, admin, or owner with `profesor` role** (`PUT /api/projects/:id/calificaciones`) |
 | Delete | **Owner only** |
 | Bulk delete | **Owner only** (sends `{ ids: [] }` to `DELETE /api/projects/bulk`) |
 | Toggle favorite | **Owner only** (`PATCH /api/projects/:id/favorite`) |

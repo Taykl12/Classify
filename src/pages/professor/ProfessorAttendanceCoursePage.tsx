@@ -3,7 +3,6 @@ import { ArrowLeft, CalendarClock } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
 import { AttendanceModal } from "../../components/professor/AttendanceModal";
 import { AttendanceSummaryModal } from "../../components/professor/AttendanceSummaryModal";
-import { DashboardLayout } from "../../components/layout/DashboardLayout";
 import { apiFetchWithRetry } from "../../lib/api";
 import {
   courseOrientationLabel,
@@ -57,7 +56,7 @@ export default function ProfessorAttendanceCoursePage() {
   }, [loadData]);
 
   return (
-    <DashboardLayout>
+    <>
       <Link to={ROUTES.PROFESSOR_ATTENDANCE} className="professor-back-link">
         <ArrowLeft size={18} aria-hidden />
         Volver a Asistencia
@@ -171,6 +170,6 @@ export default function ProfessorAttendanceCoursePage() {
           />
         </>
       ) : null}
-    </DashboardLayout>
+    </>
   );
 }

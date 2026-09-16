@@ -5,7 +5,9 @@
   border: none;
   font: inherit;
   cursor: pointer;
-  transition: background-color 0.2s ease, transform 0.15s ease;
+  transition:
+    background-color var(--motion-duration-fast) var(--motion-ease-standard),
+    transform 0.15s ease;
 }
 
 .theme-toggle:focus-visible {
@@ -16,6 +18,10 @@
 .theme-toggle__label {
   font-weight: 700;
   white-space: nowrap;
+  overflow: hidden;
+  transition:
+    opacity var(--motion-duration-fast) var(--motion-ease-standard),
+    max-width var(--motion-duration-label) var(--motion-ease-smooth);
 }
 
 .theme-toggle--sidebar {
@@ -27,6 +33,26 @@
   color: var(--color-ink);
   font-size: var(--font-size-body);
   text-align: left;
+  /* Mismas transiciones que el resto de ítems del sidebar: antes no tenía ninguna. */
+  transition:
+    background-color var(--motion-duration-fast) var(--motion-ease-standard),
+    gap var(--motion-duration-panel) var(--motion-ease-smooth),
+    width var(--motion-duration-panel) var(--motion-ease-smooth),
+    min-width var(--motion-duration-panel) var(--motion-ease-smooth),
+    min-height var(--motion-duration-panel) var(--motion-ease-smooth),
+    padding var(--motion-duration-panel) var(--motion-ease-smooth);
+}
+
+/* gap 0 en colapsado: con el label a ancho 0, un gap fijo descentraría el ícono. */
+.sidebar--collapsed .theme-toggle--sidebar {
+  gap: 0;
+}
+
+/* El desfase va solo en expandido: al cerrar, el texto se oculta al instante. */
+.sidebar--expanded .theme-toggle--sidebar .theme-toggle__label {
+  opacity: 1;
+  max-width: 140px;
+  transition-delay: 130ms;
 }
 
 .theme-toggle--sidebar:hover {
@@ -34,18 +60,22 @@
 }
 
 .sidebar--collapsed .theme-toggle--sidebar {
-  justify-content: center;
   padding: var(--space-sm);
-  width: 36px;
-  min-width: 36px;
-  min-height: 36px;
+  width: var(--touch-min);
+  min-width: var(--touch-min);
+  min-height: var(--touch-min);
 }
 
 .sidebar--collapsed .theme-toggle--sidebar .theme-toggle__label {
+  opacity: 0;
+  max-width: 0;
+}
+
+/* En la barra de auth el botón es solo ícono (44px): el label queda oculto siempre. */
+.auth-page .theme-toggle--auth .theme-toggle__label {
   position: absolute;
   width: 1px;
   height: 1px;
-  overflow: hidden;
   clip: rect(0, 0, 0, 0);
 }
 
@@ -61,12 +91,12 @@
   width: 44px;
   height: 44px;
   padding: 0;
-  border-radius: 0;
-  background: var(--auth-pill-bg, #f2f2f2);
-  color: var(--auth-ink, #111827);
+  border-radius: var(--radius-md);
+  background: var(--color-neutral-bg);
+  color: var(--color-ink);
 }
 
 .auth-page .theme-toggle--auth:hover {
-  background: var(--auth-pill-hover, lightblue);
+  background: var(--color-panel);
   transform: scale(1.05);
 }

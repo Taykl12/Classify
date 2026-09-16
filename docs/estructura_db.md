@@ -446,6 +446,7 @@ Esta sección documenta el **estado real** de la base desplegada para la aplicac
 | Carrusel inicio | `grupos_proyectos` (`es_favorito = true`) + conteo en `tareas_grupo` |
 | Pendientes | `tareas_grupo` + join `grupos_proyectos` |
 | Invitar integrantes | `grupo_estudiante` + RPC `find_user_id_by_email`, `search_usuarios_for_invite` |
+| Calificaciones por integrante | `calificaciones_proyecto` (acceso vía service role desde Express) |
 
 ### 6.3 Migraciones aplicadas (`supabase/migrations/`)
 
@@ -464,6 +465,7 @@ Esta sección documenta el **estado real** de la base desplegada para la aplicac
 | 009 | `009_search_usuarios_dni.sql` | RPC `search_usuarios_for_invite` ampliada: devuelve `dni` y busca por DNI, email, nombre o apellido. |
 | 016 | `016_usuarios_huella_id.sql` | Columna `usuarios.huella_id` (INT, UNIQUE, 0–199) para vincular slot del sensor AS608. |
 | 018 | `018_huellas_table.sql` | Tabla `huellas`: respaldo durable del template AS608 (base64) por `id_usuario`. |
+| 019 | `019_calificaciones_proyecto.sql` | Tabla `calificaciones_proyecto` (nota final 0–10 por integrante). RLS habilitado sin policies; acceso vía `createAdminClient()`. |
 
 ### Tabla 19: `huellas` (respaldo de templates biométricos)
 
@@ -479,6 +481,23 @@ Esta sección documenta el **estado real** de la base desplegada para la aplicac
 | `fecha_actualizacion` | TIMESTAMPTZ | Última actualización (enrolamiento o reasignación). |
 
 **RLS:** habilitado sin policies — acceso solo vía `createAdminClient()` (service role) desde Express.
+
+### Tabla 20: `calificaciones_proyecto` (nota final por integrante)
+
+**Propósito:** calificación final individual de cada integrante del proyecto (pestaña **Calificaciones** de `/proyectos/:id/config`).
+
+| Campo | Tipo / restricciones | Descripción |
+|-------|----------------------|-------------|
+| `id_calificacion` | BIGINT, PK, identity | Identificador. |
+| `id_grupo` | INT, FK → `grupos_proyectos(id_grupo)`, ON DELETE CASCADE | Proyecto. |
+| `id_usuario` | UUID, FK → `usuarios(id_usuario)`, ON DELETE CASCADE | Alumno calificado. |
+| `nota` | NUMERIC(4,2), NULL, CHECK 0–10 | Nota final (`NULL` = sin nota). |
+| `id_calificado_por` | UUID, FK → `usuarios(id_usuario)`, ON DELETE SET NULL | Profesor/admin que cargó la nota. |
+| `creado_en` / `actualizado_en` | TIMESTAMPTZ | Alta y última modificación. |
+
+`UNIQUE (id_grupo, id_usuario)` — el API hace upsert con `onConflict: "id_grupo,id_usuario"`.
+
+**RLS:** habilitado **sin policies** (deny-by-default para `anon`/`authenticated`) — acceso solo vía `createAdminClient()` (service role) desde Express, igual que `huellas`. Los permisos de negocio se validan en el API (`assertCanAccessGroup` + `canGradeProject`).
 
 **Sincronización con `usuarios.huella_id`:** `huella_id` indica el slot actualmente cargado en el sensor físico; `huellas` es el respaldo durable. Ambos se actualizan en enrolamiento, restauración y se limpian al vaciar sensor o quitar huella.
 
@@ -512,6 +531,7 @@ Todas con `GRANT EXECUTE` a `authenticated` (revocado de `PUBLIC`).
 | `grupos_proyectos` | Dueño **o** integrante en `grupo_estudiante` | INSERT cualquier autenticado; UPDATE/DELETE solo dueño |
 | `grupo_estudiante` | Dueño del grupo **o** propia fila (`id_usuario = auth.uid()`) | INSERT/DELETE solo dueño |
 | `tareas_grupo` | Dueño del proyecto **o** integrante del grupo | *(según políticas base del proyecto académico)* |
+| `calificaciones_proyecto` | *(nadie por RLS — solo service role)* | *(solo service role)* |
 
 **Reglas de negocio en API (además de RLS):**
 
@@ -532,6 +552,7 @@ Todas con `GRANT EXECUTE` a `authenticated` (revocado de `PUBLIC`).
 | `anteproyecto_validado` | Calificaciones — checkbox (solo profesor) |
 | `documentos` (JSONB) | Documentaciones — lista con botón Abrir |
 | `grupo_estudiante` + RPC | Equipo — integrantes por email |
+| `calificaciones_proyecto` | Calificaciones — nota final por integrante (0–10) |
 
 ### 6.7 Formato `documentos` (JSONB)
 
@@ -560,6 +581,7 @@ Se reemplaza la tabla `Documentacion_Aprobacion` para el flujo actual de la app 
 | 2026 | Búsqueda de integrantes por DNI en `search_usuarios_for_invite`. |
 | 2026 | Columna `usuarios.huella_id` + flujo de asignación de huella (admin + ESP32 + AS608). |
 | 2026 | Tabla `huellas` + vaciar/restaurar sensor AS608 desde `/admin/esp32`. |
+| 2026 | Tabla `calificaciones_proyecto`: nota final individual por integrante (acceso vía service role). |
 
 ### 6.8 Flujo de asignación de huella (app web + ESP32)
 

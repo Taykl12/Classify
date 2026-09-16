@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { BookOpen, Cpu, GraduationCap, Layers, Shield, Users } from "lucide-react";
 import { Link } from "react-router-dom";
-import { DashboardLayout } from "../../components/layout/DashboardLayout";
 import { apiFetchWithRetry } from "../../lib/api";
 import { ROUTES } from "../../routes";
 import type { AdminSummary } from "../../types/admin";
@@ -64,7 +63,7 @@ export default function AdminDashboardPage() {
   }, []);
 
   return (
-    <DashboardLayout>
+    <>
       <header className="admin-hero">
         <Shield size={52} strokeWidth={2.25} className="admin-hero__icon" aria-hidden />
         <div>
@@ -110,6 +109,6 @@ export default function AdminDashboardPage() {
           </Link>
         ))}
       </section>
-    </DashboardLayout>
+    </>
   );
 }
