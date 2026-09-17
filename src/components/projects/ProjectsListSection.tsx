@@ -78,7 +78,18 @@ export function ProjectsListSection({
         </thead>
         <tbody>
           {items.map((item) => (
-            <tr key={item.id} className={selectedIds.has(item.id) ? 'projects-table__row--selected' : undefined}>
+            <tr
+              key={item.id}
+              className={`projects-table__row${
+                selectedIds.has(item.id) ? ' projects-table__row--selected' : ''
+              }`}
+              onClick={(event) => {
+                // Los controles de la fila (checkbox, favorito, Editar) manejan su
+                // propia accion; sin este guard el clic burbujearia y se cancelaria.
+                if ((event.target as HTMLElement).closest('button, a, input, label')) return;
+                onToggleSelect(item.id);
+              }}
+            >
               <td className="projects-table__cell projects-table__cell--check" data-label="Seleccionar">
                 <input
                   type="checkbox"

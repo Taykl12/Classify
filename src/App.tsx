@@ -28,10 +28,16 @@ import RegisterPage from "./pages/RegisterPage";
 import { ROUTES } from "./routes";
 
 /**
- * Las rutas privadas viven bajo un layout route sin path: `DashboardLayout` se
- * monta UNA vez y sobrevive a la navegacion (las paginas ya no lo envuelven).
- * Si cada pagina montara su propio layout, el Sidebar se remontaria en cada
- * cambio de seccion y sus transiciones no tendrian estado previo que animar.
+ * TODAS las rutas privadas viven bajo UN SOLO layout route sin path.
+ *
+ * Es deliberado: con un layout route por rol (admin / profesor / alumno), cruzar
+ * de un grupo a otro —por ejemplo del panel del profesor a "Proyectos"— haria que
+ * React desmonte y remonte el `DashboardLayout`, recreando el Sidebar. Un elemento
+ * recien montado nace ya en su estado activo: no tiene estado previo que animar,
+ * asi que las transiciones de la seleccion no corren.
+ *
+ * La autorizacion por rol NO necesita layouts separados: cada ruta privada
+ * envuelve su pagina con la guarda que corresponda (ProfessorRoute / AdminRoute).
  */
 function App() {
   return (
@@ -40,35 +46,6 @@ function App() {
         <BrowserRouter>
           <Routes>
             <Route path={ROUTES.HOME} element={<HomeRedirect />} />
-
-            <Route
-              element={
-                <AdminRoute>
-                  <DashboardLayout />
-                </AdminRoute>
-              }
-            >
-              <Route path={ROUTES.ADMIN} element={<AdminDashboardPage />} />
-              <Route path={ROUTES.ADMIN_USERS} element={<AdminUsersPage />} />
-              <Route path={ROUTES.ADMIN_COURSES} element={<AdminCursosPage />} />
-              <Route path={ROUTES.ADMIN_SUBJECTS} element={<AdminMateriasPage />} />
-              <Route path={ROUTES.ADMIN_PROJECTS} element={<AdminProyectosPage />} />
-              <Route path={ROUTES.ADMIN_ESP32} element={<AdminEsp32Page />} />
-            </Route>
-
-            <Route
-              element={
-                <ProfessorRoute>
-                  <DashboardLayout />
-                </ProfessorRoute>
-              }
-            >
-              <Route path={ROUTES.PROFESSOR} element={<ProfessorDashboardPage />} />
-              <Route path={ROUTES.PROFESSOR_COURSES} element={<ProfessorCoursesPage />} />
-              <Route path="/profesor/cursos/:courseId" element={<ProfessorCourseDetailPage />} />
-              <Route path={ROUTES.PROFESSOR_ATTENDANCE} element={<ProfessorAttendancePage />} />
-              <Route path="/profesor/asistencia/:courseId" element={<ProfessorAttendanceCoursePage />} />
-            </Route>
 
             <Route
               element={
@@ -82,6 +59,96 @@ function App() {
               <Route path={ROUTES.CALENDARY} element={<CalendaryPage />} />
               <Route path={ROUTES.PREFERENCES} element={<PreferencesPage />} />
               <Route path="/proyectos/:projectId/config" element={<ProjectConfigPage />} />
+
+              <Route
+                path={ROUTES.PROFESSOR}
+                element={
+                  <ProfessorRoute>
+                    <ProfessorDashboardPage />
+                  </ProfessorRoute>
+                }
+              />
+              <Route
+                path={ROUTES.PROFESSOR_COURSES}
+                element={
+                  <ProfessorRoute>
+                    <ProfessorCoursesPage />
+                  </ProfessorRoute>
+                }
+              />
+              <Route
+                path="/profesor/cursos/:courseId"
+                element={
+                  <ProfessorRoute>
+                    <ProfessorCourseDetailPage />
+                  </ProfessorRoute>
+                }
+              />
+              <Route
+                path={ROUTES.PROFESSOR_ATTENDANCE}
+                element={
+                  <ProfessorRoute>
+                    <ProfessorAttendancePage />
+                  </ProfessorRoute>
+                }
+              />
+              <Route
+                path="/profesor/asistencia/:courseId"
+                element={
+                  <ProfessorRoute>
+                    <ProfessorAttendanceCoursePage />
+                  </ProfessorRoute>
+                }
+              />
+
+              <Route
+                path={ROUTES.ADMIN}
+                element={
+                  <AdminRoute>
+                    <AdminDashboardPage />
+                  </AdminRoute>
+                }
+              />
+              <Route
+                path={ROUTES.ADMIN_USERS}
+                element={
+                  <AdminRoute>
+                    <AdminUsersPage />
+                  </AdminRoute>
+                }
+              />
+              <Route
+                path={ROUTES.ADMIN_COURSES}
+                element={
+                  <AdminRoute>
+                    <AdminCursosPage />
+                  </AdminRoute>
+                }
+              />
+              <Route
+                path={ROUTES.ADMIN_SUBJECTS}
+                element={
+                  <AdminRoute>
+                    <AdminMateriasPage />
+                  </AdminRoute>
+                }
+              />
+              <Route
+                path={ROUTES.ADMIN_PROJECTS}
+                element={
+                  <AdminRoute>
+                    <AdminProyectosPage />
+                  </AdminRoute>
+                }
+              />
+              <Route
+                path={ROUTES.ADMIN_ESP32}
+                element={
+                  <AdminRoute>
+                    <AdminEsp32Page />
+                  </AdminRoute>
+                }
+              />
             </Route>
 
             <Route path={ROUTES.LOGIN} element={<LoginPage />} />

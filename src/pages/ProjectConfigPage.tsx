@@ -399,27 +399,37 @@ export default function ProjectConfigPage() {
             <h2 className="project-config__card-title">Hitos y Estado</h2>
             <p className="project-config__label">Estado Actual</p>
             <LockNotice locked={!scopeEditable && isOwner} />
-            <div className="project-config__status-pill">
-              <select
-                value={form.status}
-                onChange={(e) =>
-                  patchForm({ status: e.target.value as "Abierto" | "Cerrado" })
-                }
-                disabled={!scopeEditable}
+            <div className="project-config__status">
+              <span
+                className={`project-config__status-dot project-config__status-dot--${
+                  form.status === "Abierto" ? "open" : "closed"
+                }`}
+                aria-hidden
+              />
+              {/* Control segmentado en vez de <select>: el estado es binario y el
+                  desplegable nativo no se puede estilizar. */}
+              <div
+                className="project-config__status-pill"
+                role="group"
                 aria-label="Estado del proyecto"
-                style={{
-                  border: "none",
-                  background: "transparent",
-                  font: "inherit",
-                  fontWeight: 700,
-                  color: "inherit",
-                  flex: 1,
-                }}
               >
-                <option value="Abierto">Abierto</option>
-                <option value="Cerrado">Cerrado</option>
-              </select>
-              <span className="project-config__status-dot" aria-hidden />
+                {(["Abierto", "Cerrado"] as const).map((option) => (
+                  <button
+                    key={option}
+                    type="button"
+                    className={`project-config__status-option${
+                      form.status === option
+                        ? " project-config__status-option--active"
+                        : ""
+                    }`}
+                    onClick={() => patchForm({ status: option })}
+                    disabled={!scopeEditable}
+                    aria-pressed={form.status === option}
+                  >
+                    {option}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
           <div className="project-config__card">
@@ -457,7 +467,7 @@ export default function ProjectConfigPage() {
           </nav>
 
           {tab === "alcance" ? (
-            <div>
+            <div className="project-config__panel">
               <LockNotice locked={!scopeEditable && isOwner} />
               <label className="project-config__field">
                 <span className="project-config__label">Titulo del Proyecto</span>
@@ -491,7 +501,7 @@ export default function ProjectConfigPage() {
           ) : null}
 
           {tab === "equipo" ? (
-            <div>
+            <div className="project-config__panel">
               <LockNotice locked={!teamEditable && isOwner} />
               <div className="project-config__team-grid">
                 {sortedMembers.map((email) => (
@@ -506,7 +516,7 @@ export default function ProjectConfigPage() {
               </div>
               {teamEditable ? (
                 <>
-                  <div className="project-config__field" style={{ marginTop: "1.5rem" }}>
+                  <div className="project-config__field project-config__field--spaced">
                     <span className="project-config__label">Agregar integrantes</span>
                     <EmailChipInput
                       emails={form.memberEmails}
@@ -527,7 +537,7 @@ export default function ProjectConfigPage() {
           ) : null}
 
           {tab === "calificaciones" ? (
-            <div>
+            <div className="project-config__panel">
               <div className="project-config__field">
                 <span className="project-config__label">Aprobacion del Anteproyecto</span>
                 <label className="project-config__checkbox-row">
@@ -638,7 +648,7 @@ export default function ProjectConfigPage() {
           ) : null}
 
           {tab === "documentaciones" ? (
-            <div>
+            <div className="project-config__panel">
               <LockNotice locked={!documentationEditable && isOwner} />
               <div className="project-config__field">
                 <span className="project-config__label">Agregar Documento:</span>

@@ -1,4 +1,4 @@
-﻿.projects-table-wrapper {
+.projects-table-wrapper {
   width: 100%;
   overflow-x: auto;
   border: 1px solid var(--color-border);
@@ -28,6 +28,8 @@
 .projects-table tbody tr {
   background: var(--color-surface);
   border-bottom: 1px solid var(--color-border);
+  /* Toda la fila es clickeable para seleccionar (el checkbox queda como indicador). */
+  cursor: pointer;
 }
 
 .projects-table tbody tr:nth-child(even) {
@@ -42,6 +44,12 @@
   padding: 12px var(--space-lg);
   vertical-align: middle;
   font-size: var(--font-size-body);
+  transition: background-color var(--motion-duration-fast) var(--motion-ease-standard);
+}
+
+/* Hover sobre la fila: no aplica a la seleccionada, que ya tiene su propio color. */
+.projects-table tbody tr:not(.projects-table__row--selected):hover td {
+  background: var(--color-surface-2);
 }
 
 .projects-table tbody td:last-child {

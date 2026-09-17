@@ -497,13 +497,26 @@ router.delete("/bulk", requireAuth, async (req, res) => {
       return;
     }
     await supabase.from("grupo_estudiante").delete().in("id_grupo", toDelete);
-    await supabase.from("proyecto_profesor").delete().eq("id_profesor", userId).in("id_grupo", toDelete);
-    const { error } = await supabase.from("grupos_proyectos").delete().in("id_grupo", toDelete);
+    // El proyecto se borra ANTES del vínculo del dueño: la policy RLS de
+    // grupos_proyectos exige `proyecto_profesor` para autorizar el DELETE.
+    // Si no se borró ninguna fila el DELETE falló: hay que devolver error, no ok.
+    const { data: borrados, error } = await supabase
+      .from("grupos_proyectos")
+      .delete()
+      .in("id_grupo", toDelete)
+      .select("id_grupo");
     if (error) {
       res.status(400).json({ error: error.message });
       return;
     }
-    res.json({ deleted: toDelete.map(String) });
+    const deleted = (borrados ?? []).map((row) => String(row.id_grupo));
+    if (deleted.length === 0) {
+      res.status(403).json({ error: "No se pudieron eliminar los proyectos" });
+      return;
+    }
+    // El vínculo cae por ON DELETE CASCADE; se limpia igual por si acaso.
+    await supabase.from("proyecto_profesor").delete().eq("id_profesor", userId).in("id_grupo", toDelete);
+    res.json({ deleted });
   } catch (e) {
     res.status(500).json({ error: e instanceof Error ? e.message : "Error interno" });
   }
@@ -520,12 +533,24 @@ router.delete("/:id", requireAuth, async (req, res) => {
     const supabase = getUserSupabase(req as AuthedRequest);
     await assertIsProjectOwner(supabase, userId, idGrupo);
     await supabase.from("grupo_estudiante").delete().eq("id_grupo", idGrupo);
-    await supabase.from("proyecto_profesor").delete().eq("id_profesor", userId).eq("id_grupo", idGrupo);
-    const { error } = await supabase.from("grupos_proyectos").delete().eq("id_grupo", idGrupo);
+    // El proyecto se borra ANTES del vínculo del dueño: la policy RLS de
+    // grupos_proyectos exige `proyecto_profesor` para autorizar el DELETE.
+    // Si no se borró ninguna fila el DELETE falló (antes devolvía ok:true igual).
+    const { data: borrados, error } = await supabase
+      .from("grupos_proyectos")
+      .delete()
+      .eq("id_grupo", idGrupo)
+      .select("id_grupo");
     if (error) {
       res.status(400).json({ error: error.message });
       return;
     }
+    if (!borrados || borrados.length === 0) {
+      res.status(403).json({ error: "No se pudo eliminar el proyecto" });
+      return;
+    }
+    // El vínculo cae por ON DELETE CASCADE; se limpia igual por si acaso.
+    await supabase.from("proyecto_profesor").delete().eq("id_profesor", userId).eq("id_grupo", idGrupo);
     res.json({ ok: true });
   } catch (e) {
     const status = (e as Error & { status?: number }).status ?? 500;

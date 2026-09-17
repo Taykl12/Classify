@@ -1,4 +1,4 @@
-﻿.project-config__hero {
+.project-config__hero {
   display: flex;
   flex-wrap: wrap;
   align-items: flex-start;
@@ -99,25 +99,75 @@
   color: var(--color-ink);
 }
 
-.project-config__status-pill {
-  display: inline-flex;
+.project-config__status {
+  display: flex;
   align-items: center;
   gap: var(--space-sm);
-  padding: 10px 16px;
-  border-radius: var(--radius-md);
-  background: var(--color-neutral-bg);
-  color: var(--color-ink);
-  font-weight: 700;
-  border: 1px solid var(--color-border);
-  width: 100%;
-  justify-content: space-between;
 }
 
+/* Control segmentado: riel tipo input con dos opciones. */
+.project-config__status-pill {
+  display: flex;
+  flex: 1;
+  gap: var(--space-xs);
+  padding: var(--space-xs);
+  border-radius: var(--radius-md);
+  background: var(--color-modal-input);
+  border: 1px solid var(--color-border);
+}
+
+.project-config__status-option {
+  flex: 1;
+  min-height: 36px;
+  padding: var(--space-sm) var(--space-md);
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-ink-muted);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    background-color var(--motion-duration-select) var(--motion-ease-smooth),
+    color var(--motion-duration-select) var(--motion-ease-smooth);
+}
+
+.project-config__status-option:hover:not(:disabled):not(.project-config__status-option--active) {
+  background: var(--color-neutral-bg);
+  color: var(--color-ink);
+}
+
+.project-config__status-option--active {
+  background: var(--color-primary);
+  color: var(--color-on-accent);
+}
+
+.project-config__status-option:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.project-config__status-option:focus-visible {
+  outline: 2px solid var(--color-primary-accent);
+  outline-offset: 2px;
+}
+
+/* Punto de estado: el color comunica el valor (verde abierto / gris cerrado). */
 .project-config__status-dot {
   width: 10px;
   height: 10px;
-  border-radius: var(--radius-md);
-  background: var(--color-primary-accent);
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--color-warning-solid);
+  transition: background-color var(--motion-duration-select) var(--motion-ease-smooth);
+}
+
+.project-config__status-dot--open {
+  background: var(--color-success-solid);
+}
+
+.project-config__status-dot--closed {
+  background: var(--color-ink-muted);
 }
 
 .project-config__textarea {
@@ -165,6 +215,20 @@
   cursor: pointer;
   border-bottom: 3px solid transparent;
   margin-bottom: -2px;
+  /* Los botones persisten entre pestanas, asi que el subrayado y el color se
+     traspasan por transicion (el que sale se apaga mientras el que entra se enciende). */
+  transition:
+    color var(--motion-duration-select) var(--motion-ease-smooth),
+    border-bottom-color var(--motion-duration-select) var(--motion-ease-smooth);
+}
+
+.project-config__tab:hover {
+  color: var(--color-ink);
+}
+
+.project-config__tab:focus-visible {
+  outline: 2px solid var(--color-primary-accent);
+  outline-offset: 2px;
 }
 
 .project-config__tab--active {
@@ -172,11 +236,34 @@
   border-bottom-color: var(--color-ink);
 }
 
+/* El panel SI se monta y desmonta al cambiar de pestana, asi que su entrada va con
+   keyframes: una transicion no tendria estado previo que animar. */
+.project-config__panel {
+  animation: project-config-panel-enter var(--motion-duration-label)
+    var(--motion-ease-smooth) both;
+}
+
+@keyframes project-config-panel-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .project-config__field {
   display: flex;
   flex-direction: column;
   gap: var(--space-sm);
   margin-bottom: var(--space-md);
+}
+
+/* Separación extra para campos que siguen a un bloque (antes era un style inline). */
+.project-config__field--spaced {
+  margin-top: var(--space-lg);
 }
 
 .project-config__label {

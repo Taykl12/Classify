@@ -96,7 +96,7 @@
   /* ===== Movimiento ===== */
   --motion-duration-fast: 160ms;
   --motion-duration-base: 240ms;
-  --motion-duration-select: 800ms;
+  --motion-duration-select: 300ms;
   --motion-duration-panel: 520ms;
   --motion-duration-label: 380ms;
   --motion-ease-standard: cubic-bezier(0.4, 0, 0.2, 1);

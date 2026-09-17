@@ -385,3 +385,12 @@ a.sidebar__nav-item {
 .sidebar--collapsed .sidebar__nav-item::before {
   display: none;
 }
+
+/* El label activo no solo cambia de color: se desplaza. El movimiento se percibe
+   mucho mejor que un cambio de matiz en un texto de 14px. Solo en expandido, para
+   no pisar el translateX del estado colapsado. */
+.sidebar--expanded .sidebar__nav-item--active .sidebar__label {
+  transform: translateX(4px);
+  /* orden = color, opacity, max-width, transform: el desplazamiento entra sin delay */
+  transition-delay: 0ms, 0ms, 130ms, 0ms;
+}
