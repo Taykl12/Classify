@@ -6,7 +6,7 @@ import {
   startSession,
 } from "../lib/fingerprintState.js";
 import { getNextFreeSlot } from "../lib/fingerprintSlots.js";
-import { userIsAlumno } from "../lib/roles.js";
+import { userIsProfessor } from "../lib/roles.js";
 import { requireAdmin } from "../middleware/admin.js";
 import { requireAuth } from "../middleware/auth.js";
 
@@ -43,10 +43,10 @@ async function assertUserExists(userId: string): Promise<void> {
 async function assertUserCanHaveHuella(userId: string): Promise<void> {
   await assertUserExists(userId);
   const supabase = createAdminClient();
-  const isAlumno = await userIsAlumno(supabase, userId);
-  if (!isAlumno) {
+  const isProfesor = await userIsProfessor(supabase, userId);
+  if (!isProfesor) {
     throw Object.assign(
-      new Error("Solo los usuarios con rol Alumno pueden tener huella asignada"),
+      new Error("Solo los usuarios con rol Profesor pueden tener huella asignada"),
       { status: 400 }
     );
   }

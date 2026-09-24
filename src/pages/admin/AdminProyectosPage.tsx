@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react";
-import { Layers, Search, Users } from "lucide-react";
+import { BadgeCheck, Circle, Layers, Search, Users } from "lucide-react";
 import { AdminAssignmentList } from "../../components/admin/AdminAssignmentList";
 import { AdminModal } from "../../components/admin/AdminModal";
 import { ApiError, apiFetch, apiFetchWithRetry } from "../../lib/api";
@@ -262,15 +262,29 @@ export default function AdminProyectosPage() {
                       onClick={() => setSelectedProjectId(project.id)}
                       aria-pressed={active}
                     >
-                      <span className="admin-course-card__badge">
-                        {project.status === "Cerrado" ? "C" : "A"}
+                      <span className="admin-course-card__top">
+                        <span
+                          className={`admin-course-card__badge admin-course-card__badge--${
+                            project.status === "Cerrado" ? "closed" : "open"
+                          }`}
+                        >
+                          {project.status === "Cerrado" ? "Cerrado" : "Abierto"}
+                        </span>
+                        <span
+                          className="admin-course-card__meta"
+                          aria-label={`${project.memberCount} integrantes`}
+                        >
+                          <Users size={14} aria-hidden />
+                          {project.memberCount}
+                        </span>
                       </span>
-                      <strong>{project.name}</strong>
-                      <small>{project.ownerEmail ?? "Sin dueño"}</small>
-                      <span className="admin-course-card__meta">
-                        <Users size={14} aria-hidden />
-                        {project.memberCount} integrantes
-                      </span>
+                      <strong className="admin-course-card__name">{project.name}</strong>
+                      <small
+                        className="admin-course-card__owner"
+                        title={project.ownerEmail ?? "Sin dueño"}
+                      >
+                        {project.ownerEmail ?? "Sin dueño"}
+                      </small>
                     </button>
                   );
                 })}
@@ -364,18 +378,39 @@ export default function AdminProyectosPage() {
                         <option value="Cerrado">Cerrado</option>
                       </select>
                     </label>
-                    <label className="project-config__checkbox-row">
-                      <input
-                        type="checkbox"
-                        checked={projectForm.preprojectValidated}
-                        onChange={(e) =>
-                          setProjectForm({
-                            ...projectForm,
-                            preprojectValidated: e.target.checked,
-                          })
-                        }
-                      />
-                      Anteproyecto validado
+                    <label
+                      className={`project-config__toggle${
+                        projectForm.preprojectValidated ? " project-config__toggle--ok" : ""
+                      }`}
+                    >
+                      <span className="project-config__toggle-top">
+                        <span className="project-config__toggle-icon" aria-hidden>
+                          {projectForm.preprojectValidated ? (
+                            <BadgeCheck size={16} />
+                          ) : (
+                            <Circle size={16} />
+                          )}
+                        </span>
+                        <span className="project-config__toggle-name">
+                          Anteproyecto validado
+                        </span>
+                        <span className="project-config__switch">
+                          <input
+                            type="checkbox"
+                            checked={projectForm.preprojectValidated}
+                            onChange={(e) =>
+                              setProjectForm({
+                                ...projectForm,
+                                preprojectValidated: e.target.checked,
+                              })
+                            }
+                          />
+                          <span className="project-config__switch-track" aria-hidden />
+                        </span>
+                      </span>
+                      <span className="project-config__toggle-state">
+                        {projectForm.preprojectValidated ? "Validado" : "Sin validar"}
+                      </span>
                     </label>
                     <button
                       type="submit"

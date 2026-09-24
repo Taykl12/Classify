@@ -46,9 +46,10 @@ function userToForm(user: AdminUser): UserFormState {
   };
 }
 
-function isAlumnoUser(user: { roleId: number | null; roleLabel: string }): boolean {
-  if (user.roleId === 3) return true;
-  return user.roleLabel.trim().toLowerCase() === "alumno";
+/** La huella es exclusiva del rol Profesor (id_rol = 2). */
+function canHaveHuella(user: { roleId: number | null; roleLabel: string }): boolean {
+  if (user.roleId === 2) return true;
+  return user.roleLabel.trim().toLowerCase() === "profesor";
 }
 
 function filterUsers(users: AdminUser[], query: string): AdminUser[] {
@@ -437,19 +438,18 @@ export default function AdminUsersPage() {
                       )}
                     </td>
                     <td className="projects-table__cell projects-table__cell--actions" data-label="Acciones">
-                      <button
-                        type="button"
-                        className="projects-table__action"
-                        onClick={() => openFingerprint(item)}
-                        disabled={removingFingerprint === item.id || !isAlumnoUser(item)}
-                        title={
-                          isAlumnoUser(item)
-                            ? undefined
-                            : "Solo usuarios con rol Alumno pueden tener huella"
-                        }
-                      >
-                        {item.huellaId !== null ? "Reasignar Huella" : "Asignar Huella"}
-                      </button>
+                      {/* La huella es exclusiva de profesores: para el resto de los
+                          roles el boton no se renderiza (antes aparecia deshabilitado). */}
+                      {canHaveHuella(item) ? (
+                        <button
+                          type="button"
+                          className="projects-table__action"
+                          onClick={() => openFingerprint(item)}
+                          disabled={removingFingerprint === item.id}
+                        >
+                          {item.huellaId !== null ? "Reasignar Huella" : "Asignar Huella"}
+                        </button>
+                      ) : null}
                       {item.huellaId !== null ? (
                         <button
                           type="button"

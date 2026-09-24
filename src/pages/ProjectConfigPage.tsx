@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState, type KeyboardEvent } from "react";
-import { ArrowLeft, ExternalLink, Lock, Plus, Trash2, User } from "lucide-react";
+import { ArrowLeft, BadgeCheck, Circle, ExternalLink, Lock, Plus, Trash2, Unlock, User } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { EmailChipInput } from "../components/projects/EmailChipInput";
 import { useAuth } from "../contexts/AuthContext";
@@ -371,25 +371,48 @@ export default function ProjectConfigPage() {
 
       {canManageLocks ? (
         <section className="dashboard-panel project-config__locks" aria-label="Bloqueos por sección">
-          <h2 className="project-config__card-title">
-            <Lock size={18} aria-hidden /> Control de secciones
-          </h2>
-          {(
-            [
-              ["scope", "Alcance / Objetivo"],
-              ["documentation", "Documentación"],
-              ["team", "Equipo"],
-            ] as const
-          ).map(([key, label]) => (
-            <label key={key} className="project-config__checkbox-row">
-              <input
-                type="checkbox"
-                checked={locks[key]}
-                onChange={() => toggleLock(key)}
-              />
-              {label} {locks[key] ? "cerrada para alumnos" : "abierta"}
-            </label>
-          ))}
+          <div className="project-config__locks-head">
+            <h2 className="project-config__card-title">
+              <Lock size={18} aria-hidden /> Control de secciones
+            </h2>
+            <p className="project-config__locks-hint">
+              Cerralas para que los alumnos no puedan editarlas.
+            </p>
+          </div>
+          <div className="project-config__locks-grid">
+            {(
+              [
+                ["scope", "Alcance / Objetivo"],
+                ["documentation", "Documentación"],
+                ["team", "Equipo"],
+              ] as const
+            ).map(([key, label]) => (
+              <label
+                key={key}
+                className={`project-config__toggle${
+                  locks[key] ? " project-config__toggle--warn" : ""
+                }`}
+              >
+                <span className="project-config__toggle-top">
+                  <span className="project-config__toggle-icon" aria-hidden>
+                    {locks[key] ? <Lock size={16} /> : <Unlock size={16} />}
+                  </span>
+                  <span className="project-config__toggle-name">{label}</span>
+                  <span className="project-config__switch">
+                    <input
+                      type="checkbox"
+                      checked={locks[key]}
+                      onChange={() => toggleLock(key)}
+                    />
+                    <span className="project-config__switch-track" aria-hidden />
+                  </span>
+                </span>
+                <span className="project-config__toggle-state">
+                  {locks[key] ? "Cerrada para alumnos" : "Abierta"}
+                </span>
+              </label>
+            ))}
+          </div>
         </section>
       ) : null}
 
@@ -540,14 +563,29 @@ export default function ProjectConfigPage() {
             <div className="project-config__panel">
               <div className="project-config__field">
                 <span className="project-config__label">Aprobacion del Anteproyecto</span>
-                <label className="project-config__checkbox-row">
-                  <input
-                    type="checkbox"
-                    checked={form.preprojectValidated}
-                    onChange={(e) => patchForm({ preprojectValidated: e.target.checked })}
-                    disabled={!canApprove}
-                  />
-                  Proyecto Validado/Viable
+                <label
+                  className={`project-config__toggle${
+                    form.preprojectValidated ? " project-config__toggle--ok" : ""
+                  }`}
+                >
+                  <span className="project-config__toggle-top">
+                    <span className="project-config__toggle-icon" aria-hidden>
+                      {form.preprojectValidated ? <BadgeCheck size={16} /> : <Circle size={16} />}
+                    </span>
+                    <span className="project-config__toggle-name">Proyecto Validado/Viable</span>
+                    <span className="project-config__switch">
+                      <input
+                        type="checkbox"
+                        checked={form.preprojectValidated}
+                        onChange={(e) => patchForm({ preprojectValidated: e.target.checked })}
+                        disabled={!canApprove}
+                      />
+                      <span className="project-config__switch-track" aria-hidden />
+                    </span>
+                  </span>
+                  <span className="project-config__toggle-state">
+                    {form.preprojectValidated ? "Validado" : "Sin validar"}
+                  </span>
                 </label>
                 {!canApprove ? (
                   <p className="project-config__member-meta">

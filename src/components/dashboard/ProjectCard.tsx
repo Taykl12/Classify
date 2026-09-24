@@ -1,4 +1,4 @@
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, ListTodo } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import type { Project } from "../../types/dashboard";
 import { ROUTES } from "../../routes";
@@ -14,12 +14,20 @@ function taskLabel(count: number): string {
 
 export function ProjectCard({ project }: ProjectCardProps) {
   const navigate = useNavigate();
+  const hasPending = project.pendingTasks > 0;
 
   return (
     <article className="project-card" aria-label={project.name}>
       <div className="project-card__content">
         <h3 className="project-card__title">{project.name}</h3>
-        <p className="project-card__meta">{taskLabel(project.pendingTasks)}</p>
+        <p
+          className={`project-card__badge${
+            hasPending ? " project-card__badge--pending" : " project-card__badge--clear"
+          }`}
+        >
+          <ListTodo size={14} aria-hidden />
+          {taskLabel(project.pendingTasks)}
+        </p>
       </div>
       <div className="project-card__footer">
         <button

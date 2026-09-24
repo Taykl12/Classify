@@ -38,6 +38,7 @@ Los archivos fuente viven en `supabase/migrations/`. Este documento describe **q
 | 014 | `014_asistencias.sql` | Registro de asistencia por curso y fecha |
 | 015 | `015_project_locks_and_professor_assignment.sql` | Bloqueos por sección y profesores asignados |
 | 019 | `019_calificaciones_proyecto.sql` | Nota final individual por integrante del proyecto |
+| 020 | `020_huella_solo_profesores.sql` | La huella pasa a ser exclusiva del rol Profesor |
 
 ---
 
@@ -423,6 +424,35 @@ El control de permisos vive en el código Express (`assertCanAccessGroup` + `can
 
 ---
 
+## 020 — Huella exclusiva de profesores
+
+**Archivo:** `020_huella_solo_profesores.sql`
+
+La migración 017 había limitado la huella al rol **alumno** (`id_rol = 3`). Ahora pasa a ser exclusiva del rol **profesor** (`id_rol = 2`).
+
+### Cambios
+
+| Objeto | Acción |
+|--------|--------|
+| `chk_huella_alumno` | Se elimina. |
+| `usuarios.huella_id` | Se anula en todas las filas cuyo rol no sea profesor. |
+| `chk_huella_profesor` | Nueva constraint: `CHECK (id_rol = 2 OR huella_id IS NULL)`. |
+| `huellas` | Se borran los respaldos de templates de quienes ya no pueden tener huella. |
+
+> ⚠️ **Limpia datos.** La constraint nueva falla si quedan huellas asignadas a otros roles, así que primero se anulan. Quienes ya tenían huella deben re-enrolarse.
+
+### Post-aplicación
+
+1. **Vaciar sensor** en `/admin/esp32`: el sensor físico conserva los templates viejos y los slots quedarían desincronizados.
+2. Enrolar la huella de los profesores desde `/admin/usuarios`.
+
+### Relación con la app
+
+- `POST /api/admin/users/:id/huella/iniciar` — rechaza con 400 si el usuario no es profesor (`assertUserCanHaveHuella` en `adminFingerprint.ts`).
+- `AdminUsersPage.tsx` — el botón "Asignar/Reasignar Huella" queda deshabilitado salvo para profesores (`canHaveHuella`).
+
+---
+
 ## Cambios previos vía MCP
 
 Algunos objetos existían en el proyecto Supabase **antes** de quedar en archivos numerados locales, o se aplicaron con el MCP de Supabase. Conviven con las migraciones 001–009:
@@ -486,3 +516,4 @@ flowchart TD
 | 2026 | 010–011 | Tareas RPC y calendario |
 | 2026 | 012–014 | Módulo académico admin + asistencia profesor |
 | 2026 | 019 | Calificaciones por integrante (pestaña Calificaciones) |
+| 2026 | 020 | Huella exclusiva del rol Profesor (antes Alumno) |

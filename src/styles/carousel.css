@@ -1,4 +1,4 @@
-﻿.carousel {
+.carousel {
   position: relative;
   display: flex;
   align-items: center;
@@ -65,7 +65,9 @@
 .carousel__page .project-card {
   flex: 1 1 0;
   min-width: 0;
-  height: var(--card-height);
+  /* min-height en vez de height: si un nombre largo ocupa dos lineas, las tarjetas
+     de la fila crecen juntas (align-items: stretch) en lugar de recortar el texto. */
+  min-height: var(--card-height);
   display: flex;
   flex-direction: column;
   align-items: stretch;
@@ -103,7 +105,7 @@
   justify-content: center;
   gap: 6px;
   width: 100%;
-  min-height: 36px;
+  min-height: var(--touch-min);
   padding: 0 var(--space-md);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
@@ -126,15 +128,39 @@
 
 .project-card__title {
   margin: 0;
-  font-size: var(--font-size-lg);
+  font-size: var(--font-size-xl);
   font-weight: 700;
+  line-height: 1.25;
   color: var(--color-ink);
+  /* Nombres largos: hasta dos lineas, sin desbordar la tarjeta. */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  overflow-wrap: anywhere;
 }
 
-.project-card__meta {
+/* Contador de pendientes como chip: era texto gris y pasaba desapercibido. */
+.project-card__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  align-self: flex-start;
   margin: 0;
+  padding: 4px 10px;
+  border-radius: 999px;
   font-size: var(--font-size-sm);
-  color: var(--color-ink-muted);
+  font-weight: 700;
+}
+
+.project-card__badge--pending {
+  background: var(--color-warning-bg);
+  color: var(--color-warning-text);
+}
+
+.project-card__badge--clear {
+  background: var(--color-success-bg);
+  color: var(--color-success-text);
 }
 
 @media (max-width: 768px) {
@@ -144,7 +170,7 @@
   }
 
   .carousel__page .project-card {
-    height: 115px;
+    min-height: 150px;
   }
 }
 

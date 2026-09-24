@@ -1,4 +1,4 @@
-﻿@import "./projects.css";
+@import "./projects.css";
 @import "./projects-page.css";
 
 .admin-hero {
@@ -484,6 +484,10 @@
   flex-direction: column;
   gap: 6px;
   width: 100%;
+  /* Sin esto las tarjetas se comprimen cuando la lista supera su max-height:
+     al ser flex items del contenedor con scroll, se encogian y el texto colapsaba
+     a 0 de alto (el nombre y el correo no se veian). */
+  flex-shrink: 0;
   padding: var(--space-md);
   border: 1px solid transparent;
   border-radius: var(--radius-lg);
@@ -543,6 +547,50 @@
   align-items: center;
   gap: 6px;
   font-weight: 700;
+}
+
+/* ===== Tarjeta de proyecto: fila superior con estado + integrantes =====
+   Estas clases son adicionales: la tarjeta base se comparte con Cursos, que
+   usa el badge para el año, asi que no se modifican las reglas existentes. */
+.admin-course-card__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+}
+
+.admin-course-card__top .admin-course-card__badge {
+  align-self: auto;
+}
+
+/* Estado con nombre, no una letra suelta, y color semantico. */
+.admin-course-card__badge--open {
+  background: var(--color-success-bg);
+  color: var(--color-success-text);
+}
+
+.admin-course-card__badge--closed {
+  background: var(--color-neutral-bg);
+  color: var(--color-neutral-text);
+}
+
+/* Nombres largos: hasta dos lineas (max-height = 2 x line-height). */
+.admin-course-card__name {
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+  max-height: 2.6em;
+  overflow: hidden;
+}
+
+/* Correos largos: una linea con puntos suspensivos. */
+.admin-course-card__owner {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-course-card__top .admin-course-card__meta {
+  flex-shrink: 0;
 }
 
 .admin-course-detail {

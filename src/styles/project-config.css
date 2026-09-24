@@ -317,16 +317,159 @@
   cursor: not-allowed;
 }
 
-.project-config__checkbox-row {
+/* ===== Control de secciones (bloqueos) ===== */
+.project-config__locks-head {
   display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 14px;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-md);
+}
+
+.project-config__locks-head .project-config__card-title {
+  margin: 0;
+}
+
+.project-config__locks-hint {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-ink-muted);
+}
+
+.project-config__locks-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--space-md);
+}
+
+.project-config__toggle {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  padding: var(--space-md);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   background: var(--color-neutral-bg);
-  border: 1px solid var(--color-border);
-  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background-color var(--motion-duration-fast) var(--motion-ease-standard),
+    border-color var(--motion-duration-fast) var(--motion-ease-standard);
+}
+
+/* Cerrada = restricción activa: se marca con el color semántico de advertencia. */
+.project-config__toggle--warn {
+  background: var(--color-warning-bg);
+  border-color: var(--color-warning-text);
+}
+
+/* Variante positiva (aprobado / validado). */
+.project-config__toggle--ok {
+  background: var(--color-success-bg);
+  border-color: var(--color-success-text);
+}
+
+.project-config__toggle-top {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.project-config__toggle-icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  color: var(--color-ink-muted);
+}
+
+.project-config__toggle--warn .project-config__toggle-icon {
+  color: var(--color-warning-text);
+}
+
+.project-config__toggle--ok .project-config__toggle-icon {
+  color: var(--color-success-text);
+}
+
+.project-config__toggle-name {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--font-size-sm);
+  font-weight: 700;
   color: var(--color-ink);
+}
+
+.project-config__toggle-state {
+  font-size: var(--font-size-xs);
+  color: var(--color-ink-muted);
+}
+
+.project-config__toggle--warn .project-config__toggle-state {
+  font-weight: 700;
+  color: var(--color-warning-text);
+}
+
+.project-config__toggle--ok .project-config__toggle-state {
+  font-weight: 700;
+  color: var(--color-success-text);
+}
+
+/* Interruptor: el <input> queda invisible encima de la pista (sigue siendo el
+   control real, accesible por teclado) y la pista la dibuja un span hermano. */
+.project-config__switch {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
+.project-config__switch input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.project-config__switch-track {
+  width: 38px;
+  height: 22px;
+  border-radius: 999px;
+  background: var(--color-btn-muted);
+  position: relative;
+  transition: background-color var(--motion-duration-fast) var(--motion-ease-standard);
+}
+
+.project-config__switch-track::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--color-surface);
+  transition: transform var(--motion-duration-fast) var(--motion-ease-standard);
+}
+
+.project-config__switch input:checked + .project-config__switch-track {
+  background: var(--color-primary);
+}
+
+.project-config__switch input:checked + .project-config__switch-track::after {
+  transform: translateX(16px);
+}
+
+.project-config__switch input:focus-visible + .project-config__switch-track {
+  outline: 2px solid var(--color-primary-accent);
+  outline-offset: 2px;
+}
+
+.project-config__switch input:disabled {
+  cursor: not-allowed;
+}
+
+.project-config__switch input:disabled + .project-config__switch-track {
+  opacity: 0.6;
 }
 
 .project-config__add-row {

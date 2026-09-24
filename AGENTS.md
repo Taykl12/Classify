@@ -56,7 +56,7 @@ server/            Express backend
   src/routes/      auth.ts, projects.ts, dashboard.ts, users.ts
   src/lib/         authUser.ts, mappers.ts, projectAccess.ts, projectMembers.ts, projectOwner.ts, roles.ts
 
-supabase/migrations/  19 SQL migrations (001–019)
+supabase/migrations/  20 SQL migrations (001–020)
 ```
 
 ## API conventions
