@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { CalendarDays, Fingerprint, Search, Settings, UserX } from "lucide-react";
+import { CalendarDays, Fingerprint, RotateCcw, Search, Settings, UserX } from "lucide-react";
 import { TeacherAttendanceConfigModal } from "../../components/admin/TeacherAttendanceConfigModal";
 import { TeacherAttendanceDetailModal } from "../../components/admin/TeacherAttendanceDetailModal";
 import { TeacherAttendanceCorrectionModal } from "../../components/admin/TeacherAttendanceCorrectionModal";
+import { TeacherAttendanceForceModal } from "../../components/admin/TeacherAttendanceForceModal";
+import { TeacherAttendanceResetModal } from "../../components/admin/TeacherAttendanceResetModal";
 import { apiFetchWithRetry } from "../../lib/api";
 import { formatAttendanceDate, todayIsoDate } from "../../lib/professorDisplay";
 import type {
@@ -59,7 +61,9 @@ export default function AdminTeacherAttendancePage() {
   const [refreshToken, setRefreshToken] = useState(0);
   const [detailUserId, setDetailUserId] = useState<string | null>(null);
   const [correction, setCorrection] = useState<CorrectionTarget | null>(null);
+  const [forceUserId, setForceUserId] = useState<string | null>(null);
   const [configOpen, setConfigOpen] = useState(false);
+  const [resetOpen, setResetOpen] = useState(false);
 
   const load = useCallback(async () => {
     const response = await apiFetchWithRetry<TeacherAttendanceResponse>(
@@ -115,6 +119,9 @@ export default function AdminTeacherAttendancePage() {
   }, []);
 
   const resumen = data?.resumen;
+  const forceRecord = forceUserId
+    ? data?.registros.find((item) => item.userId === forceUserId) ?? null
+    : null;
 
   return (
     <>
@@ -229,6 +236,14 @@ export default function AdminTeacherAttendancePage() {
           >
             <Settings size={16} aria-hidden /> Configuración
           </button>
+
+          <button
+            type="button"
+            className="projects-panel__action-btn teacher-attendance-config-btn"
+            onClick={() => setResetOpen(true)}
+          >
+            <RotateCcw size={16} aria-hidden /> Resetear
+          </button>
         </div>
 
         {loading ? (
@@ -316,6 +331,13 @@ export default function AdminTeacherAttendancePage() {
                       >
                         Corregir
                       </button>
+                      <button
+                        type="button"
+                        className="projects-table__action"
+                        onClick={() => setForceUserId(record.userId)}
+                      >
+                        Tomar Huella
+                      </button>
                     </td>
                   </tr>
                 ))}
@@ -357,10 +379,24 @@ export default function AdminTeacherAttendancePage() {
         onSaved={handleCorrected}
       />
 
+      <TeacherAttendanceForceModal
+        open={forceUserId !== null}
+        userId={forceUserId ?? ""}
+        professorName={forceRecord ? professorName(forceRecord) : "Profesor"}
+        onClose={() => setForceUserId(null)}
+        onSuccess={handleCorrected}
+      />
+
       <TeacherAttendanceConfigModal
         open={configOpen}
         onClose={() => setConfigOpen(false)}
         onSaved={handleCorrected}
+      />
+
+      <TeacherAttendanceResetModal
+        open={resetOpen}
+        onClose={() => setResetOpen(false)}
+        onDone={handleCorrected}
       />
     </>
   );

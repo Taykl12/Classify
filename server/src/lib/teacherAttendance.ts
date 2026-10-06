@@ -1,9 +1,11 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import {
   DEFAULT_ATTENDANCE_CONFIG,
+  computeEntryStatus,
   normalizeDiasLaborables,
   normalizeTime,
   type AttendanceConfig,
+  type TeacherAttendanceStatus,
 } from "./attendance.js";
 
 export interface AttendanceConfigRow {
@@ -121,4 +123,79 @@ export function professorFullName(row: {
   apellido: string | null;
 }): string {
   return [row.nombre, row.apellido].filter(Boolean).join(" ").trim() || "Profesor";
+}
+
+export interface FingerprintAttendanceResult {
+  duplicado: boolean;
+  row: {
+    id_asistencia_profesor: number;
+    hora_entrada: string | null;
+    estado: TeacherAttendanceStatus;
+    metodo_registro: "Huella" | "Manual";
+  };
+}
+
+/**
+ * Registra una marcación por huella de forma idempotente: una sola fila por
+ * profesor y día. Si ya existe (o si una carrera la insertó primero) devuelve
+ * `duplicado: true` con la fila persistida en lugar de crear otra.
+ */
+export async function registerFingerprintAttendance(
+  supabase: SupabaseClient,
+  userId: string,
+  huellaId: number,
+  now: { fecha: string; hora: string },
+  config: AttendanceConfig
+): Promise<FingerprintAttendanceResult> {
+  const { data: existing, error: existingError } = await supabase
+    .from("asistencias_profesores")
+    .select("id_asistencia_profesor, hora_entrada, estado, metodo_registro")
+    .eq("id_usuario", userId)
+    .eq("fecha", now.fecha)
+    .maybeSingle();
+  if (existingError) throw new Error(existingError.message);
+
+  if (existing) {
+    return {
+      duplicado: true,
+      row: existing as FingerprintAttendanceResult["row"],
+    };
+  }
+
+  const estado = computeEntryStatus(now.hora, config);
+
+  const { data: inserted, error: insertError } = await supabase
+    .from("asistencias_profesores")
+    .insert({
+      id_usuario: userId,
+      fecha: now.fecha,
+      hora_entrada: now.hora,
+      estado,
+      metodo_registro: "Huella",
+      huella_id: huellaId,
+    })
+    .select("id_asistencia_profesor, hora_entrada, estado, metodo_registro")
+    .single();
+
+  if (insertError) {
+    // Carrera: otra marcación simultánea ya persistió la fila del día.
+    const { data: raced } = await supabase
+      .from("asistencias_profesores")
+      .select("id_asistencia_profesor, hora_entrada, estado, metodo_registro")
+      .eq("id_usuario", userId)
+      .eq("fecha", now.fecha)
+      .maybeSingle();
+    if (raced) {
+      return {
+        duplicado: true,
+        row: raced as FingerprintAttendanceResult["row"],
+      };
+    }
+    throw new Error(insertError.message);
+  }
+
+  return {
+    duplicado: false,
+    row: inserted as FingerprintAttendanceResult["row"],
+  };
 }

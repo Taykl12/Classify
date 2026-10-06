@@ -33,26 +33,18 @@ import {
   recordHeartbeat,
 } from "../lib/esp32State.js";
 import {
-  computeEntryStatus,
   getZonedDateTime,
   normalizeTime,
-  type TeacherAttendanceStatus,
 } from "../lib/attendance.js";
 import {
   findProfessorByHuella,
   getAttendanceConfig,
   getProfessorRoleId,
   professorFullName,
+  registerFingerprintAttendance,
 } from "../lib/teacherAttendance.js";
 
 const router = Router();
-
-interface MarkingRow {
-  id_asistencia_profesor: number;
-  hora_entrada: string | null;
-  estado: TeacherAttendanceStatus;
-  metodo_registro: "Huella" | "Manual";
-}
 
 router.use(express.json());
 
@@ -124,16 +116,15 @@ router.post("/asistencia", async (req, res) => {
     const attendanceConfig = await getAttendanceConfig(supabase);
     const now = getZonedDateTime(new Date(), config.attendanceTimeZone);
 
-    const { data: existing, error: existingError } = await supabase
-      .from("asistencias_profesores")
-      .select("id_asistencia_profesor, hora_entrada, estado, metodo_registro")
-      .eq("id_usuario", professor.id_usuario)
-      .eq("fecha", now.fecha)
-      .maybeSingle();
-    if (existingError) throw new Error(existingError.message);
+    const { duplicado, row } = await registerFingerprintAttendance(
+      supabase,
+      professor.id_usuario,
+      huellaId,
+      now,
+      attendanceConfig
+    );
 
-    if (existing) {
-      const row = existing as MarkingRow;
+    if (duplicado) {
       res.json({
         ok: true,
         duplicado: true,
@@ -146,46 +137,6 @@ router.post("/asistencia", async (req, res) => {
       return;
     }
 
-    const estado = computeEntryStatus(now.hora, attendanceConfig);
-
-    const { data: inserted, error: insertError } = await supabase
-      .from("asistencias_profesores")
-      .insert({
-        id_usuario: professor.id_usuario,
-        fecha: now.fecha,
-        hora_entrada: now.hora,
-        estado,
-        metodo_registro: "Huella",
-        huella_id: huellaId,
-      })
-      .select("id_asistencia_profesor, hora_entrada, estado, metodo_registro")
-      .single();
-
-    if (insertError) {
-      // Carrera: dos marcaciones simultáneas → devolvemos la ya persistida.
-      const { data: raced } = await supabase
-        .from("asistencias_profesores")
-        .select("id_asistencia_profesor, hora_entrada, estado, metodo_registro")
-        .eq("id_usuario", professor.id_usuario)
-        .eq("fecha", now.fecha)
-        .maybeSingle();
-      if (raced) {
-        const row = raced as MarkingRow;
-        res.json({
-          ok: true,
-          duplicado: true,
-          profesor: professorFullName(professor),
-          fecha: now.fecha,
-          horaEntrada: normalizeTime(row.hora_entrada),
-          estado: row.estado,
-          metodo: row.metodo_registro,
-        });
-        return;
-      }
-      throw new Error(insertError.message);
-    }
-
-    const row = inserted as MarkingRow;
     res.status(201).json({
       ok: true,
       duplicado: false,
@@ -325,8 +276,19 @@ router.post("/huella/resultado", async (req, res) => {
         res.status(500).json({ error: message });
         return;
       }
+    } else if (session.intent === "attendance") {
+      // Sesión forzada desde el panel: el match de huella registra la asistencia.
+      const attendanceConfig = await getAttendanceConfig(supabase);
+      const now = getZonedDateTime(new Date(), config.attendanceTimeZone);
+      await registerFingerprintAttendance(
+        supabase,
+        session.userId,
+        session.slotId,
+        now,
+        attendanceConfig
+      );
     }
-    // mode === "verify": no cambia BD; solo confirma match en el sensor
+    // mode === "verify" con intent "validate": no cambia BD; solo confirma match.
 
     completeSuccess(sessionId);
     res.json({ ok: true, slotId: session.slotId });
