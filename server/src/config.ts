@@ -14,4 +14,6 @@ export const config = {
   appOrigin: process.env.APP_ORIGIN ?? "http://localhost:5173",
   /** Token compartido con el ESP32 (header X-Device-Token). Cambiar en producción. */
   esp32DeviceToken: process.env.ESP32_DEVICE_TOKEN ?? "dev-esp32-token",
+  /** Zona horaria usada para fechar las marcaciones de asistencia (no el reloj del ESP32). */
+  attendanceTimeZone: process.env.ATTENDANCE_TIME_ZONE ?? "America/Argentina/Buenos_Aires",
 };

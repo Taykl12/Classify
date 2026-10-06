@@ -32,8 +32,27 @@ import {
   recordButtonPress,
   recordHeartbeat,
 } from "../lib/esp32State.js";
+import {
+  computeEntryStatus,
+  getZonedDateTime,
+  normalizeTime,
+  type TeacherAttendanceStatus,
+} from "../lib/attendance.js";
+import {
+  findProfessorByHuella,
+  getAttendanceConfig,
+  getProfessorRoleId,
+  professorFullName,
+} from "../lib/teacherAttendance.js";
 
 const router = Router();
+
+interface MarkingRow {
+  id_asistencia_profesor: number;
+  hora_entrada: string | null;
+  estado: TeacherAttendanceStatus;
+  metodo_registro: "Huella" | "Manual";
+}
 
 router.use(express.json());
 
@@ -65,6 +84,120 @@ router.post("/heartbeat", (_req, res) => {
 router.post("/button", (_req, res) => {
   recordButtonPress();
   res.json({ ok: true, ...getEsp32Status() });
+});
+
+/**
+ * Marcación de asistencia de un profesor: el AS608 identifica la huella y el
+ * ESP32 envía el `fingerprint_id` (slot = usuarios.huella_id). El backend decide
+ * fecha, hora y estado; el dispositivo nunca fija la hora.
+ *
+ * Un mismo profesor solo puede tener una marcación por día: reintentos devuelven
+ * la existente (`duplicado: true`) sin crear otra fila.
+ */
+router.post("/asistencia", async (req, res) => {
+  recordHeartbeat();
+
+  const rawId =
+    req.body?.fingerprint_id ?? req.body?.fingerprintId ?? req.body?.slotId;
+  const huellaId = Number(rawId);
+  if (!Number.isInteger(huellaId) || huellaId < 0 || huellaId > 199) {
+    res.status(400).json({ error: "fingerprint_id inválido" });
+    return;
+  }
+
+  const supabase = createAdminClient();
+
+  try {
+    const professorRoleId = await getProfessorRoleId(supabase);
+    if (professorRoleId === null) {
+      res.status(500).json({ error: "No se pudo resolver el rol Profesor" });
+      return;
+    }
+
+    const professor = await findProfessorByHuella(supabase, professorRoleId, huellaId);
+    if (!professor) {
+      // Huella inexistente o asignada a un usuario que no es profesor autorizado.
+      res.status(404).json({ error: "Huella no registrada para un profesor" });
+      return;
+    }
+
+    const attendanceConfig = await getAttendanceConfig(supabase);
+    const now = getZonedDateTime(new Date(), config.attendanceTimeZone);
+
+    const { data: existing, error: existingError } = await supabase
+      .from("asistencias_profesores")
+      .select("id_asistencia_profesor, hora_entrada, estado, metodo_registro")
+      .eq("id_usuario", professor.id_usuario)
+      .eq("fecha", now.fecha)
+      .maybeSingle();
+    if (existingError) throw new Error(existingError.message);
+
+    if (existing) {
+      const row = existing as MarkingRow;
+      res.json({
+        ok: true,
+        duplicado: true,
+        profesor: professorFullName(professor),
+        fecha: now.fecha,
+        horaEntrada: normalizeTime(row.hora_entrada),
+        estado: row.estado,
+        metodo: row.metodo_registro,
+      });
+      return;
+    }
+
+    const estado = computeEntryStatus(now.hora, attendanceConfig);
+
+    const { data: inserted, error: insertError } = await supabase
+      .from("asistencias_profesores")
+      .insert({
+        id_usuario: professor.id_usuario,
+        fecha: now.fecha,
+        hora_entrada: now.hora,
+        estado,
+        metodo_registro: "Huella",
+        huella_id: huellaId,
+      })
+      .select("id_asistencia_profesor, hora_entrada, estado, metodo_registro")
+      .single();
+
+    if (insertError) {
+      // Carrera: dos marcaciones simultáneas → devolvemos la ya persistida.
+      const { data: raced } = await supabase
+        .from("asistencias_profesores")
+        .select("id_asistencia_profesor, hora_entrada, estado, metodo_registro")
+        .eq("id_usuario", professor.id_usuario)
+        .eq("fecha", now.fecha)
+        .maybeSingle();
+      if (raced) {
+        const row = raced as MarkingRow;
+        res.json({
+          ok: true,
+          duplicado: true,
+          profesor: professorFullName(professor),
+          fecha: now.fecha,
+          horaEntrada: normalizeTime(row.hora_entrada),
+          estado: row.estado,
+          metodo: row.metodo_registro,
+        });
+        return;
+      }
+      throw new Error(insertError.message);
+    }
+
+    const row = inserted as MarkingRow;
+    res.status(201).json({
+      ok: true,
+      duplicado: false,
+      profesor: professorFullName(professor),
+      fecha: now.fecha,
+      horaEntrada: normalizeTime(row.hora_entrada),
+      estado: row.estado,
+      metodo: row.metodo_registro,
+    });
+  } catch (e) {
+    res.status(500).json({ error: e instanceof Error ? e.message : "Error interno" });
+  }
 });
 
 router.get("/huella/pendiente", (_req, res) => {

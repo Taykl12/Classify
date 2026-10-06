@@ -39,6 +39,7 @@ Los archivos fuente viven en `supabase/migrations/`. Este documento describe **q
 | 015 | `015_project_locks_and_professor_assignment.sql` | Bloqueos por sección y profesores asignados |
 | 019 | `019_calificaciones_proyecto.sql` | Nota final individual por integrante del proyecto |
 | 020 | `020_huella_solo_profesores.sql` | La huella pasa a ser exclusiva del rol Profesor |
+| 021 | `021_asistencia_profesores.sql` | Asistencia general de ingreso de profesores (huella + correcciones) |
 
 ---
 
@@ -453,6 +454,37 @@ La migración 017 había limitado la huella al rol **alumno** (`id_rol = 3`). Ah
 
 ---
 
+## 021 — Asistencia general de profesores
+
+**Archivo:** `021_asistencia_profesores.sql`
+
+Asistencia de **ingreso al establecimiento** de profesores disparada por huella (AS608/ESP32). No es asistencia por curso/materia (para eso existe `asistencias`, migración 014).
+
+### Objetos nuevos
+
+| Objeto | Detalle |
+|--------|--------|
+| `configuracion_asistencia` | Fila única (`id = 1`): `hora_entrada` (`08:00`), `tolerancia_minutos` (10), `minutos_ausencia` (120), `dias_laborables smallint[]` (ISO 1–7). Editable por admin. |
+| `asistencias_profesores` | Una fila por profesor y día (`UNIQUE (id_usuario, fecha)`): `hora_entrada`, `estado` (`Presente`/`Tardanza`/`Ausente`/`Justificado`), `metodo_registro` (`Huella`/`Manual`), `huella_id`, `id_registrado_por`, `observaciones`. |
+| `asistencias_profesores_ajustes` | Auditoría de correcciones: valor anterior/nuevo (estado y hora), `motivo`, `id_modificado_por`, `creado_en`. |
+
+`RLS` habilitado **sin policies** en las tres tablas: acceso solo vía `createAdminClient()` (service role) desde Express.
+
+### Reglas de negocio (en el API, no en la BD)
+
+- La **ausencia no se materializa** a las 00:00: se calcula al leer (`Sin marcar` → `Ausente` al pasar `hora_entrada + minutos_ausencia`).
+- Días fuera de `dias_laborables` → `No corresponde` (no cuentan como ausencia).
+- La fecha/hora la fija el backend con `ATTENDANCE_TIME_ZONE`, nunca el ESP32.
+- Reintentos el mismo día devuelven la marcación existente (sin duplicar).
+
+### Relación con la app
+
+- **Dispositivo:** `POST /api/device/esp32/asistencia` (`X-Device-Token`) con `{ fingerprint_id }`.
+- **Admin:** `GET /api/admin/asistencia-profesores?fecha=`, `GET /:userId/historial`, `POST /:userId/correccion`, `GET|PUT /config`.
+- **UI:** `/admin/asistencia-profesores` (resumen, tabla, selector de fecha, búsqueda, filtro por estado, detalle con historial y corrección).
+
+---
+
 ## Cambios previos vía MCP
 
 Algunos objetos existían en el proyecto Supabase **antes** de quedar en archivos numerados locales, o se aplicaron con el MCP de Supabase. Conviven con las migraciones 001–009:
@@ -517,3 +549,4 @@ flowchart TD
 | 2026 | 012–014 | Módulo académico admin + asistencia profesor |
 | 2026 | 019 | Calificaciones por integrante (pestaña Calificaciones) |
 | 2026 | 020 | Huella exclusiva del rol Profesor (antes Alumno) |
+| 2026 | 021 | Asistencia general de profesores (marcación por huella + correcciones) |

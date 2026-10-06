@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { BookOpen, Cpu, GraduationCap, Layers, Shield, Users } from "lucide-react";
+import { BookOpen, Cpu, Fingerprint, GraduationCap, Layers, Shield, Users } from "lucide-react";
 import { Link } from "react-router-dom";
 import { apiFetchWithRetry } from "../../lib/api";
 import { ROUTES } from "../../routes";
@@ -18,6 +18,12 @@ const QUICK_LINKS = [
     description: "Crear cursos y asignar alumnos o profesores.",
     to: ROUTES.ADMIN_COURSES,
     icon: <GraduationCap size={24} aria-hidden />,
+  },
+  {
+    label: "Asistencia de profesores",
+    description: "Marcaciones por huella, tardanzas y correcciones del personal.",
+    to: ROUTES.ADMIN_TEACHER_ATTENDANCE,
+    icon: <Fingerprint size={24} aria-hidden />,
   },
   {
     label: "Gestionar materias",

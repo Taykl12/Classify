@@ -447,6 +447,7 @@ Esta sección documenta el **estado real** de la base desplegada para la aplicac
 | Pendientes | `tareas_grupo` + join `grupos_proyectos` |
 | Invitar integrantes | `grupo_estudiante` + RPC `find_user_id_by_email`, `search_usuarios_for_invite` |
 | Calificaciones por integrante | `calificaciones_proyecto` (acceso vía service role desde Express) |
+| Asistencia de profesores (huella) | `usuarios.huella_id`, `asistencias_profesores`, `asistencias_profesores_ajustes`, `configuracion_asistencia` |
 
 ### 6.3 Migraciones aplicadas (`supabase/migrations/`)
 
@@ -466,6 +467,7 @@ Esta sección documenta el **estado real** de la base desplegada para la aplicac
 | 016 | `016_usuarios_huella_id.sql` | Columna `usuarios.huella_id` (INT, UNIQUE, 0–199) para vincular slot del sensor AS608. |
 | 018 | `018_huellas_table.sql` | Tabla `huellas`: respaldo durable del template AS608 (base64) por `id_usuario`. |
 | 019 | `019_calificaciones_proyecto.sql` | Tabla `calificaciones_proyecto` (nota final 0–10 por integrante). RLS habilitado sin policies; acceso vía `createAdminClient()`. |
+| 021 | `021_asistencia_profesores.sql` | `configuracion_asistencia`, `asistencias_profesores` y `asistencias_profesores_ajustes`; asistencia general de ingreso de profesores por huella. |
 
 ### Tabla 19: `huellas` (respaldo de templates biométricos)
 
@@ -500,6 +502,53 @@ Esta sección documenta el **estado real** de la base desplegada para la aplicac
 **RLS:** habilitado **sin policies** (deny-by-default para `anon`/`authenticated`) — acceso solo vía `createAdminClient()` (service role) desde Express, igual que `huellas`. Los permisos de negocio se validan en el API (`assertCanAccessGroup` + `canGradeProject`).
 
 **Sincronización con `usuarios.huella_id`:** `huella_id` indica el slot actualmente cargado en el sensor físico; `huellas` es el respaldo durable. Ambos se actualizan en enrolamiento, restauración y se limpian al vaciar sensor o quitar huella.
+
+### Tabla 21: `asistencias_profesores` (asistencia general de ingreso)
+
+**Propósito:** registrar la marcación diaria de ingreso de cada profesor (no por curso/materia). Una fila por profesor y día.
+
+| Campo | Tipo / restricciones | Descripción |
+|-------|----------------------|-------------|
+| `id_asistencia_profesor` | BIGINT, PK, identity | Identificador. |
+| `id_usuario` | UUID, FK → `usuarios(id_usuario)`, ON DELETE CASCADE | Profesor. |
+| `fecha` | DATE, NOT NULL, DEFAULT CURRENT_DATE | Día de la marcación. |
+| `hora_entrada` | TIME, NULL | Hora de ingreso (NULL en correcciones sin hora). |
+| `estado` | TEXT, CHECK (`Presente` \| `Tardanza` \| `Ausente` \| `Justificado`) | Estado persistido. |
+| `metodo_registro` | TEXT, CHECK (`Huella` \| `Manual`), DEFAULT `Huella` | Origen de la marcación. |
+| `huella_id` | INTEGER, NULL | Slot del AS608 que originó la marcación. |
+| `id_registrado_por` | UUID, FK → `usuarios(id_usuario)`, ON DELETE SET NULL | Admin que corrigió (si aplica). |
+| `observaciones` | TEXT, NULL | Motivo/observación (se completa en correcciones). |
+| `creado_en` / `actualizado_en` | TIMESTAMPTZ | Alta y última modificación. |
+
+`UNIQUE (id_usuario, fecha)` — impide duplicados del mismo día. `Presente`, `Tardanza` y `Ausente` derivados se calculan en el API; solo se persiste lo que ocurrió (marcación o corrección).
+
+### Tabla 22: `asistencias_profesores_ajustes` (auditoría)
+
+**Propósito:** conservar cada corrección manual sin sobrescribir silenciosamente el valor original.
+
+| Campo | Tipo | Descripción |
+|-------|------|-------------|
+| `id_ajuste` | BIGINT, PK, identity | Identificador. |
+| `id_asistencia_profesor` | BIGINT, FK → `asistencias_profesores`, ON DELETE CASCADE | Registro corregido. |
+| `estado_anterior` / `hora_entrada_anterior` | TEXT / TIME, NULL | Valor previo. |
+| `estado_nuevo` / `hora_entrada_nuevo` | TEXT / TIME | Valor corregido. |
+| `motivo` | TEXT, NOT NULL | Motivo de la corrección. |
+| `id_modificado_por` | UUID, FK → `usuarios`, ON DELETE SET NULL | Admin autor. |
+| `creado_en` | TIMESTAMPTZ | Fecha/hora de la corrección. |
+
+### Tabla 23: `configuracion_asistencia` (fila única)
+
+**Propósito:** parámetros globales de la asistencia de profesores. Fila única `id = 1`.
+
+| Campo | Tipo | Descripción |
+|-------|------|-------------|
+| `hora_entrada` | TIME, NOT NULL, DEFAULT `08:00` | Horario esperado. |
+| `tolerancia_minutos` | INTEGER, DEFAULT 10 | Margen antes de marcar `Tardanza`. |
+| `minutos_ausencia` | INTEGER, DEFAULT 120 | Minutos tras la entrada para considerar `Ausente`. |
+| `dias_laborables` | SMALLINT[], DEFAULT `{1,2,3,4,5}` | Días ISO (1=Lun … 7=Dom). |
+| `actualizado_en` / `id_actualizado_por` | TIMESTAMPTZ / UUID | Auditoría de la config. |
+
+**RLS:** las tres tablas con RLS habilitado **sin policies** — acceso solo vía `createAdminClient()` (service role) desde Express.
 
 **Migraciones adicionales vía Supabase MCP** (mismo proyecto, sin archivo local separado):
 
@@ -616,3 +665,19 @@ Endpoints dispositivo: `GET huella/pendiente`, `POST huella/progreso`, `POST hue
 Estado admin: `GET /api/admin/esp32/huellas/estado` (polling cada ~1,5 s).
 
 **Nota:** usuarios enrolados antes de la tabla `huellas` no tienen respaldo hasta reasignar la huella una vez.
+
+### 6.10 Asistencia de profesores por huella (migración 021)
+
+Flujo de marcación en reposo (distinto del enrolamiento de 6.8):
+
+1. El ESP32, cuando no está en una sesión de enrolamiento/validación/wipe/restore, lee la huella con el AS608 y, si la reconoce (`fingerSearch`), envía `POST /api/device/esp32/asistencia` con `{ fingerprint_id }`.
+2. El backend valida el header `X-Device-Token`, busca un **profesor** (`usuarios.id_rol = 2`) con `huella_id = fingerprint_id`.
+   - Huella inexistente o de un rol distinto → `404` controlado; **no** se crea asistencia.
+3. El backend fija fecha/hora con `ATTENDANCE_TIME_ZONE` (nunca el reloj del ESP32), calcula el estado con `configuracion_asistencia` y hace upsert de una fila por día.
+4. Reintentos del mismo día devuelven la marcación existente (`duplicado: true`) sin duplicar.
+
+**Estados mostrados:** `Presente` / `Tardanza` (persistidos), `Ausente` y `Sin marcar` (derivados al leer), `Justificado` (corrección manual). Los días fuera de `dias_laborables` → `No corresponde`.
+
+**Panel admin** (`/admin/asistencia-profesores`): resumen del día, tabla (profesor, horario esperado, hora de entrada, estado, método), selector de fecha, búsqueda y filtro por estado; detalle con historial reciente y corrección manual auditada.
+
+**Endpoints:** dispositivo `POST /api/device/esp32/asistencia`; admin `GET /api/admin/asistencia-profesores`, `GET /:userId/historial`, `POST /:userId/correccion`, `GET|PUT /config`.

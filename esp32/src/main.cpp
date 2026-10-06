@@ -28,6 +28,7 @@ const char* BUTTON_PATH = "/api/device/esp32/button";
 const char* FINGER_PENDING_PATH = "/api/device/esp32/huella/pendiente";
 const char* FINGER_PROGRESS_PATH = "/api/device/esp32/huella/progreso";
 const char* FINGER_RESULT_PATH = "/api/device/esp32/huella/resultado";
+const char* ATTENDANCE_PATH = "/api/device/esp32/asistencia";
 const char* DEVICE_JOB_PENDING_PATH = "/api/device/esp32/huella/lote/pendiente";
 const char* DEVICE_JOB_NEXT_PATH = "/api/device/esp32/huella/lote/siguiente";
 const char* DEVICE_JOB_PROGRESS_PATH = "/api/device/esp32/huella/lote/progreso";
@@ -65,6 +66,8 @@ const unsigned long WIFI_CONNECT_TIMEOUT_MS = 30000;
 const unsigned long WIFI_RETRY_INTERVAL_MS = 10000;
 const unsigned long FINGERPRINT_POLL_INTERVAL_MS = 5000;
 const unsigned long FINGER_STEP_TIMEOUT_MS = 15000;
+const unsigned long ATTENDANCE_SCAN_INTERVAL_MS = 700;
+const unsigned long ATTENDANCE_COOLDOWN_MS = 3000;
 const int HTTP_FAILS_BEFORE_BACKOFF = 2;
 
 HardwareSerial fingerSerial(1);
@@ -81,6 +84,7 @@ unsigned long httpAvailableAtMs = 0;
 unsigned long lastWifiAttemptMs = 0;
 unsigned long lastFingerprintPollMs = 0;
 unsigned long lastDeviceJobPollMs = 0;
+unsigned long lastAttendanceScanMs = 0;
 int lastButtonReading = HIGH;
 int consecutiveHttpFails = 0;
 bool httpBusy = false;
@@ -482,6 +486,15 @@ bool postFingerprintResult(
   String body;
   serializeJson(doc, body);
   return httpPostJson(FINGER_RESULT_PATH, body, false);
+}
+
+bool postAttendance(int fingerprintId, int confidence) {
+  JsonDocument doc;
+  doc["fingerprint_id"] = fingerprintId;
+  doc["confidence"] = confidence;
+  String body;
+  serializeJson(doc, body);
+  return httpPostJson(ATTENDANCE_PATH, body, false);
 }
 
 bool waitForFinger(unsigned long timeoutMs) {
@@ -992,6 +1005,58 @@ void runFingerprintJob(const String& sessionId, int slotId, const String& mode) 
   }
 }
 
+/**
+ * Marcación de asistencia en reposo: cuando el sensor no está ocupado en un
+ * enrolamiento/validación/vaciar/restaurar, lee la huella y, si el AS608 la
+ * reconoce, envía el fingerprint_id al backend. Classify decide fecha/hora/estado.
+ */
+void checkAttendanceScan(unsigned long now) {
+  if (
+    !fingerprintReady ||
+    fingerprintJobActive ||
+    pendingButtonPost ||
+    !canSendHttp(now) ||
+    now < httpQuietUntil ||
+    now - lastAttendanceScanMs < ATTENDANCE_SCAN_INTERVAL_MS
+  ) {
+    return;
+  }
+
+  lastAttendanceScanMs = now;
+
+  const uint8_t image = finger.getImage();
+  if (image == FINGERPRINT_NOFINGER) {
+    return;
+  }
+  if (image != FINGERPRINT_OK) {
+    return;
+  }
+
+  if (finger.image2Tz(1) != FINGERPRINT_OK) {
+    return;
+  }
+
+  if (finger.fingerFastSearch() != FINGERPRINT_OK) {
+    Serial.println("Asistencia: huella no reconocida");
+    waitForNoFinger(2000);
+    return;
+  }
+
+  const int fingerprintId = finger.fingerID;
+  const int confidence = finger.confidence;
+  Serial.printf("Asistencia: huella #%d (conf=%d)\n", fingerprintId, confidence);
+
+  closeHeartbeatSession();
+  if (postAttendance(fingerprintId, confidence)) {
+    blinkLed(2, 80);
+  }
+
+  // Esperamos a que retire el dedo para no marcar repetido en el mismo apoyo.
+  waitForNoFinger(5000);
+  httpQuietUntil = millis() + ATTENDANCE_COOLDOWN_MS;
+  lastHeartbeatMs = millis();
+}
+
 void checkPendingFingerprint(unsigned long now) {
   if (
     fingerprintJobActive ||
@@ -1276,6 +1341,7 @@ void loop() {
   processPendingButton(now);
   checkPendingDeviceJob(now);
   checkPendingFingerprint(now);
+  checkAttendanceScan(now);
 
   const bool heartbeatAllowed =
     !pendingButtonPost &&

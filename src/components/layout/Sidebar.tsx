@@ -4,6 +4,7 @@ import {
   CalendarClock,
   ClipboardCheck,
   Cpu,
+  Fingerprint,
   GraduationCap,
   Home,
   Layers,
@@ -49,6 +50,12 @@ const ADMIN_NAV: NavItem[] = [
     label: "Cursos",
     icon: <GraduationCap size={22} aria-hidden />,
     to: ROUTES.ADMIN_COURSES,
+  },
+  {
+    id: "admin-attendance",
+    label: "Asistencia",
+    icon: <Fingerprint size={22} aria-hidden />,
+    to: ROUTES.ADMIN_TEACHER_ATTENDANCE,
   },
   {
     id: "admin-subjects",

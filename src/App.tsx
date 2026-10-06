@@ -13,6 +13,7 @@ import AdminMateriasPage from "./pages/admin/AdminMateriasPage";
 import AdminProyectosPage from "./pages/admin/AdminProyectosPage";
 import AdminEsp32Page from "./pages/admin/AdminEsp32Page";
 import AdminUsersPage from "./pages/admin/AdminUsersPage";
+import AdminTeacherAttendancePage from "./pages/admin/AdminTeacherAttendancePage";
 import ProfessorAttendanceCoursePage from "./pages/professor/ProfessorAttendanceCoursePage";
 import ProfessorAttendancePage from "./pages/professor/ProfessorAttendancePage";
 import ProfessorCourseDetailPage from "./pages/professor/ProfessorCourseDetailPage";
@@ -146,6 +147,14 @@ function App() {
                 element={
                   <AdminRoute>
                     <AdminEsp32Page />
+                  </AdminRoute>
+                }
+              />
+              <Route
+                path={ROUTES.ADMIN_TEACHER_ATTENDANCE}
+                element={
+                  <AdminRoute>
+                    <AdminTeacherAttendancePage />
                   </AdminRoute>
                 }
               />

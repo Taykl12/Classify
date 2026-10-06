@@ -45,6 +45,15 @@ Se añadió una aplicación **React + TypeScript + Vite** con **CSS vanilla** (s
 - **Enrolamiento:** `POST .../huella/resultado` acepta `templateBase64` opcional; persiste respaldo en `huellas`.
 - **Firmware:** protocolo AS608 crudo (UPLOAD/DOWNLOAD) + base64 inline; `checkPendingDeviceJob()` para wipe (`emptyDatabase`) y restore masivo.
 
+### Asistencia de profesores por huella (octubre 2026)
+
+- **BD:** migración `021_asistencia_profesores.sql` — tablas `asistencias_profesores` (una fila por profesor/día), `asistencias_profesores_ajustes` (auditoría) y `configuracion_asistencia` (hora de entrada, tolerancia, límite de ausencia y días laborables).
+- **Dispositivo:** `POST /api/device/esp32/asistencia` (`X-Device-Token`) con `{ fingerprint_id }`; el backend resuelve el profesor, fija fecha/hora (`ATTENDANCE_TIME_ZONE`) y calcula `Presente`/`Tardanza`. Huella inexistente → 404, sin registro; reintentos del día → sin duplicar.
+- **Admin API:** `GET /api/admin/asistencia-profesores?fecha=&q=&estado=`, `GET /:userId/historial`, `POST /:userId/correccion`, `GET|PUT /config`.
+- **Admin UI:** nueva sección `/admin/asistencia-profesores` (sidebar + acceso rápido) con resumen del día, tabla, selector de fecha, búsqueda, filtro por estado, detalle con historial y corrección manual auditada.
+- **Estados derivados:** `Ausente` y `Sin marcar` se calculan al leer (no hay cron a las 00:00); los días no laborables no cuentan como ausencia.
+- **Firmware:** `checkAttendanceScan()` en `esp32/src/main.cpp` — marcación en reposo cuando el sensor no está ocupado.
+
 ---
 
 ## Stack y dependencias nuevas

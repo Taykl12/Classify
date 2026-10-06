@@ -40,6 +40,19 @@ Carrusel: `GET /api/dashboard/featured` solo proyectos con `es_favorito = true`.
 Tabla: `eventos_calendario` — RPC `create_evento_calendario`.
 Migración: `011_eventos_calendario.sql`.
 
+## API asistencia de profesores (huella)
+
+| Método | Ruta | Acción |
+|--------|------|--------|
+| POST | `/api/device/esp32/asistencia` | Marcación del ESP32 (`X-Device-Token`, `{ fingerprint_id }`) |
+| GET | `/api/admin/asistencia-profesores?fecha=` | Listado del día + resumen |
+| GET | `/api/admin/asistencia-profesores/:userId/historial` | Historial reciente |
+| POST | `/api/admin/asistencia-profesores/:userId/correccion` | Corrección manual auditada |
+| GET/PUT | `/api/admin/asistencia-profesores/config` | Configuración de horario |
+
+Tablas: `asistencias_profesores`, `asistencias_profesores_ajustes`, `configuracion_asistencia`.
+Migración: `021_asistencia_profesores.sql`.
+
 ## Mappers API
 
 - `estado_tarea`: `En Progreso` → `En curso`

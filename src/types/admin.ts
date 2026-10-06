@@ -121,3 +121,73 @@ export interface AdminCoursesResponse {
 export interface AdminSubjectsResponse {
   subjects: AdminSubject[];
 }
+
+export type TeacherAttendanceEstado =
+  | "Presente"
+  | "Tardanza"
+  | "Ausente"
+  | "Justificado";
+export type TeacherAttendanceDisplayEstado =
+  | TeacherAttendanceEstado
+  | "Sin marcar"
+  | "No corresponde";
+
+export interface TeacherAttendanceRecord {
+  userId: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  profilePhotoUrl: string | null;
+  huellaId: number | null;
+  fecha: string;
+  horaEntrada: string | null;
+  estado: TeacherAttendanceDisplayEstado;
+  metodo: "Huella" | "Manual" | null;
+  observaciones: string;
+  corregido: boolean;
+}
+
+export interface TeacherAttendanceResumen {
+  presentes: number;
+  tardanzas: number;
+  ausentes: number;
+  justificados: number;
+  sinMarcar: number;
+  total: number;
+}
+
+export interface TeacherAttendanceResponse {
+  fecha: string;
+  esDiaLaborable: boolean;
+  horaEntradaEsperada: string;
+  resumen: TeacherAttendanceResumen;
+  registros: TeacherAttendanceRecord[];
+}
+
+export interface TeacherAttendanceConfig {
+  horaEntrada: string;
+  toleranciaMinutos: number;
+  minutosAusencia: number;
+  diasLaborables: number[];
+}
+
+export interface TeacherAttendanceHistoryItem {
+  fecha: string;
+  horaEntrada: string | null;
+  estado: TeacherAttendanceEstado;
+  metodo: "Huella" | "Manual";
+  observaciones: string;
+  corregido: boolean;
+}
+
+export interface TeacherAttendanceHistoryResponse {
+  profesor: {
+    userId: string;
+    firstName: string;
+    lastName: string;
+    profilePhotoUrl: string | null;
+    huellaId: number | null;
+    nombreCompleto: string;
+  };
+  historial: TeacherAttendanceHistoryItem[];
+}
