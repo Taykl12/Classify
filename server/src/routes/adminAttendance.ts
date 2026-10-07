@@ -4,6 +4,7 @@ import { config } from "../config.js";
 import { createAdminClient } from "../lib/supabase.js";
 import { requireAdmin } from "../middleware/admin.js";
 import { requireAuth, type AuthedRequest } from "../middleware/auth.js";
+import { startSession } from "../lib/fingerprintState.js";
 import {
   getZonedDateTime,
   isWorkday,
@@ -262,6 +263,26 @@ router.get("/", async (req, res) => {
   }
 });
 
+/**
+ * Reset de asistencias para testing: elimina las marcaciones registradas HOY
+ * (y su auditoría en cascada). No afecta días anteriores. Acceso solo admin.
+ */
+router.delete("/", async (_req, res) => {
+  try {
+    const supabase = createAdminClient();
+    const fecha = todayInZone();
+    const { data, error } = await supabase
+      .from("asistencias_profesores")
+      .delete()
+      .eq("fecha", fecha)
+      .select("id_asistencia_profesor");
+    if (error) throw new Error(error.message);
+    res.json({ fecha, deleted: data?.length ?? 0 });
+  } catch (e) {
+    res.status(statusFromError(e)).json({ error: messageFromError(e) });
+  }
+});
+
 router.get("/:userId/historial", async (req, res) => {
   try {
     const supabase = createAdminClient();
@@ -327,6 +348,62 @@ router.get("/:userId/historial", async (req, res) => {
           corregido: corregidos.has(item.id_asistencia_profesor),
         };
       }),
+    });
+  } catch (e) {
+    res.status(statusFromError(e)).json({ error: messageFromError(e) });
+  }
+});
+
+/**
+ * Toma de asistencia por huella forzada desde el panel: inicia una sesión
+ * `verify` con intent "attendance". El ESP32 la toma en su próximo poll, valida
+ * la huella del profesor y, al confirmar, el backend registra la marcación.
+ * Si el profesor ya tiene marcación hoy, se bloquea (409) sin sobrescribir.
+ */
+router.post("/:userId/marcar-forzada", async (req, res) => {
+  try {
+    const supabase = createAdminClient();
+    const professorRoleId = await getProfessorRoleId(supabase);
+    if (professorRoleId === null) {
+      throw Object.assign(new Error("Rol Profesor no configurado"), { status: 500 });
+    }
+    const professor = await getProfessorOrThrow(
+      supabase,
+      professorRoleId,
+      req.params.userId
+    );
+
+    if (professor.huella_id === null) {
+      throw Object.assign(
+        new Error("El profesor no tiene una huella asignada"),
+        { status: 400 }
+      );
+    }
+
+    const { data: existing, error: existingError } = await supabase
+      .from("asistencias_profesores")
+      .select("id_asistencia_profesor")
+      .eq("id_usuario", professor.id_usuario)
+      .eq("fecha", todayInZone())
+      .maybeSingle();
+    if (existingError) throw new Error(existingError.message);
+    if (existing) {
+      throw Object.assign(
+        new Error("Este profesor ya tiene asistencia registrada hoy"),
+        { status: 409 }
+      );
+    }
+
+    const session = startSession(
+      professor.id_usuario,
+      professor.huella_id,
+      "verify",
+      "attendance"
+    );
+    res.status(201).json({
+      sessionId: session.sessionId,
+      slotId: session.slotId,
+      step: session.step,
     });
   } catch (e) {
     res.status(statusFromError(e)).json({ error: messageFromError(e) });

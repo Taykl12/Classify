@@ -12,11 +12,19 @@ export type FingerprintStep =
 
 export type FingerprintMode = "enroll" | "delete" | "verify";
 
+/**
+ * Propósito de una sesión `verify`: "validate" solo confirma el match en el
+ * sensor; "attendance" además registra la asistencia del profesor al confirmar.
+ * El ESP32 no distingue: ambos usan el mismo modo `verify`.
+ */
+export type FingerprintIntent = "validate" | "attendance";
+
 export interface FingerprintSession {
   sessionId: string;
   userId: string;
   slotId: number;
   mode: FingerprintMode;
+  intent: FingerprintIntent;
   step: FingerprintStep;
   errorMessage: string | null;
   createdAt: number;
@@ -116,7 +124,8 @@ export function getActiveSession(): FingerprintSession | null {
 export function startSession(
   userId: string,
   slotId: number,
-  mode: FingerprintMode
+  mode: FingerprintMode,
+  intent: FingerprintIntent = "validate"
 ): FingerprintSession {
   expireIfNeeded();
 
@@ -145,6 +154,7 @@ export function startSession(
     userId,
     slotId,
     mode,
+    intent,
     step: "requested",
     errorMessage: null,
     createdAt: now(),
