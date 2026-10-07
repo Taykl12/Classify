@@ -1,6 +1,7 @@
 import { Router } from "express";
 import type { SupabaseClient, User } from "@supabase/supabase-js";
 import { createAdminClient } from "../lib/supabase.js";
+import { mapAuthError } from "../lib/authMessages.js";
 import {
   composeCourseName,
   validateDivisionForYear,
@@ -503,9 +504,10 @@ router.post("/users", async (req, res) => {
       },
     });
     if (authError || !authData.user) {
-      throw Object.assign(new Error(authError?.message ?? "No se pudo crear el usuario"), {
-        status: 400,
-      });
+      throw Object.assign(
+        new Error(mapAuthError(authError, "No se pudo crear el usuario")),
+        { status: 400 }
+      );
     }
     createdUserId = authData.user.id;
     const { error: profileError } = await supabase.from("usuarios").insert({
@@ -554,7 +556,12 @@ router.patch("/users/:id", async (req, res) => {
     }
     if (Object.keys(authUpdates).length > 0) {
       const { error } = await supabase.auth.admin.updateUserById(targetId, authUpdates);
-      if (error) throw Object.assign(new Error(error.message), { status: 400 });
+      if (error) {
+        throw Object.assign(
+          new Error(mapAuthError(error, "No se pudo actualizar el usuario")),
+          { status: 400 }
+        );
+      }
     }
 
     const profileUpdates: Record<string, string | number | null> = {};
@@ -605,7 +612,12 @@ router.delete("/users/:id", async (req, res) => {
       );
     }
     const { error: authError } = await supabase.auth.admin.deleteUser(targetId);
-    if (authError) throw Object.assign(new Error(authError.message), { status: 400 });
+    if (authError) {
+      throw Object.assign(
+        new Error(mapAuthError(authError, "No se pudo eliminar el usuario")),
+        { status: 400 }
+      );
+    }
     res.json({ deleted: targetId });
   } catch (e) {
     res.status(statusFromError(e)).json({ error: messageFromError(e) });

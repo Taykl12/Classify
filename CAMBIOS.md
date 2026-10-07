@@ -54,6 +54,19 @@ Se añadió una aplicación **React + TypeScript + Vite** con **CSS vanilla** (s
 - **Estados derivados:** `Ausente` y `Sin marcar` se calculan al leer (no hay cron a las 00:00); los días no laborables no cuentan como ausencia.
 - **Firmware:** `checkAttendanceScan()` en `esp32/src/main.cpp` — marcación en reposo cuando el sensor no está ocupado.
 
+### Restablecer contraseña (flujo completo)
+
+- **Problema:** el enlace de recuperación de Supabase redirigía al `/login`, que ignoraba el token, y no existía pantalla ni endpoint para fijar la nueva contraseña.
+- **Backend:** `POST /api/auth/reset-password` (valida el token de recuperación y llama `updateUser({ password })`, devuelve sesión); `recover-password` ahora redirige a `${APP_ORIGIN}/restablecer-contrasena`.
+- **Frontend:** nueva ruta pública `/restablecer-contrasena` (`ResetPasswordPage`) que lee `#access_token=...&type=recovery`, pide la nueva contraseña y persiste la sesión; `AuthContext.resetPassword`.
+- **Requisito externo:** whitelistear la URL en Supabase Auth → URL Configuration → Redirect URLs y confirmar que la plantilla de email use `{{ .ConfirmationURL }}`.
+
+### Mensajes de error de autenticación en español
+
+- **Helper:** `server/src/lib/authMessages.ts` (`mapAuthError`) traduce los errores de Supabase Auth por `code` y por patrones del mensaje en inglés, con fallback en español.
+- **Aplicado en:** login, registro, recuperar contraseña, restablecer contraseña (`auth.ts`), cambio de email/contraseña (`profile.ts`) y alta/edición/borrado de usuarios (`admin.ts`).
+- **Ejemplo:** `Invalid login credentials` → `Email o contraseña incorrectos.`; `Email not confirmed` → `Tu correo todavía no está confirmado…`; `over_email_send_rate_limit` → `Demasiados intentos…`.
+
 ---
 
 ## Stack y dependencias nuevas

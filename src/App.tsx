@@ -26,6 +26,7 @@ import ProjectsPage from "./pages/ProjectsPage";
 import PreferencesPage from "./pages/PreferencesPage";
 import RecoverPasswordPage from "./pages/RecoverPasswordPage";
 import RegisterPage from "./pages/RegisterPage";
+import ResetPasswordPage from "./pages/ResetPasswordPage";
 import { ROUTES } from "./routes";
 
 /**
@@ -163,6 +164,7 @@ function App() {
             <Route path={ROUTES.LOGIN} element={<LoginPage />} />
             <Route path={ROUTES.REGISTER} element={<RegisterPage />} />
             <Route path={ROUTES.RECOVER_PASSWORD} element={<RecoverPasswordPage />} />
+            <Route path={ROUTES.RESET_PASSWORD} element={<ResetPasswordPage />} />
             <Route path="*" element={<Navigate to={ROUTES.LOGIN} replace />} />
           </Routes>
         </BrowserRouter>

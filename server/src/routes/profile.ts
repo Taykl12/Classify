@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { buildAuthUser } from "../lib/authUser.js";
+import { mapAuthError } from "../lib/authMessages.js";
 import { createAnonClient } from "../lib/supabase.js";
 import { getUserSupabase, requireAuth, type AuthedRequest } from "../middleware/auth.js";
 
@@ -170,7 +171,9 @@ router.patch("/", requireAuth, async (req, res) => {
     if (email && email !== currentEmail) {
       const { error: emailError } = await userClient.auth.updateUser({ email });
       if (emailError) {
-        res.status(400).json({ error: emailError.message });
+        res.status(400).json({
+          error: mapAuthError(emailError, "No se pudo actualizar el correo"),
+        });
         return;
       }
     }
@@ -180,7 +183,9 @@ router.patch("/", requireAuth, async (req, res) => {
         password: newPassword,
       });
       if (passwordError) {
-        res.status(400).json({ error: passwordError.message });
+        res.status(400).json({
+          error: mapAuthError(passwordError, "No se pudo actualizar la contraseña"),
+        });
         return;
       }
     }

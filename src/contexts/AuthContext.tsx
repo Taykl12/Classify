@@ -38,6 +38,7 @@ interface AuthContextValue {
   }) => Promise<{ needsConfirmation?: boolean }>;
   logout: () => Promise<void>;
   recoverPassword: (email: string) => Promise<string>;
+  resetPassword: (accessToken: string, password: string) => Promise<AuthUser>;
   refreshUser: (nextUser: AuthUser) => void;
 }
 
@@ -132,6 +133,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return data.message;
   }, []);
 
+  const resetPassword = useCallback(
+    async (accessToken: string, password: string) => {
+      const data = await apiFetch<{ accessToken: string; user: AuthUser }>(
+        "/api/auth/reset-password",
+        {
+          method: "POST",
+          body: JSON.stringify({ accessToken, password }),
+        }
+      );
+      persistSession(data.accessToken, data.user);
+      return data.user;
+    },
+    [persistSession]
+  );
+
   const refreshUser = useCallback(
     (nextUser: AuthUser) => {
       const token = getAccessToken();
@@ -141,8 +157,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 
   const value = useMemo(
-    () => ({ user, loading, login, register, logout, recoverPassword, refreshUser }),
-    [user, loading, login, register, logout, recoverPassword, refreshUser]
+    () => ({
+      user,
+      loading,
+      login,
+      register,
+      logout,
+      recoverPassword,
+      resetPassword,
+      refreshUser,
+    }),
+    [user, loading, login, register, logout, recoverPassword, resetPassword, refreshUser]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

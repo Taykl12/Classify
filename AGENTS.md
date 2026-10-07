@@ -75,7 +75,10 @@ supabase/migrations/  20 SQL migrations (001–020)
 | `POST /api/auth/register` | Creates Supabase Auth user + `usuarios` row; role = `alumno` (3) by default |
 | `POST /api/auth/login` | Returns `{ accessToken, user }` |
 | `GET /api/auth/me` | Validates token, returns user profile |
-| `POST /api/auth/recover-password` | Calls Supabase `resetPasswordForEmail` |
+| `POST /api/auth/recover-password` | Calls Supabase `resetPasswordForEmail`; `redirectTo` = `${APP_ORIGIN}/restablecer-contrasena` |
+| `POST /api/auth/reset-password` | Body `{ accessToken, password }`; validates recovery token, calls `updateUser({ password })`, returns `{ accessToken, user }` |
+
+Password reset route (public): `/restablecer-contrasena` (`ResetPasswordPage`) reads Supabase hash fragment `#access_token=...&type=recovery`. **Requires** the URL whitelisted in Supabase Auth → URL Configuration → Redirect URLs.
 
 ## Project ownership rules (important)
 
