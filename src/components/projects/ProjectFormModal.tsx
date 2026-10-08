@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { Plus } from "lucide-react";
 import { useAuth } from "../../contexts/AuthContext";
+import { useModalEscape } from "../../hooks/useModalEscape";
 import { ensureCreatorInMembers } from "../../lib/memberEmails";
 import type { ProjectFormValues } from "../../types/projects";
 import { EMPTY_PROJECT_FORM } from "../../types/projects";
@@ -161,6 +162,7 @@ export function ProjectFormModal({
   onClose,
   onSubmit,
 }: ProjectFormModalProps) {
+  useModalEscape(open, onClose);
   if (!open) return null;
 
   const formKey =

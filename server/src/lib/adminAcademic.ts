@@ -107,9 +107,10 @@ function validateTimeRange(startHour: string, startMinute: string, endHour: stri
   const start = `${startHour}:${startMinute}`;
   const end = `${endHour}:${endMinute}`;
   if (start >= end) {
-    throw Object.assign(new Error("La hora de fin debe ser posterior al inicio"), {
-      status: 400,
-    });
+    throw Object.assign(
+      new Error(`Horario inválido: ${start} - ${end} (el fin debe ser posterior al inicio)`),
+      { status: 400 }
+    );
   }
 }
 

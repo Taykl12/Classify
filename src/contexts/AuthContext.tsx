@@ -30,12 +30,6 @@ interface AuthContextValue {
   user: AuthUser | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  register: (payload: {
-    email: string;
-    password: string;
-    firstName: string;
-    lastName: string;
-  }) => Promise<{ needsConfirmation?: boolean }>;
   logout: () => Promise<void>;
   recoverPassword: (email: string) => Promise<string>;
   resetPassword: (accessToken: string, password: string) => Promise<AuthUser>;
@@ -92,30 +86,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     persistSession(data.accessToken, data.user);
   }, [persistSession]);
 
-  const register = useCallback(
-    async (payload: {
-      email: string;
-      password: string;
-      firstName: string;
-      lastName: string;
-    }) => {
-      const data = await apiFetch<{
-        accessToken?: string;
-        user?: AuthUser;
-        message?: string;
-      }>("/api/auth/register", {
-        method: "POST",
-        body: JSON.stringify(payload),
-      });
-      if (data.accessToken && data.user) {
-        persistSession(data.accessToken, data.user);
-        return {};
-      }
-      return { needsConfirmation: true };
-    },
-    [persistSession]
-  );
-
   const logout = useCallback(async () => {
     try {
       await apiFetch("/api/auth/logout", { method: "POST" });
@@ -161,13 +131,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       user,
       loading,
       login,
-      register,
       logout,
       recoverPassword,
       resetPassword,
       refreshUser,
     }),
-    [user, loading, login, register, logout, recoverPassword, resetPassword, refreshUser]
+    [user, loading, login, logout, recoverPassword, resetPassword, refreshUser]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

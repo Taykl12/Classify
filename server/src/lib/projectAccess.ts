@@ -26,6 +26,25 @@ export async function getAccessibleGroupIds(
 /** @deprecated Usar getAccessibleGroupIds */
 export const getOwnedGroupIds = getAccessibleGroupIds;
 
+/** Proyectos que el usuario gestiona (dueño o profesor asignado). Admin ⇒ todos. */
+export async function getManagedGroupIds(
+  supabase: SupabaseClient,
+  userId: string
+): Promise<{ isAdmin: boolean; ids: Set<number> }> {
+  const isAdmin = await userIsAdmin(supabase, userId);
+  if (isAdmin) return { isAdmin: true, ids: new Set() };
+  const [asOwner, asAssigned] = await Promise.all([
+    supabase.from("proyecto_profesor").select("id_grupo").eq("id_profesor", userId),
+    supabase.from("proyecto_profesor_asignado").select("id_grupo").eq("id_profesor", userId),
+  ]);
+  if (asOwner.error) throw new Error(asOwner.error.message);
+  if (asAssigned.error) throw new Error(asAssigned.error.message);
+  const ids = new Set<number>();
+  for (const row of asOwner.data ?? []) ids.add(row.id_grupo as number);
+  for (const row of asAssigned.data ?? []) ids.add(row.id_grupo as number);
+  return { isAdmin: false, ids };
+}
+
 export async function assertCanAccessGroup(
   supabase: SupabaseClient,
   userId: string,

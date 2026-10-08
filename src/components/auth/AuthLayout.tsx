@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { AuthFooter } from './AuthFooter';
 
-export type AuthVariant = 'login' | 'register' | 'recover';
+export type AuthVariant = 'login' | 'recover';
 
 interface AuthLayoutProps {
   variant: AuthVariant;

@@ -429,10 +429,10 @@ Esta sección documenta el **estado real** de la base desplegada para la aplicac
 
 | Concepto | Implementación |
 |--------|----------------|
-| Login / registro | **Supabase Auth** (`auth.users`): email y contraseña. |
+| Login | **Supabase Auth** (`auth.users`): email y contraseña. Las cuentas las crea un administrador. |
 | Perfil en app | Tabla `usuarios`: `id_usuario` = UUID = `auth.users.id`. |
 | Email en consultas | Se lee desde `auth.users`, no desde una columna `email` en `usuarios`. |
-| Rol en UI | `usuarios.id_rol` → `roles.nombre_rol` (`admin`, `profesor`, `alumno`). Registro asigna **alumno** por defecto. |
+| Rol en UI | `usuarios.id_rol` → `roles.nombre_rol` (`admin`, `profesor`, `alumno`). El rol lo define el administrador al crear la cuenta. |
 | Cargo en sidebar | Mapeo API: `Profesor`, `Alumno`, etc. |
 
 ### 6.2 Tablas usadas por la app web (hoy)
@@ -443,10 +443,11 @@ Esta sección documenta el **estado real** de la base desplegada para la aplicac
 | `/proyectos` | `grupos_proyectos`, `proyecto_profesor`, `grupo_estudiante` |
 | Admin usuarios + huella | `usuarios` (`huella_id`), `huellas` (templates base64), sesión en memoria en API + ESP32 |
 | Configuración proyecto | `grupos_proyectos` (columnas de alcance, links, `documentos` JSONB) |
-| Carrusel inicio | `grupos_proyectos` (`es_favorito = true`) + conteo en `tareas_grupo` |
+| Carrusel inicio | `proyecto_favorito` (favorito por usuario) + conteo en `tareas_grupo` |
 | Pendientes | `tareas_grupo` + join `grupos_proyectos` |
 | Invitar integrantes | `grupo_estudiante` + RPC `find_user_id_by_email`, `search_usuarios_for_invite` |
-| Calificaciones por integrante | `calificaciones_proyecto` (acceso vía service role desde Express) |
+| Calificaciones por integrante | `calificaciones_proyecto` (notas diarias con descripción/fecha; promedio) |
+| Tareas del proyecto | `tareas_grupo` (crear/listar/editar/eliminar desde `/proyectos/:id/tareas`) |
 | Asistencia de profesores (huella) | `usuarios.huella_id`, `asistencias_profesores`, `asistencias_profesores_ajustes`, `configuracion_asistencia` |
 
 ### 6.3 Migraciones aplicadas (`supabase/migrations/`)
@@ -468,6 +469,8 @@ Esta sección documenta el **estado real** de la base desplegada para la aplicac
 | 018 | `018_huellas_table.sql` | Tabla `huellas`: respaldo durable del template AS608 (base64) por `id_usuario`. |
 | 019 | `019_calificaciones_proyecto.sql` | Tabla `calificaciones_proyecto` (nota final 0–10 por integrante). RLS habilitado sin policies; acceso vía `createAdminClient()`. |
 | 021 | `021_asistencia_profesores.sql` | `configuracion_asistencia`, `asistencias_profesores` y `asistencias_profesores_ajustes`; asistencia general de ingreso de profesores por huella. |
+| 022 | `022_favoritos_usuario_calendario.sql` | `proyecto_favorito` (favoritos por usuario), `can_view_proyecto`, horas/recurrencia y policies UPDATE/DELETE en `eventos_calendario`. |
+| 023 | `023_tareas_y_notas_diarias.sql` | Tareas: RPC `create_tarea_grupo` con `can_view_proyecto` y policies CRUD. Notas: `calificaciones_proyecto` pasa a notas diarias (`descripcion`, `fecha`, sin UNIQUE). |
 
 ### Tabla 19: `huellas` (respaldo de templates biométricos)
 
@@ -484,7 +487,7 @@ Esta sección documenta el **estado real** de la base desplegada para la aplicac
 
 **RLS:** habilitado sin policies — acceso solo vía `createAdminClient()` (service role) desde Express.
 
-### Tabla 20: `calificaciones_proyecto` (nota final por integrante)
+### Tabla 20: `calificaciones_proyecto` (notas diarias por integrante)
 
 **Propósito:** calificación final individual de cada integrante del proyecto (pestaña **Calificaciones** de `/proyectos/:id/config`).
 
@@ -493,11 +496,13 @@ Esta sección documenta el **estado real** de la base desplegada para la aplicac
 | `id_calificacion` | BIGINT, PK, identity | Identificador. |
 | `id_grupo` | INT, FK → `grupos_proyectos(id_grupo)`, ON DELETE CASCADE | Proyecto. |
 | `id_usuario` | UUID, FK → `usuarios(id_usuario)`, ON DELETE CASCADE | Alumno calificado. |
-| `nota` | NUMERIC(4,2), NULL, CHECK 0–10 | Nota final (`NULL` = sin nota). |
+| `nota` | NUMERIC(4,2), NULL, CHECK 0–10 | Nota de esa evaluación. |
+| `descripcion` | TEXT, NULL | Descripción/motivo de la nota. |
+| `fecha` | DATE, NOT NULL, DEFAULT CURRENT_DATE | Fecha de la nota. |
 | `id_calificado_por` | UUID, FK → `usuarios(id_usuario)`, ON DELETE SET NULL | Profesor/admin que cargó la nota. |
 | `creado_en` / `actualizado_en` | TIMESTAMPTZ | Alta y última modificación. |
 
-`UNIQUE (id_grupo, id_usuario)` — el API hace upsert con `onConflict: "id_grupo,id_usuario"`.
+Una fila por **nota** (varias por alumno). El promedio por alumno se calcula en el API (`computeAverage`). El `UNIQUE (id_grupo, id_usuario)` se eliminó en la migración 023.
 
 **RLS:** habilitado **sin policies** (deny-by-default para `anon`/`authenticated`) — acceso solo vía `createAdminClient()` (service role) desde Express, igual que `huellas`. Los permisos de negocio se validan en el API (`assertCanAccessGroup` + `canGradeProject`).
 

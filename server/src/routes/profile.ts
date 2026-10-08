@@ -34,6 +34,16 @@ function avatarExtension(mimeType: string): string | null {
   return null;
 }
 
+/** Extrae la ruta del objeto dentro del bucket `avatars` desde su URL pública. */
+function avatarObjectPathFromUrl(url: string | null): string | null {
+  if (!url) return null;
+  const marker = `/${AVATAR_BUCKET}/`;
+  const index = url.indexOf(marker);
+  if (index === -1) return null;
+  const path = url.slice(index + marker.length).split("?")[0];
+  return path || null;
+}
+
 async function loadProfileRow(userClient: ReturnType<typeof getUserSupabase>, userId: string) {
   const { data, error } = await userClient
     .from("usuarios")
@@ -138,12 +148,16 @@ router.patch("/", requireAuth, async (req, res) => {
         return;
       }
 
-      const objectPath = `${userId}/profile.${ext}`;
+      // Nombre único por subida: evita que el navegador/CDN sirvan la imagen
+      // anterior cuando antes se reutilizaba `${userId}/profile.${ext}`.
+      const previousRow = await loadProfileRow(userClient, userId);
+      const objectPath = `${userId}/profile-${Date.now()}.${ext}`;
       const { error: uploadError } = await userClient.storage
         .from(AVATAR_BUCKET)
         .upload(objectPath, buffer, {
-          upsert: true,
+          upsert: false,
           contentType: body.avatarMimeType,
+          cacheControl: "3600",
         });
 
       if (uploadError) {
@@ -156,6 +170,15 @@ router.patch("/", requireAuth, async (req, res) => {
         .getPublicUrl(objectPath);
 
       updates.foto_perfil = publicData.publicUrl;
+
+      // Limpieza best-effort del avatar anterior.
+      const oldPath = avatarObjectPathFromUrl(previousRow?.foto_perfil ?? null);
+      if (oldPath && oldPath !== objectPath) {
+        await userClient.storage
+          .from(AVATAR_BUCKET)
+          .remove([oldPath])
+          .catch(() => undefined);
+      }
     }
 
     const { error: profileError } = await userClient

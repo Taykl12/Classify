@@ -2,16 +2,15 @@ import { useCallback, useEffect, useMemo, useState, type KeyboardEvent } from "r
 import { ArrowLeft, BadgeCheck, Circle, ExternalLink, Lock, Plus, Trash2, Unlock, User } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { EmailChipInput } from "../components/projects/EmailChipInput";
+import { ProjectGradesPanel } from "../components/projects/ProjectGradesPanel";
 import { useAuth } from "../contexts/AuthContext";
 import { ApiError, apiFetch, apiFetchWithRetry, isUnauthorizedError } from "../lib/api";
 import { ensureCreatorInMembers, sortMembersWithCreatorFirst } from "../lib/memberEmails";
-import { documentNameFromUrl, openExternalUrl } from "../lib/openUrl";
+import { documentNameFromUrl, isSafeExternalUrl, openExternalUrl } from "../lib/openUrl";
 import type {
   ProjectConfigTab,
   ProjectDetail,
   ProjectDocument,
-  ProjectGradeMember,
-  ProjectGradesResponse,
   ProjectLocks,
 } from "../types/projects";
 import { ROUTES } from "../routes";
@@ -50,26 +49,6 @@ function detailToForm(detail: ProjectDetail, creatorEmail?: string | null): Conf
     documents: detail.documents ?? [],
     memberEmails: ensureCreatorInMembers(detail.memberEmails ?? [], creatorEmail ?? detail.ownerEmail),
   };
-}
-
-function gradeMemberName(member: ProjectGradeMember): string {
-  const full = [member.lastName, member.firstName].filter(Boolean).join(", ");
-  if (full) return full;
-  if (member.email) return member.email;
-  if (member.dni) return `DNI ${member.dni}`;
-  return "Integrante";
-}
-
-function gradeMemberInitials(member: ProjectGradeMember): string {
-  const initials = `${member.lastName.charAt(0)}${member.firstName.charAt(0)}`.trim();
-  return initials ? initials.toUpperCase() : "?";
-}
-
-function clampGrade(raw: string): number | null {
-  if (!raw.trim()) return null;
-  const parsed = Number(raw);
-  if (!Number.isFinite(parsed)) return null;
-  return Math.min(10, Math.max(0, parsed));
 }
 
 function LinkField({
@@ -134,22 +113,13 @@ export default function ProjectConfigPage() {
   const [saved, setSaved] = useState<ConfigFormState | null>(null);
   const [docNameDraft, setDocNameDraft] = useState("");
   const [docDraft, setDocDraft] = useState("");
-  const [grades, setGrades] = useState<ProjectGradeMember[]>([]);
-  const [savedGrades, setSavedGrades] = useState<ProjectGradeMember[]>([]);
-  const [canGrade, setCanGrade] = useState(false);
-  const [gradesError, setGradesError] = useState<string | null>(null);
 
   const creatorEmail = user?.email ?? ownerEmail;
 
   const load = useCallback(async () => {
     if (!projectId) return;
     setError(null);
-    const [detail, gradesResult] = await Promise.all([
-      apiFetchWithRetry<ProjectDetail>(`/api/projects/${projectId}`),
-      apiFetchWithRetry<ProjectGradesResponse>(`/api/projects/${projectId}/calificaciones`)
-        .then((res) => ({ ok: true as const, res }))
-        .catch((e: unknown) => ({ ok: false as const, e })),
-    ]);
+    const detail = await apiFetchWithRetry<ProjectDetail>(`/api/projects/${projectId}`);
     const next = detailToForm(detail, user?.email ?? detail.ownerEmail);
     setForm(next);
     setSaved(next);
@@ -158,23 +128,6 @@ export default function ProjectConfigPage() {
     setCanManageLocks(Boolean(detail.canManageLocks));
     setLocks(detail.locks ?? DEFAULT_LOCKS);
     setOwnerEmail(detail.ownerEmail ?? null);
-
-    if (gradesResult.ok) {
-      const members = gradesResult.res.members.map((member) => ({ ...member }));
-      setGrades(members);
-      setSavedGrades(members);
-      setCanGrade(Boolean(gradesResult.res.canGrade));
-      setGradesError(null);
-    } else {
-      setGrades([]);
-      setSavedGrades([]);
-      setCanGrade(false);
-      setGradesError(
-        gradesResult.e instanceof Error
-          ? gradesResult.e.message
-          : "No se pudieron cargar las calificaciones"
-      );
-    }
   }, [projectId, user?.email]);
 
   useEffect(() => {
@@ -214,7 +167,6 @@ export default function ProjectConfigPage() {
 
   function handleUndo() {
     if (saved) setForm({ ...saved });
-    setGrades(savedGrades.map((member) => ({ ...member })));
   }
 
   function toggleLock(key: keyof ProjectLocks) {
@@ -223,6 +175,23 @@ export default function ProjectConfigPage() {
 
   async function handleSave() {
     if (!projectId || !form || !canSave) return;
+
+    const invalidDoc = form.documents.find(
+      (doc) => doc.url.trim() && !isSafeExternalUrl(doc.url)
+    );
+    if (invalidDoc) {
+      setError(`Enlace inválido en "${invalidDoc.name}": usá un enlace http(s)`);
+      return;
+    }
+    if (form.backupLink.trim() && !isSafeExternalUrl(form.backupLink)) {
+      setError("El enlace de respaldo debe ser http(s)");
+      return;
+    }
+    if (form.gradesLink.trim() && !isSafeExternalUrl(form.gradesLink)) {
+      setError("El enlace de calificaciones debe ser http(s)");
+      return;
+    }
+
     setSaving(true);
     setError(null);
     try {
@@ -265,14 +234,6 @@ export default function ProjectConfigPage() {
         method: "PUT",
         body: JSON.stringify(payload),
       });
-      if (canGrade && grades.length > 0) {
-        await apiFetch<ProjectGradesResponse>(`/api/projects/${projectId}/calificaciones`, {
-          method: "PUT",
-          body: JSON.stringify({
-            grades: grades.map((member) => ({ userId: member.userId, grade: member.grade })),
-          }),
-        });
-      }
       await load();
     } catch (e) {
       setError(e instanceof ApiError ? e.message : "No se pudo guardar");
@@ -284,6 +245,11 @@ export default function ProjectConfigPage() {
   function addDocument() {
     const url = docDraft.trim();
     if (!url || !form) return;
+    if (!isSafeExternalUrl(url)) {
+      setError("Usá un enlace http(s) válido para el documento");
+      return;
+    }
+    setError(null);
     const name = docNameDraft.trim() || documentNameFromUrl(url);
     patchForm({
       documents: [...form.documents, { name, url }],
@@ -601,86 +567,12 @@ export default function ProjectConfigPage() {
                 disabled={!documentationEditable}
               />
               <div className="project-config__field">
-                <span className="project-config__label">Notas por Integrante</span>
-                {gradesError ? (
-                  <p className="dashboard-error" role="alert">
-                    No se pudieron cargar las calificaciones: {gradesError}
-                  </p>
-                ) : null}
-                {!canGrade ? (
-                  <p className="project-config__member-meta">
-                    Solo un profesor asignado o administrador puede cargar notas.
-                  </p>
-                ) : null}
-                {grades.length === 0 ? (
-                  <p className="project-config__member-meta">
-                    Todavía no hay integrantes en el equipo.
-                  </p>
-                ) : (
-                  <table className="project-config__grades-table">
-                    <thead>
-                      <tr>
-                        <th scope="col">Integrante</th>
-                        <th scope="col">DNI</th>
-                        <th scope="col">Nota</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {grades.map((member, index) => (
-                        <tr key={member.userId}>
-                          <td
-                            className="project-config__grades-cell"
-                            data-label="Integrante"
-                          >
-                            <div className="project-config__grades-student">
-                              {member.profilePhotoUrl ? (
-                                <img
-                                  src={member.profilePhotoUrl}
-                                  alt=""
-                                  className="project-config__grades-avatar"
-                                />
-                              ) : (
-                                <span className="project-config__grades-avatar project-config__grades-avatar--fallback">
-                                  {gradeMemberInitials(member)}
-                                </span>
-                              )}
-                              <span className="project-config__grades-name">
-                                {gradeMemberName(member)}
-                              </span>
-                            </div>
-                          </td>
-                          <td
-                            className="project-config__grades-cell project-config__grades-cell--muted"
-                            data-label="DNI"
-                          >
-                            {member.dni || "—"}
-                          </td>
-                          <td className="project-config__grades-cell" data-label="Nota">
-                            <input
-                              type="number"
-                              className="project-config__grade-input"
-                              step="0.01"
-                              min={0}
-                              max={10}
-                              inputMode="decimal"
-                              value={member.grade ?? ""}
-                              disabled={!canGrade}
-                              aria-label={`Nota de ${gradeMemberName(member)}`}
-                              onChange={(e) => {
-                                const grade = clampGrade(e.target.value);
-                                setGrades((current) =>
-                                  current.map((item, i) =>
-                                    i === index ? { ...item, grade } : item
-                                  )
-                                );
-                              }}
-                            />
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                )}
+                <span className="project-config__label">Notas diarias por integrante</span>
+                <p className="project-config__member-meta">
+                  Cada nota es un registro con fecha y descripción. El promedio se calcula
+                  automáticamente.
+                </p>
+                <ProjectGradesPanel projectId={projectId ?? ""} onChanged={() => void load()} />
               </div>
             </div>
           ) : null}

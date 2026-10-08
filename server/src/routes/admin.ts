@@ -839,9 +839,12 @@ function readSubjectPayload(body: unknown): {
   const raw = body as Record<string, unknown>;
   const name = toTrimmedString(raw.name);
   const courseId = Number(raw.courseId);
-  if (!name) throw Object.assign(new Error("Nombre de la materia requerido"), { status: 400 });
+  if (!name) throw Object.assign(new Error("El nombre de la materia es obligatorio"), { status: 400 });
+  if (name.length > 150) {
+    throw Object.assign(new Error("El nombre no puede superar 150 caracteres"), { status: 400 });
+  }
   if (!Number.isInteger(courseId) || courseId <= 0) {
-    throw Object.assign(new Error("Curso requerido"), { status: 400 });
+    throw Object.assign(new Error("Seleccioná un curso válido"), { status: 400 });
   }
   const horario = optionalString(raw.horario);
   validateHorario(horario);

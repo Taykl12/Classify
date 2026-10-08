@@ -81,6 +81,10 @@ export default function ProjectsPage() {
     navigate(ROUTES.projectConfig(item.id));
   }
 
+  function openTasks(item: ProjectListItem) {
+    navigate(ROUTES.projectTasks(item.id));
+  }
+
   function closeModal() {
     setCreateOpen(false);
     setModalError(null);
@@ -180,6 +184,7 @@ export default function ProjectsPage() {
           onToggleSelect={toggleSelect}
           onToggleSelectAll={toggleSelectAll}
           onEdit={openEdit}
+          onTasks={openTasks}
           onToggleFavorite={handleToggleFavorite}
         />
       </section>

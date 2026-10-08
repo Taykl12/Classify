@@ -8,6 +8,7 @@ import {
   type TareaGrupoRow,
 } from "../lib/mappers.js";
 import { getAccessibleGroupIds } from "../lib/projectAccess.js";
+import { getFavoriteGroupIds } from "../lib/favorites.js";
 
 const router = Router();
 
@@ -15,16 +16,20 @@ router.get("/featured", requireAuth, async (req, res) => {
   try {
     const { userId } = req as AuthedRequest;
     const supabase = getUserSupabase(req as AuthedRequest);
-    const ids = await getAccessibleGroupIds(supabase, userId);
-    if (ids.length === 0) {
+    const [ids, favoriteIds] = await Promise.all([
+      getAccessibleGroupIds(supabase, userId),
+      getFavoriteGroupIds(supabase, userId),
+    ]);
+    const accessible = new Set(ids);
+    const favoriteAccessible = [...favoriteIds].filter((id) => accessible.has(id));
+    if (favoriteAccessible.length === 0) {
       res.json([]);
       return;
     }
     const { data: grupos, error: gError } = await supabase
       .from("grupos_proyectos")
-      .select("id_grupo, nombre_proyecto, es_favorito")
-      .in("id_grupo", ids)
-      .eq("es_favorito", true);
+      .select("id_grupo, nombre_proyecto")
+      .in("id_grupo", favoriteAccessible);
     if (gError) {
       res.status(500).json({ error: gError.message });
       return;

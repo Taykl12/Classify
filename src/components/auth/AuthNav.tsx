@@ -4,7 +4,7 @@ import { AuthAvatar } from './AuthAvatar';
 import '../../styles/theme-toggle.css';
 
 interface AuthNavProps {
-  alternateLink: {
+  alternateLink?: {
     to: string;
     label: string;
   };
@@ -20,11 +20,13 @@ export function AuthNav({ alternateLink }: AuthNavProps) {
           <span>Classify</span>
         </Link>
       </div>
-      <ul>
-        <li>
-          <Link to={alternateLink.to}>{alternateLink.label}</Link>
-        </li>
-      </ul>
+      {alternateLink ? (
+        <ul>
+          <li>
+            <Link to={alternateLink.to}>{alternateLink.label}</Link>
+          </li>
+        </ul>
+      ) : null}
     </nav>
   );
 }

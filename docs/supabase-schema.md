@@ -34,11 +34,44 @@ Carrusel: `GET /api/dashboard/featured` solo proyectos con `es_favorito = true`.
 
 | Método | Ruta | Acción |
 |--------|------|--------|
-| GET | `/api/calendar/events` | Eventos de proyectos accesibles |
-| POST | `/api/calendar/events` | Crear evento (`eventDate` obligatorio) |
+| GET | `/api/calendar/events` | Eventos accesibles + vencimientos de tareas (`type: "event" \| "task"`) |
+| POST | `/api/calendar/events` | Crear evento (valida prioridad, fecha y horas) |
+| PATCH | `/api/calendar/events/:id` | Editar evento |
+| DELETE | `/api/calendar/events/:id` | Eliminar evento |
+| GET | `/api/calendar/events/export.ics` | Exportar eventos filtrados (`.ics`) |
 
-Tabla: `eventos_calendario` — RPC `create_evento_calendario`.
-Migración: `011_eventos_calendario.sql`.
+Tabla: `eventos_calendario` (+ `hora_inicio`, `hora_fin`, `recurrencia`).
+RPC `create_evento_calendario`. Policies con `can_view_proyecto` / `can_manage_proyecto`.
+Migraciones: `011`, `022`.
+
+## Favoritos de proyectos
+
+`proyecto_favorito` (un favorito por usuario). `PATCH /api/projects/:id/favorite` para
+cualquier usuario con acceso; `GET /api/dashboard/featured` y `GET /api/projects` usan
+los favoritos del usuario. Migración: `022`.
+
+## API tareas de proyecto
+
+| Método | Ruta | Acción |
+|--------|------|--------|
+| GET | `/api/tasks/:projectId` | Listar tareas del proyecto |
+| POST | `/api/tasks` | Crear tarea (`projectId`, `title`, `priority`, `deadline?`) |
+| PATCH | `/api/tasks/:taskId` | Editar tarea (incluye `status`) |
+| DELETE | `/api/tasks/:taskId` | Eliminar tarea |
+
+Tabla `tareas_grupo`. Acceso: dueño, integrante, profesor asignado o admin
+(`can_view_proyecto`). Migraciones: `010`, `023`. UI: `/proyectos/:id/tareas`.
+
+## API notas diarias
+
+| Método | Ruta | Acción |
+|--------|------|--------|
+| GET | `/api/projects/:id/calificaciones` | Notas por integrante + promedio |
+| POST | `/api/projects/:id/calificaciones` | Agregar nota (nota, descripción, fecha) |
+| PATCH | `/api/projects/:id/calificaciones/:gradeId` | Editar nota |
+| DELETE | `/api/projects/:id/calificaciones/:gradeId` | Eliminar nota |
+
+Tabla `calificaciones_proyecto` (varias notas por alumno). Migraciones: `019`, `023`.
 
 ## API asistencia de profesores (huella)
 
@@ -60,7 +93,8 @@ Migración: `021_asistencia_profesores.sql`.
 
 ## Roles seed
 
-`admin`, `profesor`, `alumno` — registro asigna `profesor` por defecto.
+`admin`, `profesor`, `alumno`. No hay registro público: un administrador crea cada usuario
+desde `/admin/usuarios` y elige su rol.
 
 ## RLS (migración aplicada)
 

@@ -61,11 +61,34 @@ Se añadió una aplicación **React + TypeScript + Vite** con **CSS vanilla** (s
 - **Frontend:** nueva ruta pública `/restablecer-contrasena` (`ResetPasswordPage`) que lee `#access_token=...&type=recovery`, pide la nueva contraseña y persiste la sesión; `AuthContext.resetPassword`.
 - **Requisito externo:** whitelistear la URL en Supabase Auth → URL Configuration → Redirect URLs y confirmar que la plantilla de email use `{{ .ConfirmationURL }}`.
 
-### Mensajes de error de autenticación en español
+### Correcciones y mejoras de proyectos/calendario (octubre 2026)
 
-- **Helper:** `server/src/lib/authMessages.ts` (`mapAuthError`) traduce los errores de Supabase Auth por `code` y por patrones del mensaje en inglés, con fallback en español.
-- **Aplicado en:** login, registro, recuperar contraseña, restablecer contraseña (`auth.ts`), cambio de email/contraseña (`profile.ts`) y alta/edición/borrado de usuarios (`admin.ts`).
-- **Ejemplo:** `Invalid login credentials` → `Email o contraseña incorrectos.`; `Email not confirmed` → `Tu correo todavía no está confirmado…`; `over_email_send_rate_limit` → `Demasiados intentos…`.
+- **Favoritos por usuario:** migración `022` con tabla `proyecto_favorito` (RLS por fila propia + `can_view_proyecto`). Cualquier usuario con acceso puede marcar/quitar; se eliminó la restricción de dueño. Carrusel y listado usan los favoritos del usuario.
+- **Imágenes de perfil:** el avatar se sube con nombre único (`profile-<timestamp>.<ext>`) y se borra el anterior; evita que el navegador/CDN muestre la imagen vieja.
+- **Calendario (roles):** `eventos_calendario` ahora permite ver/crear a profesor asignado y admin (`can_view_proyecto`); el RPC acepta admin.
+- **Calendario (UI):** se corrigió el `<button>` anidado (grilla con `role="grid"`/`gridcell`), los días de meses adyacentes navegan en vez de crear eventos, Escape cierra el modal del día y el de detalle, navegación por teclado (flechas/Home/End/PageUp/PageDown), `aria-label` por celda.
+- **Calendario (API):** validación server-side de `priority`, `eventDate`, `projectId`; contrato POST consistente con GET.
+- **Calendario (nuevo):** editar/eliminar eventos (`PATCH`/`DELETE` + policies RLS), detalle individual, vista agenda con búsqueda y filtro por proyecto, vencimientos de tareas diferenciados (solo lectura), horas de evento y exportación `.ics`. Columna `recurrencia` preparada (sin expansión todavía).
+- **Modales:** `AdminModal`, `ProjectFormModal`, `EventFormModal` y modales del día/detalle cierran con Escape respetando el stack (`useModalEscape`).
+- **Carousel:** navegación con `ArrowLeft`/`ArrowRight` cuando el foco está dentro.
+- **Materias:** el selector de hora se porta a `document.body` (ya no queda recortado por el modal); validación explícita de nombre, curso e `inicio < fin` en cliente y servidor.
+- **Seguridad:** validación de URLs (`http`/`https` únicamente) en documentos y links; `openExternalUrl` rechaza `javascript:`; saneo de longitud/caracteres de control en textos. Sin `dangerouslySetInnerHTML` (React escapa el contenido).
+
+### Tareas de proyecto y notas diarias (octubre 2026)
+
+- **BD (migración 023):**
+  - `create_tarea_grupo` usa `can_view_proyecto`; nuevas policies SELECT/INSERT/UPDATE/DELETE en `tareas_grupo` (integrantes pueden gestionar).
+  - `calificaciones_proyecto` pasa a **notas diarias**: columnas `descripcion` y `fecha`, se elimina el `UNIQUE (id_grupo, id_usuario)`.
+- **Tareas (UI nueva):** botón **Tareas** en el listado de proyectos → página `/proyectos/:id/tareas`. Crear (fecha límite opcional), listar, cambiar estado (Pendiente / En Progreso / Completado), editar y eliminar. Profesores y alumnos del proyecto pueden operar.
+- **API tareas:** `GET /api/tasks/:projectId`, `POST /api/tasks`, `PATCH/DELETE /api/tasks/:taskId`.
+- **Notas diarias (UI):** la pestaña Calificaciones ahora lista las notas de cada alumno (fecha, valor, descripción), con promedio automático y alta/edición/borrado.
+- **API notas:** `GET/POST /api/projects/:id/calificaciones`, `PATCH/DELETE /api/projects/:id/calificaciones/:gradeId`.
+
+### Eliminación del registro público
+
+- Se quita la funcionalidad de **registrarse**: en Classify las cuentas (profesores y alumnos) las crea un administrador desde `/admin/usuarios`.
+- **Frontend:** eliminados `RegisterPage` y `register.css`; removidas su ruta (`/register`), el método `AuthContext.register` y los enlaces "Registrarse" del login. `AuthNav.alternateLink` pasó a ser opcional; `AuthVariant` quedó `login | recover`.
+- **Backend:** eliminado `POST /api/auth/register` y `getDefaultRoleId` (solo se usaban ahí). `registerUnauthorizedHandler` (otra cosa) se mantiene.
 
 ---
 

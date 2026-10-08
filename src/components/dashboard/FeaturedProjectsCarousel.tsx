@@ -1,6 +1,6 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useCallback, useMemo, useRef, useState } from 'react';
-import type { CSSProperties } from 'react';
+import type { CSSProperties, KeyboardEvent } from 'react';
 import { useCarouselItemsPerPage } from '../../hooks/useCarouselMetrics';
 import { useViewportWidth } from '../../hooks/useViewportWidth';
 import type { Project } from '../../types/dashboard';
@@ -37,6 +37,21 @@ export function FeaturedProjectsCarousel({ projects }: FeaturedProjectsCarouselP
     setPageIndex((page) => Math.min(maxPage, page + 1));
   }, [maxPage]);
 
+  // Flechas del teclado solo cuando el foco está dentro del carrusel (no hay
+  // listener global: el handler vive en el elemento de la región).
+  const handleKeyDown = useCallback(
+    (event: KeyboardEvent<HTMLDivElement>) => {
+      if (event.key === "ArrowLeft") {
+        event.preventDefault();
+        goPrev();
+      } else if (event.key === "ArrowRight") {
+        event.preventDefault();
+        goNext();
+      }
+    },
+    [goPrev, goNext],
+  );
+
   const trackStyle = useMemo((): CSSProperties | undefined => {
     if (viewportWidth <= 0) return undefined;
     return {
@@ -46,7 +61,14 @@ export function FeaturedProjectsCarousel({ projects }: FeaturedProjectsCarouselP
   }, [currentPage, pageCount, viewportWidth]);
 
   return (
-    <div className="carousel" role="region" aria-label="Proyectos destacados">
+    <div
+      className="carousel"
+      role="region"
+      aria-label="Proyectos destacados"
+      aria-roledescription="carrusel"
+      tabIndex={0}
+      onKeyDown={handleKeyDown}
+    >
       <button
         type="button"
         className="carousel__nav carousel__nav--prev"
@@ -85,7 +107,7 @@ export function FeaturedProjectsCarousel({ projects }: FeaturedProjectsCarouselP
       </button>
 
       <p className="carousel__pagination sr-only" aria-live="polite">
-        Página {currentPage + 1} de {pageCount}
+        Página {currentPage + 1} de {pageCount}. Usá las flechas izquierda y derecha para navegar.
       </p>
     </div>
   );

@@ -42,9 +42,9 @@ export function mapProjectConfig(row: GrupoProyectoRow) {
   };
 }
 
-export function mapProjectDetail(row: GrupoProyectoRow) {
+export function mapProjectDetail(row: GrupoProyectoRow, isFavorite: boolean) {
   return {
-    ...mapProjectListItem(row),
+    ...mapProjectListItem(row, isFavorite),
     objective: row.descripcion ?? "",
     ...mapProjectConfig(row),
   };
@@ -79,7 +79,7 @@ function mapPriority(p: string): "Alta" | "Media" | "Baja" {
   return "Media";
 }
 
-export function mapProjectListItem(row: GrupoProyectoRow) {
+export function mapProjectListItem(row: GrupoProyectoRow, isFavorite: boolean) {
   const status = (row.estado_proyecto ?? "Abierto") as ProjectListStatus;
   const scopeNotes = row.notas_alcance?.trim() ?? "";
   return {
@@ -89,7 +89,7 @@ export function mapProjectListItem(row: GrupoProyectoRow) {
     scopeNotes,
     status: status === "Cerrado" ? "Cerrado" : "Abierto",
     createdAt: formatDate(row.fecha_creacion),
-    isFavorite: Boolean(row.es_favorito),
+    isFavorite,
     preprojectValidated: Boolean(row.anteproyecto_validado),
   };
 }

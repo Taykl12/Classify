@@ -154,3 +154,30 @@ Lo que falta:
 - `src/styles/Calendary.css`
 
 **Migraciones:** ninguna.
+
+---
+
+## Estado actual (migración 022)
+
+El calendario se reescribió. Componentes:
+
+- `src/pages/Calendary.tsx`: grilla mensual accesible (`role="grid"`, roving tabindex,
+  flechas/Home/End/PageUp/PageDown, `aria-label` por celda), vista agenda, filtros y
+  búsqueda, export `.ics`.
+- `src/components/calendar/EventFormModal.tsx`: crear/editar con fecha, horas y prioridad.
+- `src/components/calendar/CalendarModals.tsx`: modal del día y detalle individual
+  (editar/eliminar).
+- `src/components/calendar/AgendaView.tsx`: lista agrupada por fecha.
+
+Comportamiento:
+
+- Los días de meses adyacentes **navegan al mes** correspondiente; no crean eventos ni
+  muestran eventos inconsistentes.
+- Cada celda es un `gridcell` (no hay `<button>` anidado). Los chips de evento son
+  botones que abren el **detalle individual**; el clic en la celda abre el resumen del
+  día o el formulario si está vacío.
+- Los vencimientos de `tareas_grupo.fecha_limite` se muestran como `type: "task"`
+  (amarillo), **solo lectura**, diferenciados de los eventos.
+- `eventos_calendario` tiene `hora_inicio`, `hora_fin` y `recurrencia` (preparada, sin
+  expansión de recurrencia todavía).
+

@@ -34,9 +34,9 @@ src/               React frontend
   App.tsx          Router + AuthProvider + ThemeProvider
   routes.ts        ROUTES constant (paths in Spanish: /proyectos, /calendario, /recuperar-contrasena)
   lib/api.ts       apiFetch / apiFetchWithRetry — Bearer token from localStorage, auto-logout on 401
-  contexts/        AuthContext (Supabase login/register/logout), ThemeContext (light/dark toggle)
+  contexts/        AuthContext (Supabase login/logout), ThemeContext (light/dark toggle)
   components/
-    auth/          LoginPage, RegisterPage, RecoverPasswordPage helpers
+    auth/          LoginPage, RecoverPasswordPage helpers
     layout/        DashboardLayout + Sidebar
     dashboard/     FeaturedProjectsCarousel + PendingProjectsSection
     projects/      ProjectFormModal, ProjectsListSection, EmailChipInput
@@ -45,7 +45,7 @@ src/               React frontend
     global.css     Base styles
     *.css          Per-page/per-component styles
   types/           dashboard.ts, projects.ts, users.ts
-  pages/           DashboardPage, ProjectsPage, ProjectConfigPage, LoginPage, RegisterPage, RecoverPasswordPage, Calendary
+  pages/           DashboardPage, ProjectsPage, ProjectConfigPage, LoginPage, RecoverPasswordPage, Calendary
 
 server/            Express backend
   src/index.ts     Server entry (port 3001)
@@ -72,7 +72,6 @@ supabase/migrations/  20 SQL migrations (001–020)
 
 | Endpoint | Notes |
 |----------|-------|
-| `POST /api/auth/register` | Creates Supabase Auth user + `usuarios` row; role = `alumno` (3) by default |
 | `POST /api/auth/login` | Returns `{ accessToken, user }` |
 | `GET /api/auth/me` | Validates token, returns user profile |
 | `POST /api/auth/recover-password` | Calls Supabase `resetPasswordForEmail`; `redirectTo` = `${APP_ORIGIN}/restablecer-contrasena` |
@@ -92,7 +91,7 @@ Password reset route (public): `/restablecer-contrasena` (`ResetPasswordPage`) r
 | Assign grades per member | **Assigned professor, admin, or owner with `profesor` role** (`PUT /api/projects/:id/calificaciones`) |
 | Delete | **Owner only** |
 | Bulk delete | **Owner only** (sends `{ ids: [] }` to `DELETE /api/projects/bulk`) |
-| Toggle favorite | **Owner only** (`PATCH /api/projects/:id/favorite`) |
+| Toggle favorite | **Any user with access** (per-user, `PATCH /api/projects/:id/favorite`) |
 
 ## Database
 
@@ -100,7 +99,8 @@ Password reset route (public): `/restablecer-contrasena` (`ResetPasswordPage`) r
 - User profile in `usuarios` table (not `auth.users`)
 - Roles seed: admin=1, profesor=2, alumno=3
 - Projects: `grupos_proyectos` (main), `proyecto_profesor` (owner link), `grupo_estudiante` (members)
-- Tasks: `tareas_grupo` (kanban — Pendiente / En Progreso / Completado)
+- Tasks: `tareas_grupo` (Pendiente / En Progreso / Completado); UI en `/proyectos/:id/tareas` (botón "Tareas" en `/proyectos`); API `GET /api/tasks/:projectId`, `POST/PATCH/DELETE /api/tasks`
+- Grades: `calificaciones_proyecto` son **notas diarias** (varias por alumno con `descripcion` + `fecha`); promedio calculado en el API; UI en la pestaña Calificaciones
 - Documents stored as JSONB in `grupos_proyectos.documentos`
 - RPC functions: `create_grupo_proyecto`, `find_user_id_by_email`, `get_group_member_emails`, `search_usuarios_for_invite`, `get_project_owner_email`
 

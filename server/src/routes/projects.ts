@@ -19,7 +19,9 @@ import {
   getGroupMemberEmails,
   syncGroupMembers,
 } from "../lib/projectMembers.js";
-import { userIsProfessor } from "../lib/roles.js";
+import { userIsAdmin, userIsProfessor } from "../lib/roles.js";
+import { getFavoriteGroupIds, isFavoriteProyecto } from "../lib/favorites.js";
+import { optionalHttpUrl, optionalText, readHttpUrl, readText } from "../lib/validation.js";
 import { createAdminClient } from "../lib/supabase.js";
 import {
   assertCanAccessGroup,
@@ -59,10 +61,6 @@ type ProjectBody = {
   locks?: ProjectLocksBody;
 };
 
-type ProjectGradeBody = {
-  grades?: Array<{ userId?: string; grade?: number | null }>;
-};
-
 interface ProjectMemberProfileRow {
   id_usuario: string;
   nombre: string | null;
@@ -79,7 +77,34 @@ interface ProjectGradeMemberDto {
   lastName: string;
   dni: string;
   profilePhotoUrl: string | null;
-  grade: number | null;
+  grades: ProjectGradeEntryDto[];
+  average: number | null;
+}
+
+interface ProjectGradeEntryDto {
+  id: string;
+  nota: number | null;
+  descripcion: string;
+  fecha: string;
+}
+
+interface GradeEntryRow {
+  id_calificacion: number;
+  id_usuario: string;
+  nota: number | string | null;
+  descripcion: string | null;
+  fecha: string;
+}
+
+const MAX_GRADE_TEXT = 500;
+
+function computeAverage(grades: ProjectGradeEntryDto[]): number | null {
+  const values = grades
+    .map((grade) => grade.nota)
+    .filter((nota): nota is number => nota !== null);
+  if (values.length === 0) return null;
+  const sum = values.reduce((total, value) => total + value, 0);
+  return Math.round((sum / values.length) * 100) / 100;
 }
 
 /** Nombre del rol global (`usuarios.id_rol` → `roles.nombre_rol`), en minúsculas. */
@@ -115,22 +140,25 @@ async function listProjectGradeMembers(idGrupo: number): Promise<ProjectGradeMem
       .in("id_usuario", memberIds),
     supabase
       .from("calificaciones_proyecto")
-      .select("id_usuario, nota")
-      .eq("id_grupo", idGrupo),
+      .select("id_calificacion, id_usuario, nota, descripcion, fecha")
+      .eq("id_grupo", idGrupo)
+      .order("fecha", { ascending: false })
+      .order("id_calificacion", { ascending: false }),
   ]);
   if (usersResult.error) throw new Error(usersResult.error.message);
   if (gradesResult.error) throw new Error(gradesResult.error.message);
 
-  const gradesByUser = new Map<string, number | null>();
-  const gradeRows = (gradesResult.data ?? []) as Array<{
-    id_usuario: string;
-    nota: number | string | null;
-  }>;
-  for (const row of gradeRows) {
-    gradesByUser.set(
-      row.id_usuario,
-      row.nota === null || row.nota === undefined ? null : Number(row.nota)
-    );
+  const gradesByUser = new Map<string, ProjectGradeEntryDto[]>();
+  for (const row of (gradesResult.data ?? []) as GradeEntryRow[]) {
+    const list = gradesByUser.get(row.id_usuario) ?? [];
+    list.push({
+      id: String(row.id_calificacion),
+      nota:
+        row.nota === null || row.nota === undefined ? null : Number(row.nota),
+      descripcion: (row.descripcion ?? "").trim(),
+      fecha: String(row.fecha).split("T")[0] ?? String(row.fecha),
+    });
+    gradesByUser.set(row.id_usuario, list);
   }
 
   const usersById = new Map(
@@ -140,15 +168,19 @@ async function listProjectGradeMembers(idGrupo: number): Promise<ProjectGradeMem
   return memberIds
     .map((id) => usersById.get(id))
     .filter((profile): profile is ProjectMemberProfileRow => globalRoleName(profile?.roles) === "alumno")
-    .map((profile) => ({
-      userId: profile.id_usuario,
-      email: "",
-      firstName: profile.nombre?.trim() ?? "",
-      lastName: profile.apellido?.trim() ?? "",
-      dni: profile.dni?.trim() ?? "",
-      profilePhotoUrl: profile.foto_perfil ?? null,
-      grade: gradesByUser.get(profile.id_usuario) ?? null,
-    }))
+    .map((profile) => {
+      const grades = gradesByUser.get(profile.id_usuario) ?? [];
+      return {
+        userId: profile.id_usuario,
+        email: "",
+        firstName: profile.nombre?.trim() ?? "",
+        lastName: profile.apellido?.trim() ?? "",
+        dni: profile.dni?.trim() ?? "",
+        profilePhotoUrl: profile.foto_perfil ?? null,
+        grades,
+        average: computeAverage(grades),
+      };
+    })
     .sort((a, b) => {
       const nameA = `${a.lastName} ${a.firstName}`.trim().toLowerCase();
       const nameB = `${b.lastName} ${b.firstName}`.trim().toLowerCase();
@@ -172,19 +204,25 @@ function buildConfigPatch(
   options?: { allowPreprojectApproval?: boolean }
 ): Record<string, unknown> {
   const patch: Record<string, unknown> = {};
-  if (body.objective !== undefined) patch.descripcion = body.objective.trim() || null;
-  if (body.scopeDetail !== undefined) patch.alcance_detalle = body.scopeDetail.trim() || null;
-  if (body.scopeNotes !== undefined) patch.notas_alcance = body.scopeNotes.trim() || null;
+  if (body.objective !== undefined) patch.descripcion = readText(body.objective, 2000) || null;
+  if (body.scopeDetail !== undefined) patch.alcance_detalle = readText(body.scopeDetail, 5000) || null;
+  if (body.scopeNotes !== undefined) patch.notas_alcance = readText(body.scopeNotes, 2000) || null;
   if (body.preprojectValidated !== undefined && options?.allowPreprojectApproval) {
     patch.anteproyecto_validado = body.preprojectValidated;
   }
-  if (body.backupLink !== undefined) patch.link_respaldo = body.backupLink.trim() || null;
-  if (body.gradesLink !== undefined) patch.link_calificaciones = body.gradesLink.trim() || null;
+  if (body.backupLink !== undefined) {
+    patch.link_respaldo = optionalHttpUrl(body.backupLink, "Enlace de respaldo");
+  }
+  if (body.gradesLink !== undefined) {
+    patch.link_calificaciones = optionalHttpUrl(body.gradesLink, "Enlace de calificaciones");
+  }
   if (body.documents !== undefined) {
     const docs: ProjectDocumentRow[] = body.documents.flatMap((d) => {
-      const url = d.url?.trim();
+      const url = readText(d.url, 2000);
       if (!url) return [];
-      return [{ nombre: d.name?.trim() || url, url }];
+      const safeUrl = readHttpUrl(url, "Documento");
+      const name = readText(d.name, 200) || safeUrl;
+      return [{ nombre: name, url: safeUrl }];
     });
     patch.documentos = docs;
   }
@@ -196,6 +234,9 @@ function validateProjectBody(body: ProjectBody, partial = false): string | null 
     return "El nombre del proyecto es obligatorio";
   }
   if (body.name !== undefined && !body.name.trim()) return "El nombre es obligatorio";
+  if (body.name !== undefined && body.name.trim().length > 150) {
+    return "El nombre no puede superar 150 caracteres";
+  }
   if (body.status && body.status !== "Abierto" && body.status !== "Cerrado") {
     return "Estado inválido";
   }
@@ -227,7 +268,8 @@ async function buildProjectDetailResponse(
   supabase: ReturnType<typeof getUserSupabase>,
   userId: string,
   idGrupo: number,
-  grupo: GrupoProyectoRow
+  grupo: GrupoProyectoRow,
+  isFavorite: boolean
 ) {
   const [memberEmails, ownerEmail, access, assignedProfessorEmails] = await Promise.all([
     getGroupMemberEmails(supabase, idGrupo),
@@ -237,7 +279,7 @@ async function buildProjectDetailResponse(
   ]);
   const locks = mapProjectLocks(grupo);
   return {
-    ...mapProjectDetail(grupo),
+    ...mapProjectDetail(grupo, isFavorite),
     locks,
     memberEmails,
     ownerEmail,
@@ -253,21 +295,39 @@ router.get("/", requireAuth, async (req, res) => {
   try {
     const { userId } = req as AuthedRequest;
     const supabase = getUserSupabase(req as AuthedRequest);
-    const ids = await getAccessibleGroupIds(supabase, userId);
-    if (ids.length === 0) {
-      res.json([]);
-      return;
-    }
-    const { data: grupos, error } = await supabase
+    const scopeAll = String(req.query.scope ?? "").trim().toLowerCase() === "all";
+
+    const [ids, favoriteIds] = await Promise.all([
+      getAccessibleGroupIds(supabase, userId),
+      getFavoriteGroupIds(supabase, userId),
+    ]);
+
+    // `scope=all` solo tiene efecto para administradores (listado global).
+    const wantsAll = scopeAll && (await userIsAdmin(supabase, userId));
+
+    let query = supabase
       .from("grupos_proyectos")
       .select(GRUPO_PROJECT_SELECT)
-      .in("id_grupo", ids)
       .order("fecha_creacion", { ascending: false });
+
+    if (!wantsAll) {
+      if (ids.length === 0) {
+        res.json([]);
+        return;
+      }
+      query = query.in("id_grupo", ids);
+    }
+
+    const { data: grupos, error } = await query;
     if (error) {
       res.status(500).json({ error: error.message });
       return;
     }
-    res.json((grupos as GrupoProyectoRow[]).map(mapProjectListItem));
+    res.json(
+      (grupos as GrupoProyectoRow[]).map((row) =>
+        mapProjectListItem(row, favoriteIds.has(row.id_grupo))
+      )
+    );
   } catch (e) {
     res.status(500).json({ error: e instanceof Error ? e.message : "Error interno" });
   }
@@ -292,7 +352,16 @@ router.get("/:id", requireAuth, async (req, res) => {
       res.status(404).json({ error: "Proyecto no encontrado" });
       return;
     }
-    res.json(await buildProjectDetailResponse(supabase, userId, idGrupo, grupo as GrupoProyectoRow));
+    const isFavorite = await isFavoriteProyecto(supabase, userId, idGrupo);
+    res.json(
+      await buildProjectDetailResponse(
+        supabase,
+        userId,
+        idGrupo,
+        grupo as GrupoProyectoRow,
+        isFavorite
+      )
+    );
   } catch (e) {
     const status = (e as Error & { status?: number }).status ?? 500;
     res.status(status).json({ error: e instanceof Error ? e.message : "Error interno" });
@@ -333,7 +402,7 @@ router.post("/", requireAuth, async (req, res) => {
       return;
     }
     const memberEmails = await getGroupMemberEmails(supabase, grupo.id_grupo as number);
-    res.status(201).json({ ...mapProjectListItem(grupo as GrupoProyectoRow), memberEmails });
+    res.status(201).json({ ...mapProjectListItem(grupo as GrupoProyectoRow, false), memberEmails });
   } catch (e) {
     res.status(500).json({ error: e instanceof Error ? e.message : "Error interno" });
   }
@@ -432,7 +501,16 @@ router.put("/:id", requireAuth, async (req, res) => {
       res.status(404).json({ error: "Proyecto no encontrado" });
       return;
     }
-    res.json(await buildProjectDetailResponse(supabase, userId, idGrupo, grupo as GrupoProyectoRow));
+    const isFavorite = await isFavoriteProyecto(supabase, userId, idGrupo);
+    res.json(
+      await buildProjectDetailResponse(
+        supabase,
+        userId,
+        idGrupo,
+        grupo as GrupoProyectoRow,
+        isFavorite
+      )
+    );
   } catch (e) {
     const status = (e as Error & { status?: number }).status ?? 500;
     res.status(status).json({ error: e instanceof Error ? e.message : "Error interno" });
@@ -453,19 +531,34 @@ router.patch("/:id/favorite", requireAuth, async (req, res) => {
       return;
     }
     const supabase = getUserSupabase(req as AuthedRequest);
-    await assertIsProjectOwner(supabase, userId, idGrupo);
+    // Favorito personal: cualquier usuario con acceso puede marcarlo/quitar.
+    await assertCanAccessGroup(supabase, userId, idGrupo);
 
-    const { data: grupo, error } = await supabase
+    if (isFavorite) {
+      const { error } = await supabase
+        .from("proyecto_favorito")
+        .insert({ id_grupo: idGrupo, id_usuario: userId });
+      // 23505 = ya estaba marcado: idempotente.
+      if (error && error.code !== "23505") throw new Error(error.message);
+    } else {
+      const { error } = await supabase
+        .from("proyecto_favorito")
+        .delete()
+        .eq("id_usuario", userId)
+        .eq("id_grupo", idGrupo);
+      if (error) throw new Error(error.message);
+    }
+
+    const { data: grupo, error: fetchError } = await supabase
       .from("grupos_proyectos")
-      .update({ es_favorito: isFavorite })
-      .eq("id_grupo", idGrupo)
       .select(GRUPO_PROJECT_SELECT)
+      .eq("id_grupo", idGrupo)
       .single();
-    if (error || !grupo) {
-      res.status(400).json({ error: error?.message ?? "No se pudo actualizar favorito" });
+    if (fetchError || !grupo) {
+      res.status(404).json({ error: "Proyecto no encontrado" });
       return;
     }
-    res.json(mapProjectListItem(grupo as GrupoProyectoRow));
+    res.json(mapProjectListItem(grupo as GrupoProyectoRow, isFavorite));
   } catch (e) {
     const status = (e as Error & { status?: number }).status ?? 500;
     res.status(status).json({ error: e instanceof Error ? e.message : "Error interno" });
@@ -583,7 +676,45 @@ router.get("/:id/calificaciones", requireAuth, async (req, res) => {
   }
 });
 
-router.put("/:id/calificaciones", requireAuth, async (req, res) => {
+function todayIso(): string {
+  const now = new Date();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+  return `${now.getFullYear()}-${month}-${day}`;
+}
+
+function readGradeNota(value: unknown): number | null {
+  if (value === null || value === undefined || value === "") return null;
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed) || parsed < 0 || parsed > 10) {
+    throw Object.assign(new Error("Nota inválida (0–10)"), { status: 400 });
+  }
+  return Math.round(parsed * 100) / 100;
+}
+
+function readGradeDate(value: unknown): string {
+  const raw = typeof value === "string" ? value.trim() : "";
+  if (!raw) return todayIso();
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(raw)) {
+    throw Object.assign(new Error("Fecha inválida (YYYY-MM-DD)"), { status: 400 });
+  }
+  return raw;
+}
+
+async function assertCanGradeProject(
+  supabase: ReturnType<typeof getUserSupabase>,
+  userId: string,
+  idGrupo: number
+): Promise<void> {
+  if (await canGradeProject(supabase, userId, idGrupo)) return;
+  throw Object.assign(
+    new Error("Solo un profesor asignado o administrador puede calificar"),
+    { status: 403 }
+  );
+}
+
+/** Agrega una nota diaria a un integrante. */
+router.post("/:id/calificaciones", requireAuth, async (req, res) => {
   try {
     const { userId } = req as AuthedRequest;
     const idGrupo = parseGroupId(paramId(req.params.id));
@@ -591,76 +722,125 @@ router.put("/:id/calificaciones", requireAuth, async (req, res) => {
       res.status(400).json({ error: "ID inválido" });
       return;
     }
-    const body = req.body as ProjectGradeBody;
-    if (!Array.isArray(body.grades)) {
-      res.status(400).json({ error: "Datos de calificaciones inválidos" });
+    const body = req.body as Record<string, unknown>;
+    const targetId = typeof body.userId === "string" ? body.userId.trim() : "";
+    if (!targetId) {
+      res.status(400).json({ error: "Alumno requerido" });
       return;
     }
+    const nota = readGradeNota(body.nota);
+    if (nota === null) {
+      res.status(400).json({ error: "Ingresá una nota" });
+      return;
+    }
+    const descripcion = optionalText(body.descripcion, MAX_GRADE_TEXT);
+    const fecha = readGradeDate(body.fecha);
 
     const supabase = getUserSupabase(req as AuthedRequest);
     await assertCanAccessGroup(supabase, userId, idGrupo);
+    await assertCanGradeProject(supabase, userId, idGrupo);
 
-    if (!(await canGradeProject(supabase, userId, idGrupo))) {
-      res.status(403).json({ error: "Solo un profesor asignado o administrador puede calificar" });
-      return;
-    }
-
-    const normalized: Array<{ userId: string; grade: number | null }> = [];
-    for (const entry of body.grades) {
-      const targetId = typeof entry.userId === "string" ? entry.userId.trim() : "";
-      if (!targetId) {
-        res.status(400).json({ error: "Datos de calificaciones inválidos" });
-        return;
-      }
-      let grade: number | null = null;
-      if (entry.grade !== null && entry.grade !== undefined) {
-        if (
-          typeof entry.grade !== "number" ||
-          !Number.isFinite(entry.grade) ||
-          entry.grade < 0 ||
-          entry.grade > 10
-        ) {
-          res.status(400).json({ error: "Nota inválida" });
-          return;
-        }
-        grade = Math.round(entry.grade * 100) / 100;
-      }
-      normalized.push({ userId: targetId, grade });
-    }
-
-    // Solo se puede calificar a integrantes con rol global `alumno` (el docente queda afuera).
     const members = await listProjectGradeMembers(idGrupo);
-    const gradableIds = new Set(members.map((member) => member.userId));
-    if (normalized.some((item) => !gradableIds.has(item.userId))) {
+    if (!members.some((member) => member.userId === targetId)) {
       res.status(400).json({ error: "El alumno no pertenece al proyecto" });
       return;
     }
 
-    if (normalized.length > 0) {
-      const admin = createAdminClient();
-      const rows = normalized.map((item) => ({
-        id_grupo: idGrupo,
-        id_usuario: item.userId,
-        nota: item.grade,
-        id_calificado_por: userId,
-        actualizado_en: new Date().toISOString(),
-      }));
-      const { error: upsertError } = await admin
-        .from("calificaciones_proyecto")
-        .upsert(rows, { onConflict: "id_grupo,id_usuario" });
-      if (upsertError) throw new Error(upsertError.message);
+    const admin = createAdminClient();
+    const { error } = await admin.from("calificaciones_proyecto").insert({
+      id_grupo: idGrupo,
+      id_usuario: targetId,
+      nota,
+      descripcion,
+      fecha,
+      id_calificado_por: userId,
+      actualizado_en: new Date().toISOString(),
+    });
+    if (error) throw new Error(error.message);
+
+    res.status(201).json({ canGrade: true, members: await listProjectGradeMembers(idGrupo) });
+  } catch (e) {
+    const status = (e as Error & { status?: number }).status ?? 500;
+    res.status(status).json({ error: e instanceof Error ? e.message : "Error interno" });
+  }
+});
+
+/** Edita una nota diaria. */
+router.patch("/:id/calificaciones/:gradeId", requireAuth, async (req, res) => {
+  try {
+    const { userId } = req as AuthedRequest;
+    const idGrupo = parseGroupId(paramId(req.params.id));
+    const gradeId = Number(paramId(req.params.gradeId));
+    if (!idGrupo || !Number.isInteger(gradeId) || gradeId <= 0) {
+      res.status(400).json({ error: "ID inválido" });
+      return;
+    }
+    const body = req.body as Record<string, unknown>;
+    const patch: Record<string, unknown> = {};
+    if ("nota" in body) patch.nota = readGradeNota(body.nota);
+    if ("descripcion" in body) patch.descripcion = optionalText(body.descripcion, MAX_GRADE_TEXT);
+    if ("fecha" in body) patch.fecha = readGradeDate(body.fecha);
+    if (Object.keys(patch).length === 0) {
+      res.status(400).json({ error: "Nada para actualizar" });
+      return;
+    }
+    patch.id_calificado_por = userId;
+    patch.actualizado_en = new Date().toISOString();
+
+    const supabase = getUserSupabase(req as AuthedRequest);
+    await assertCanAccessGroup(supabase, userId, idGrupo);
+    await assertCanGradeProject(supabase, userId, idGrupo);
+
+    const admin = createAdminClient();
+    const { data, error } = await admin
+      .from("calificaciones_proyecto")
+      .update(patch)
+      .eq("id_calificacion", gradeId)
+      .eq("id_grupo", idGrupo)
+      .select("id_calificacion")
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    if (!data) {
+      res.status(404).json({ error: "Nota no encontrada" });
+      return;
     }
 
-    // Reflejamos las notas recién guardadas sin volver a consultar.
-    const gradesByUser = new Map(normalized.map((item) => [item.userId, item.grade]));
-    res.json({
-      canGrade: true,
-      members: members.map((member) =>
-        gradesByUser.has(member.userId)
-          ? { ...member, grade: gradesByUser.get(member.userId) ?? null }
-          : member
-      ),
-    });
+    res.json({ canGrade: true, members: await listProjectGradeMembers(idGrupo) });
+  } catch (e) {
+    const status = (e as Error & { status?: number }).status ?? 500;
+    res.status(status).json({ error: e instanceof Error ? e.message : "Error interno" });
+  }
+});
+
+/** Elimina una nota diaria. */
+router.delete("/:id/calificaciones/:gradeId", requireAuth, async (req, res) => {
+  try {
+    const { userId } = req as AuthedRequest;
+    const idGrupo = parseGroupId(paramId(req.params.id));
+    const gradeId = Number(paramId(req.params.gradeId));
+    if (!idGrupo || !Number.isInteger(gradeId) || gradeId <= 0) {
+      res.status(400).json({ error: "ID inválido" });
+      return;
+    }
+    const supabase = getUserSupabase(req as AuthedRequest);
+    await assertCanAccessGroup(supabase, userId, idGrupo);
+    await assertCanGradeProject(supabase, userId, idGrupo);
+
+    const admin = createAdminClient();
+    const { data, error } = await admin
+      .from("calificaciones_proyecto")
+      .delete()
+      .eq("id_calificacion", gradeId)
+      .eq("id_grupo", idGrupo)
+      .select("id_calificacion")
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    if (!data) {
+      res.status(404).json({ error: "Nota no encontrada" });
+      return;
+    }
+
+    res.json({ canGrade: true, members: await listProjectGradeMembers(idGrupo) });
   } catch (e) {
     const status = (e as Error & { status?: number }).status ?? 500;
     res.status(status).json({ error: e instanceof Error ? e.message : "Error interno" });

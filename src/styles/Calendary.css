@@ -547,3 +547,269 @@
     font-size: var(--font-size-xs);
   }
 }
+
+/* ===== Ajustes de grilla accesible (filas con role) ===== */
+.calendary-page .calendar-grid {
+  display: flex;
+  flex-direction: column;
+}
+
+.calendary-page .calendar-row {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  flex: 1;
+  min-height: 0;
+}
+
+.calendary-page .day-cell--other-month {
+  background: var(--color-surface-2);
+}
+
+.calendary-page .calendar-header__right {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.calendary-page .calendar-view-toggle {
+  display: flex;
+  gap: 2px;
+}
+
+.calendary-page .calendar-btn--active {
+  background: var(--color-primary-accent);
+  color: var(--color-on-accent);
+  border-color: var(--color-primary-accent);
+}
+
+.calendary-page .calendar-btn--danger {
+  border-color: var(--color-error-text);
+  color: var(--color-error-text);
+  min-height: var(--touch-min);
+  padding: 0 var(--space-lg);
+  font-size: var(--font-size-body);
+}
+
+.calendary-page .calendar-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-sm);
+}
+
+.calendary-page .calendar-filter {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  flex: 1 1 220px;
+  min-height: var(--touch-min);
+  padding: 0 var(--space-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-ink-muted);
+}
+
+.calendary-page .calendar-filter input,
+.calendary-page .calendar-filter select {
+  width: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: var(--color-ink);
+  font: inherit;
+}
+
+.calendary-page .day-event-dot--task {
+  background: var(--color-warning-solid);
+  color: var(--color-on-accent);
+}
+
+.calendary-page .day-event-dot--task:hover {
+  background: var(--color-warning-text);
+}
+
+/* ===== Modal del día / detalle ===== */
+.calendary-page .day-events-modal__date {
+  margin: 0;
+  padding: var(--space-sm) var(--space-md) 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-ink-muted);
+  text-transform: capitalize;
+}
+
+.calendary-page .day-events-modal__item-btn {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  width: 100%;
+  padding: 0;
+  border: none;
+  background: transparent;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+.calendar-type-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 10px;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+}
+
+.calendar-type-badge--task {
+  background: var(--color-warning-bg);
+  color: var(--color-warning-text);
+}
+
+.calendar-type-badge--state {
+  background: var(--color-neutral-bg);
+  color: var(--color-neutral-text);
+}
+
+.calendar-event-detail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  padding: var(--space-md);
+}
+
+.calendar-event-detail__title {
+  margin: 0;
+  font-size: var(--font-size-lg);
+}
+
+.calendar-event-detail__badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+}
+
+.calendar-event-detail__facts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-sm);
+  margin: 0;
+}
+
+.calendar-event-detail__facts dt {
+  font-size: var(--font-size-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-ink-muted);
+}
+
+.calendar-event-detail__facts dd {
+  margin: 2px 0 0;
+  font-weight: 600;
+  color: var(--color-ink);
+  text-transform: capitalize;
+}
+
+.calendar-event-detail__desc {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-ink);
+}
+
+.calendar-event-detail__note {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-ink-muted);
+}
+
+/* ===== Vista agenda ===== */
+.calendary-page .calendar-agenda {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  overflow-y: auto;
+}
+
+.calendary-page .calendar-agenda__group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.calendary-page .calendar-agenda__date {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  color: var(--color-primary);
+  text-transform: capitalize;
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: var(--space-xs);
+}
+
+.calendary-page .calendar-agenda__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.calendary-page .calendar-agenda__item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  width: 100%;
+  padding: var(--space-sm) var(--space-md);
+  border: 1px solid var(--color-border);
+  border-left: 4px solid var(--color-primary-accent);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+.calendary-page .calendar-agenda__item--task {
+  border-left-color: var(--color-warning-solid);
+}
+
+.calendary-page .calendar-agenda__item:hover {
+  background: var(--color-panel);
+}
+
+.calendary-page .calendar-agenda__time {
+  flex: 0 0 96px;
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  color: var(--color-ink-muted);
+}
+
+.calendary-page .calendar-agenda__body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.calendary-page .calendar-agenda__project {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--font-size-xs);
+  color: var(--color-ink-muted);
+}
+
+.calendary-page .calendar-agenda__empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  padding: var(--space-xl);
+  color: var(--color-ink-muted);
+}

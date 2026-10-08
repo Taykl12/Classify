@@ -40,6 +40,8 @@ Los archivos fuente viven en `supabase/migrations/`. Este documento describe **q
 | 019 | `019_calificaciones_proyecto.sql` | Nota final individual por integrante del proyecto |
 | 020 | `020_huella_solo_profesores.sql` | La huella pasa a ser exclusiva del rol Profesor |
 | 021 | `021_asistencia_profesores.sql` | Asistencia general de ingreso de profesores (huella + correcciones) |
+| 022 | `022_favoritos_usuario_calendario.sql` | Favoritos por usuario + calendario (roles, edición/borrado, horas, recurrencia) |
+| 023 | `023_tareas_y_notas_diarias.sql` | Acceso a tareas (integrante/asignado/admin) + notas diarias por alumno |
 
 ---
 
@@ -485,6 +487,58 @@ Asistencia de **ingreso al establecimiento** de profesores disparada por huella 
 
 ---
 
+## 022 — Favoritos por usuario + calendario
+
+**Archivo:** `022_favoritos_usuario_calendario.sql`
+
+### Objetos nuevos / modificados
+
+| Objeto | Acción |
+|--------|--------|
+| `can_view_proyecto(id_grupo)` | Nueva función SECURITY DEFINER: manager (admin/dueño/asignado) o integrante. |
+| `proyecto_favorito` | Nueva tabla (id_grupo, id_usuario, UNIQUE). RLS: SELECT/INSERT/DELETE solo de la fila propia; INSERT exige acceso (`can_view_proyecto`). |
+| `grupos_proyectos.es_favorito` | Columna deprecada (sin uso por la app); los favoritos existentes se migran al dueño. |
+| `eventos_calendario` | Nuevas columnas `hora_inicio`, `hora_fin`, `recurrencia` (CHECK Ninguna/Diaria/Semanal/Mensual) y CHECK `hora_fin > hora_inicio`. |
+| Policies `eventos_calendario_*` | SELECT/INSERT ahora usan `can_view_proyecto` (incluye admin/profesor asignado). Nuevas policies UPDATE/DELETE (creador o `can_manage_proyecto`). |
+| `create_evento_calendario(...)` | Recreada con parámetros de hora/recurrencia y validaciones (título, prioridad, fechas, horas, acceso). |
+
+### Relación con la app
+
+- `PATCH /api/projects/:id/favorite` pasa a ser por usuario (cualquiera con acceso).
+- `GET /api/projects` y `/api/dashboard/featured` leen `proyecto_favorito`.
+- Calendario: `PATCH`/`DELETE /api/calendar/events/:id`, export `.ics`, horas y recurrencia preparada.
+
+---
+
+## 023 — Tareas de proyecto y notas diarias
+
+**Archivo:** `023_tareas_y_notas_diarias.sql`
+
+### Tareas (`tareas_grupo`)
+
+| Objeto | Acción |
+|--------|--------|
+| `create_tarea_grupo(...)` | Recreado: valida título/prioridad y usa `can_view_proyecto` (dueño, integrante, profesor asignado, admin). |
+| Policies `tareas_grupo_*` | SELECT/INSERT/UPDATE/DELETE con `can_view_proyecto` (los integrantes pueden gestionar tareas). |
+
+### Notas diarias (`calificaciones_proyecto`)
+
+| Objeto | Acción |
+|--------|--------|
+| `descripcion`, `fecha` | Columnas nuevas (`fecha` por defecto `CURRENT_DATE`). |
+| `UNIQUE (id_grupo, id_usuario)` | Se elimina: ahora hay varias notas por alumno. |
+| `idx_calificaciones_proyecto_usuario` | Índice nuevo (`id_grupo, id_usuario`). |
+
+El promedio por alumno se calcula en el API (`computeAverage`).
+
+### Relación con la app
+
+- `GET /api/tasks/:projectId`, `POST /api/tasks`, `PATCH/DELETE /api/tasks/:taskId`.
+- `GET/POST /api/projects/:id/calificaciones`, `PATCH/DELETE /api/projects/:id/calificaciones/:gradeId`.
+- UI: página `/proyectos/:id/tareas` (botón “Tareas” en el listado) y pestaña Calificaciones como notas diarias.
+
+---
+
 ## Cambios previos vía MCP
 
 Algunos objetos existían en el proyecto Supabase **antes** de quedar en archivos numerados locales, o se aplicaron con el MCP de Supabase. Conviven con las migraciones 001–009:
@@ -550,3 +604,5 @@ flowchart TD
 | 2026 | 019 | Calificaciones por integrante (pestaña Calificaciones) |
 | 2026 | 020 | Huella exclusiva del rol Profesor (antes Alumno) |
 | 2026 | 021 | Asistencia general de profesores (marcación por huella + correcciones) |
+| 2026 | 022 | Favoritos por usuario + calendario (roles, edición/borrado, horas, recurrencia) |
+| 2026 | 023 | Tareas de proyecto (UI + permisos) y notas diarias por alumno |

@@ -1,4 +1,5 @@
-import type { ReactNode } from "react";
+import { useId, type ReactNode } from "react";
+import { useModalEscape } from "../../hooks/useModalEscape";
 import "../../styles/projects-modal.css";
 
 interface AdminModalProps {
@@ -18,6 +19,9 @@ export function AdminModal({
   footer,
   onClose,
 }: AdminModalProps) {
+  const titleId = useId();
+  useModalEscape(open, onClose);
+
   if (!open) return null;
 
   return (
@@ -26,11 +30,11 @@ export function AdminModal({
         className="project-modal__dialog admin-modal__dialog"
         role="dialog"
         aria-modal="true"
-        aria-labelledby="admin-modal-title"
+        aria-labelledby={titleId}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="project-modal__body">
-          <h2 id="admin-modal-title" className="project-modal__title">
+          <h2 id={titleId} className="project-modal__title">
             {title}
           </h2>
           {error ? (

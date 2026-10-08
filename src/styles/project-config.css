@@ -779,3 +779,150 @@
     color: var(--color-ink-muted);
   }
 }
+/* ===== Notas diarias por integrante ===== */
+.project-grades {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.project-grades__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.project-grades__member {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  background: var(--color-surface);
+}
+
+.project-grades__member-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+}
+
+.project-grades__identity {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.project-grades__avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.project-grades__avatar--fallback {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-panel);
+  color: var(--color-primary);
+  font-weight: 700;
+}
+
+.project-grades__name {
+  margin: 0;
+  font-weight: 700;
+  color: var(--color-ink);
+}
+
+.project-grades__average {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-success-text);
+}
+
+.project-grades__empty {
+  margin: var(--space-sm) 0 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-ink-muted);
+}
+
+.project-grades__notes {
+  list-style: none;
+  margin: var(--space-sm) 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.project-grades__note {
+  display: grid;
+  grid-template-columns: 90px 48px 1fr auto;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-2);
+}
+
+.project-grades__note-date {
+  font-size: var(--font-size-xs);
+  color: var(--color-ink-muted);
+}
+
+.project-grades__note-value {
+  font-weight: 800;
+  color: var(--color-primary-accent);
+  text-align: center;
+}
+
+.project-grades__note-desc {
+  font-size: var(--font-size-sm);
+  color: var(--color-ink);
+}
+
+.project-grades__note-actions {
+  display: inline-flex;
+  gap: var(--space-xs);
+}
+
+.project-grades__icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-ink-muted);
+  cursor: pointer;
+}
+
+.project-grades__icon-btn:hover {
+  color: var(--color-primary-accent);
+  border-color: var(--color-primary-accent);
+}
+
+.project-grades__icon-btn--danger:hover {
+  color: var(--color-error-text);
+  border-color: var(--color-error-text);
+}
+
+@media (max-width: 640px) {
+  .project-grades__note {
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      "date value"
+      "desc desc"
+      "actions actions";
+  }
+}

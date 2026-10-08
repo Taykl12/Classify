@@ -10,6 +10,7 @@ interface ProjectsListSectionProps {
   onToggleSelect: (id: string) => void;
   onToggleSelectAll: () => void;
   onEdit: (item: ProjectListItem) => void;
+  onTasks: (item: ProjectListItem) => void;
   onToggleFavorite: (item: ProjectListItem) => void;
 }
 
@@ -36,6 +37,7 @@ export function ProjectsListSection({
   onToggleSelect,
   onToggleSelectAll,
   onEdit,
+  onTasks,
   onToggleFavorite,
 }: ProjectsListSectionProps) {
   const allSelected = items.length > 0 && items.every((i) => selectedIds.has(i.id));
@@ -139,6 +141,13 @@ export function ProjectsListSection({
                 className="projects-table__cell projects-table__cell--actions"
                 data-label={COLUMN_HEADERS[6]}
               >
+                <button
+                  type="button"
+                  className="projects-table__action"
+                  onClick={() => onTasks(item)}
+                >
+                  Tareas
+                </button>
                 <button
                   type="button"
                   className="projects-table__action"

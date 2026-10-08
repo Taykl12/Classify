@@ -152,7 +152,7 @@ async function buildAdminDetail(
     getAssignedProfessorIds(supabase, idGrupo),
     getGroupMemberEmails(supabase, idGrupo),
   ]);
-  const detail = mapProjectDetail(row);
+  const detail = mapProjectDetail(row, false);
   return {
     ...mapAdminListItem(row, ownerEmail, assignedProfessorIds, memberEmails.length),
     description: detail.description,

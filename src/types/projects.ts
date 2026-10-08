@@ -52,6 +52,13 @@ export const EMPTY_PROJECT_FORM: ProjectFormValues = {
 
 export type ProjectConfigTab = "alcance" | "equipo" | "calificaciones" | "documentaciones";
 
+export interface ProjectGradeEntry {
+  id: string;
+  nota: number | null;
+  descripcion: string;
+  fecha: string;
+}
+
 export interface ProjectGradeMember {
   userId: string;
   email: string;
@@ -59,7 +66,8 @@ export interface ProjectGradeMember {
   lastName: string;
   dni: string;
   profilePhotoUrl: string | null;
-  grade: number | null;
+  grades: ProjectGradeEntry[];
+  average: number | null;
 }
 
 export interface ProjectGradesResponse {

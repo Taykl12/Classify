@@ -22,10 +22,10 @@ import ProfessorDashboardPage from "./pages/professor/ProfessorDashboardPage";
 import DashboardPage from "./pages/DashboardPage";
 import LoginPage from "./pages/LoginPage";
 import ProjectConfigPage from "./pages/ProjectConfigPage";
+import ProjectTasksPage from "./pages/ProjectTasksPage";
 import ProjectsPage from "./pages/ProjectsPage";
 import PreferencesPage from "./pages/PreferencesPage";
 import RecoverPasswordPage from "./pages/RecoverPasswordPage";
-import RegisterPage from "./pages/RegisterPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 import { ROUTES } from "./routes";
 
@@ -61,6 +61,7 @@ function App() {
               <Route path={ROUTES.CALENDARY} element={<CalendaryPage />} />
               <Route path={ROUTES.PREFERENCES} element={<PreferencesPage />} />
               <Route path="/proyectos/:projectId/config" element={<ProjectConfigPage />} />
+              <Route path="/proyectos/:projectId/tareas" element={<ProjectTasksPage />} />
 
               <Route
                 path={ROUTES.PROFESSOR}
@@ -162,7 +163,6 @@ function App() {
             </Route>
 
             <Route path={ROUTES.LOGIN} element={<LoginPage />} />
-            <Route path={ROUTES.REGISTER} element={<RegisterPage />} />
             <Route path={ROUTES.RECOVER_PASSWORD} element={<RecoverPasswordPage />} />
             <Route path={ROUTES.RESET_PASSWORD} element={<ResetPasswordPage />} />
             <Route path="*" element={<Navigate to={ROUTES.LOGIN} replace />} />

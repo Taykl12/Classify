@@ -4,7 +4,7 @@ import { AdminAssignmentList } from "../../components/admin/AdminAssignmentList"
 import { AdminModal } from "../../components/admin/AdminModal";
 import { AdminSubjectScheduleFields } from "../../components/admin/AdminSubjectScheduleFields";
 import { ApiError, apiFetch, apiFetchWithRetry } from "../../lib/api";
-import { composeHorario, emptyParsedHorario, parseHorario } from "../../lib/adminAcademic";
+import { composeHorario, composeTime, emptyParsedHorario, parseHorario } from "../../lib/adminAcademic";
 import type { ScheduleSlot } from "../../lib/adminAcademic";
 import type {
   AdminCourse,
@@ -147,10 +147,32 @@ export default function AdminMateriasPage() {
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
-    setSubmitting(true);
     setModalError(null);
+
+    const name = form.name.trim();
+    if (!name) {
+      setModalError("El nombre de la materia es obligatorio");
+      return;
+    }
+    if (!form.courseId) {
+      setModalError("Seleccioná un curso");
+      return;
+    }
+    const invalidSlot = form.scheduleSlots.find(
+      (slot) =>
+        composeTime(slot.startHour, slot.startMinute) >=
+        composeTime(slot.endHour, slot.endMinute)
+    );
+    if (invalidSlot) {
+      setModalError(
+        `En ${invalidSlot.day}, la hora de fin debe ser posterior a la de inicio`
+      );
+      return;
+    }
+
+    setSubmitting(true);
     const payload = {
-      name: form.name,
+      name,
       courseId: Number(form.courseId),
       horario: composeHorario(form.scheduleSlots),
     };

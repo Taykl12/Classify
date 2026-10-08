@@ -89,7 +89,7 @@ Definidas en `src/routes.ts`. Rutas protegidas usan `<ProtectedRoute>`: si no ha
 | Ruta | Página | Notas |
 |------|--------|-------|
 | `/` | Redirige según sesión | `HomeRedirect` |
-| `/login`, `/register`, `/recuperar-contrasena` | Auth pública | |
+| `/login`, `/recuperar-contrasena`, `/restablecer-contrasena` | Auth pública | Los usuarios los crea un administrador (no hay registro público) |
 | `/dashboard` | Inicio | Carrusel favoritos + tareas pendientes |
 | `/proyectos` | Listado | CRUD, favoritos, borrado masivo |
 | `/proyectos/:id/config` | Configuración | Pestañas alcance, docs, equipo, calificaciones |
@@ -123,9 +123,9 @@ Al montar, si hay token llama `GET /api/auth/me` para validarlo.
 | Método | Endpoint | Efecto |
 |--------|----------|--------|
 | `login` | `POST /api/auth/login` | Guarda token + usuario |
-| `register` | `POST /api/auth/register` | Registro; puede pedir confirmación por email |
 | `logout` | `POST /api/auth/logout` | Limpia localStorage |
 | `recoverPassword` | `POST /api/auth/recover-password` | Email de reset Supabase |
+| `resetPassword` | `POST /api/auth/reset-password` | Fija la nueva contraseña desde el enlace |
 | `refreshUser` | — | Actualiza usuario en memoria tras editar perfil |
 
 Usuario en memoria (`AuthUser`): `id`, `email`, `firstName`, `lastName`, `roleLabel`, `profilePhotoUrl`.
@@ -148,7 +148,7 @@ Routers bajo prefijo `/api`:
 
 | Prefijo | Archivo | Responsabilidad |
 |---------|---------|-----------------|
-| `/api/auth` | `routes/auth.ts` | Login, registro, me, recuperar contraseña |
+| `/api/auth` | `routes/auth.ts` | Login, me, recuperar/restablecer contraseña |
 | `/api/projects` | `routes/projects.ts` | CRUD proyectos, favoritos, config |
 | `/api/dashboard` | `routes/dashboard.ts` | Favoritos destacados, tareas pendientes |
 | `/api/users` | `routes/users.ts` | Búsqueda de usuarios para invitar |
@@ -173,17 +173,15 @@ Hay dos clientes en `lib/supabase.ts`:
 
 | Función | Uso |
 |---------|-----|
-| `createAnonClient()` | Login, registro, validar token (sin sesión de usuario en el cliente) |
+| `createAnonClient()` | Login, validar token, recuperar contraseña (sin sesión de usuario en el cliente) |
 | `createUserClient(token)` | Operaciones autenticadas con RLS |
 | `createAdminClient()` | Rutas admin y profesor que necesitan leer/escribir sin depender de RLS del JWT |
 
-### 5.3 Registro y perfil
+### 5.3 Perfil y alta de usuarios
 
-**Registro** (`POST /api/auth/register`):
-
-1. `supabase.auth.signUp` → usuario en Auth
-2. Si hay sesión inmediata, inserta fila en `usuarios` con rol `alumno` (id 3)
-3. Devuelve `accessToken` + perfil mapeado
+**Alta de usuarios:** no hay registro público. Un **administrador** crea las cuentas
+(profesores y alumnos) desde `/admin/usuarios` (`POST /api/admin/users`), que crea el
+usuario en Supabase Auth y su fila en `usuarios` con el rol elegido.
 
 **Perfil** (`PATCH /api/profile`):
 
@@ -322,7 +320,7 @@ Mismo patrón en dashboard, config de proyecto y preferencias: **página → api
 - **Calendario:** UI mensual; aún no persiste eventos en BD (ver [`calendario.md`](./calendario.md)).
 - **Kanban / tareas:** tablas existen (`tareas_grupo`); la UI de tablero no está en esta rama.
 - **Tests:** no hay framework de tests configurado.
-- **Refresh token:** la API devuelve `refreshToken` en login/registro pero el frontend no lo renueva automáticamente; depende de la duración del JWT de Supabase.
+- **Refresh token:** la API devuelve `refreshToken` en login pero el frontend no lo renueva automáticamente; depende de la duración del JWT de Supabase.
 
 ---
 

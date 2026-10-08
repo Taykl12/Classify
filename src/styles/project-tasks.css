@@ -1,0 +1,98 @@
+.projects-tasks__topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-md);
+  margin-bottom: var(--space-md);
+}
+
+.projects-tasks__back {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  font-weight: 600;
+  color: var(--color-primary-accent);
+  text-decoration: none;
+}
+
+.projects-tasks__back:hover {
+  text-decoration: underline;
+}
+
+.projects-tasks__summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-md);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-ink-muted);
+}
+
+.projects-tasks__filter select {
+  min-height: var(--touch-min);
+  padding: 0 var(--space-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-ink);
+  font: inherit;
+  box-shadow: var(--shadow-soft);
+}
+
+.projects-tasks__status {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.projects-tasks__status select {
+  min-height: 36px;
+  padding: 0 var(--space-sm);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-ink);
+  font: inherit;
+  font-size: var(--font-size-sm);
+}
+
+.task-status-badge,
+.task-priority-badge {
+  display: inline-block;
+  padding: 2px var(--space-sm);
+  border-radius: 999px;
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.task-status-badge--pendiente {
+  background: var(--color-neutral-bg);
+  color: var(--color-neutral-text);
+}
+
+.task-status-badge--progreso {
+  background: var(--color-warning-bg);
+  color: var(--color-warning-text);
+}
+
+.task-status-badge--completado {
+  background: var(--color-success-bg);
+  color: var(--color-success-text);
+}
+
+.task-priority-badge--alta {
+  background: var(--color-error-bg);
+  color: var(--color-error-text);
+}
+
+.task-priority-badge--media {
+  background: var(--color-warning-bg);
+  color: var(--color-warning-text);
+}
+
+.task-priority-badge--baja {
+  background: var(--color-neutral-bg);
+  color: var(--color-neutral-text);
+}

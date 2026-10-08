@@ -338,6 +338,13 @@
   overflow: hidden;
 }
 
+.admin-time-picker__panel--floating {
+  position: fixed;
+  top: auto;
+  left: auto;
+  z-index: 400;
+}
+
 .admin-time-picker__column {
   max-height: 220px;
   overflow-y: auto;

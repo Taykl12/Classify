@@ -36,7 +36,7 @@ export default function LoginPage() {
   }
 
   return (
-    <AuthLayout variant="login" nav={<AuthNav alternateLink={{ to: ROUTES.REGISTER, label: "Registrarse" }} />}>
+    <AuthLayout variant="login" nav={<AuthNav />}>
       <div className="container">
         <form className="login-box auth-box" onSubmit={handleSubmit}>
           <AuthAvatar size="form" />
@@ -47,9 +47,6 @@ export default function LoginPage() {
           <input type="password" placeholder="Contraseña" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="current-password" required />
           <Link className="auth-link" to={ROUTES.RECOVER_PASSWORD}>Olvidé mi contraseña</Link>
           <button type="submit" className="auth-btn" disabled={submitting}>{submitting ? "Ingresando…" : "Iniciar Sesion"}</button>
-          <p className="auth-form-footer">
-            ¿No tienes una cuenta? <Link className="auth-link" to={ROUTES.REGISTER}>Regístrate aquí</Link>
-          </p>
         </form>
       </div>
     </AuthLayout>
